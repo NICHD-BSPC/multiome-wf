@@ -1,0 +1,3 @@
+sample	replicate	genome	HDF5_Multiple_Assays	RDS_Multiple_Assays	Gene.Expression	Peaks	TF	fragments	singlecell	meta_modality	meta_batch	meta_geno
+tissue1		hg38				../test_data/tenx_atac/filtered_peak_bc_matrix.h5	../test_data/tenx_atac/filtered_tf_bc_matrix.h5	../test_data/tenx_atac/fragments.tsv.gz	../test_data/tenx_atac/summary.csv	ATAC	batch1	wt
+tissue2		hg38				../test_data/tenx_atac/filtered_peak_bc_matrix.h5	../test_data/tenx_atac/filtered_tf_bc_matrix.h5	../test_data/tenx_atac/fragments.tsv.gz	../test_data/tenx_atac/summary.csv	ATAC	batch2	wt

@@ -1,0 +1,196 @@
+---
+title: "Normalization and Dimentionality Reduction"
+output:
+    html_document:
+            keep_md: yes
+            toc: true
+            toc_float: true
+            code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    warning=FALSE,
+    message=FALSE,
+    results='hide'
+    )
+
+```
+
+```{r packages_and_functions, include=FALSE}
+library(Signac)
+library(Seurat)
+library(GenomeInfoDb)
+library(knitr)
+library(future)
+set.seed(1234)
+
+source('common.R')
+```
+
+## Parallelization
+
+```{r parallelize, include=FALSE}
+
+# Assign the number of cores for parallelization
+ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+options(future.globals.maxSize=40000 * 1024^2,
+        mc.cores=ncpus)
+
+# Parallelize the run
+plan("multicore", workers=ncpus)
+
+
+```
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+```{r variables}
+config_path = params[['config']]
+```
+
+
+## Read in data
+
+Read in all Seurat objects and combine in a list.
+
+```{r input}
+seurat = readRDS(params[['seurat_in']])
+cat('Input Seurat object: \n')
+print(seurat)
+
+
+tryCatch(expr={ DefaultAssay(seurat) <- "Peaks" },
+         error=function(e) { DefaultAssay(seurat) <- "Gene.Expression" }
+)
+
+
+config <- yaml::read_yaml(file = config_path)
+```
+
+
+## Group data for normalization
+
+We'll iterate over a single group listed in the 'normalize' section of the yaml config file (Snakemake will choose which assay to use right now). For every group found, we'll look for the selected assay and normalize using a user selected method.
+
+
+
+```{r group}
+target = basename(params[['seurat_out']])
+target = gsub("^(.*).rds", "\\1", target)
+print("Normalizing for group:")
+print(target)
+
+groups = config[['normalize']][['groups']]
+
+idx = which(names(groups) %in% target)
+ 
+if (length(idx) == 0) {
+    print("Group is not present in config's normalize groups list.")
+    q()
+} else if (length(idx) > 1) {
+    print("You are trying to normalize group/assay multiple times. Please fix.")
+    q()
+}
+
+group_name = names(groups)[idx]
+print('Current group:')
+print(group_name)
+
+group = groups[[idx]]
+
+assay = group[['assay_name']]
+norm_method = group[['norm_method']]
+
+print('assay')
+print(assay)
+
+print('norm_method')
+print(norm_method)
+```
+
+
+## Check if assay is present in data
+
+We'll also look for cells that have zero or NA values in the metadata column for the selected group assay. This is needed because when merging Seurat objects (necessary for multiple samples/replicates), samples that have zero counts for an assay (Peaks column for GEX samples) are assigned NA in the respective metadata column. This breaks most downstream processes.
+
+```{r check}
+# remove cells with 0 counts for the selected assay
+var_name = paste0('nCount_', assay)
+print(var_name)
+var_val = 0
+
+# https://github.com/satijalab/seurat/issues/1053
+# old code:
+# expr <- FetchData(object = seurat, vars = var_name)
+new_idx <- tryCatch(expr={
+             fetch <- FetchData(object = seurat, vars = var_name)
+             !is.na(fetch) & (fetch > 0) },
+        error=function(e) { idx }
+        )
+
+
+```
+
+
+## Normalize and Linear Dimension Reduction
+
+Now we'll iterate over the list and perform normalization for each assay. For each element in the list of seurat objects (grouped by assay), we'll call common.R::preprocess_seurat() which performs log, clr, or lsi normalization. For each assay a unique dimensional reduction name is created, in case we need to have multiple reductions (umap for GEX and umap for ATAC, etc)
+
+```{r normalize}
+if (length(new_idx) > 0 & !identical(idx, new_idx)) {
+    # https://github.com/satijalab/seurat/issues/1053
+    seurat_sub = seurat[,which(x = new_idx)]
+    seurat_sub
+    seurat_sub = preprocess_seurat(seurat_obj = seurat_sub, assay = assay, norm_method = norm_method)
+} else {
+    seurat_sub <- seurat
+    print('Assay not present in dataset. Skipping.')
+}
+
+print('Dim Reduction slots in Seurat object:')
+print(seurat_sub@reductions)
+```
+
+
+## Double check object & dimension reduction {.tabset tabset-pills}
+
+### Elbow Plot
+
+```{r final, results='asis'}
+print('final seurat objects, with normalized assay and linear dim reduciton')
+print(seurat_sub)
+
+targets = c("pca", "lsi")
+idx = grep(paste(targets,collapse="|"), names(seurat_sub@reductions))
+reduction_name = names(seurat_sub@reductions)[idx]
+
+if (!is.null(reduction_name)) {
+    max_comps = ncol(seurat_sub[[reduction_name]]@cell.embeddings)
+    ElbowPlot(object = seurat_sub, ndims = max_comps, reduction = reduction_name)
+}
+
+```
+
+
+## Save Seurat object
+
+```{r save}
+saveRDS(object=seurat_sub, file=params[['seurat_out']])
+print('Done saving list of seurat objects.')
+```
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+```
+

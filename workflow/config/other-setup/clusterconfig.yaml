@@ -1,0 +1,23 @@
+__default__:
+  prefix: "--gres=lscratch:100 --mem=200g --time=24:00:00 --partition=norm"
+
+create_seurat:
+  prefix: "--gres=lscratch:100 --mem=200g --time=24:00:00 --partition=norm"
+
+integrate:
+  prefix: "--gres=lscratch:250 --mem=500g --time=24:00:00 --partition=largemem"
+
+diff_analysis:
+  prefix: "--gres=lscratch:400 --mem=800g --time=24:00:00 --partition=largemem"
+
+
+chooser_paral:
+  prefix: "--gres=lscratch:100 --mem=150g --time=24:00:00 --partition=norm"
+
+chooser_aggr:
+  prefix: "--gres=lscratch:100 --mem=150g --time=1:00:00 --partition=quick"
+
+guide:
+  prefix: "--gres=lscratch:10 --mem=20g --time=10:00 --partition=quick"
+
+

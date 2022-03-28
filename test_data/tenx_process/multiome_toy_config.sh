@@ -1,0 +1,12 @@
+PER_BARCODE_METRICS="per_barcode_metrics.csv"
+TOY_BARCODE_CSV="toy_barcode.csv"
+ATAC_FRAG="atac_fragments.tsv"
+TOY_ATAC="toy_atac.tsv"
+TOY_ATAC_ATAC="toy_atac_atac.tsv"
+ATAC_PEAKS="atac_peaks.bed"
+TOY_PEAKS_BED="toy_peaks.bed"
+TOY_PEAKS_PEAKS="toy_peaks_peaks.tsv"
+TOYGEX_BARCODES="toygex_barcodes.txt"
+BARCODE_NTH=5
+ATAC_NTH=6
+PEAK_NTH=6

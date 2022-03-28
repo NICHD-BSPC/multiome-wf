@@ -1,0 +1,304 @@
+# Define path to file containing outputs of cellranger-arc
+# Sample based data should be included in a samples.tsv file that contains one row per sample.
+#   All columns are strings
+# sample: sample name
+# replicate: technical replicates from a sample. One line per ('sample', 'replicate') combination
+# feature_type: assay/modality
+#   Currently supported feature_types: 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Multiome'
+samples: config/rna-config/samples.tsv
+
+# Barcode suffix/ibrary ID mappings should be included in a aggregates.tsv file.
+#   This is only needed for cellranger/cellranger-atac/cellranger-arc aggr outputs.
+#   Each line contains sample/replicate info identical to samples.tsv entries.
+#   'library_id' is taken from cellranger aggregates.tsv, 'bc_suffix' is rownumber or 'library_id' (1 based)
+#   If not used, set it to "".
+aggregates: ""
+
+# Additional assay info should be included in an assays.tsv file that contains one row per assay per sample/rep.
+# Only include "DIY" custom count matrices, any "core" cellranger matrices/assays are included in 'samples.tsv'.
+# If not used, set it to "".
+assays: ""
+
+# Choose how to build your annotation (e.g. EnsDb or GTF)
+# if "GTF", provide path to annotation file, otherwise null.
+ANNOTATION: EnsDb
+ANNO_FILE: "path/to/genes.gtf.gz"
+
+# Feature based QC filtering of cells.
+# rm_outliers_method: Detect outliers using standard deviation 'sd' or Tukey's interquartile ranger 'iqr'.
+#
+# meta_labels: Which metadata columns to use for filtering?
+#   Can select from 'feature_type' in samples.tsv, or any column in units.tsv excluding 'sample' and 'unit'.
+#
+# lower: Key:value pairs of metadata column and associated lower limit for cutoff, below which exclude cells.
+#   If present, overrides lower limit detected by outlier method.
+#   If null, outlier method tries to remove cells automatically
+#
+# upper: Key:value pairs of metadata column and associated upper limit for cutoff, above which exclude cells.
+#   If present, overrides upper limit detected by outlier method.
+#   If null, outlier method tries to remove cells automatically
+qc:
+  remove_outliers: true
+  rm_outliers_method: sd
+  meta_labels:
+  - nCount_Gene.Expression
+  - nCount_Peaks
+  - percent.mt
+  - TSS.enrichment
+  lower: 
+    nCount_Gene.Expression: 100
+    TSS.enrichment: 2
+  upper: null
+
+
+# Determine whether or not to run macs2 (Y or N)
+# If run macs, which metadata column to split fragments by (currently, any columns in 'samples.tsv' supported)
+# Set to "N" for RNA-seq (single modality)
+macs2:
+  run: "N"
+  group_fragments_by: genome # feature_type
+
+
+# Normalization and linear reduction
+# groups: Each group to perform normalization. Group name (key) must be unique.
+#
+# assay_name: Which Seurat assay to use. Seurat assay names are '.' delimited.
+#   Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
+#
+# norm_method: Method to normalize the group's assay.
+#   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
+normalize:
+  groups:
+    unintegrated_0:
+      assay_name: Gene.Expression
+      norm_method: sct
+
+
+
+# Integrate data sets
+# activate: Integrate (transform) count data and/or dimensional reductions/embeddings?
+#   Integration rule will create a new Seurat object for each integration performed.
+#   All newly created 'integrated' Seurat objects will be concatenated into a list upon rule completion.
+#
+# memory_MB: Integration of large data may to increase as needed to 5-35 GB. Default R memory is 500 MB. 
+#
+# atac_integrate_embeddings:
+#   If True, integrate low-dimensional cell embeddings (LSI coordinates) across the datasets.
+#     Best option for integrating multiple ATAC Peaks data sets.
+#   If False, integrate (transform) ATAC Peaks counts matrix across datasets (not LSI coordinates).
+#     May over fit. Kept mainly for legacy support.
+#
+# groups: Each group to perform integration. Group name (key) must be unique.
+#
+# split_by: Metadata column(s) to generate Seurat list prior to integration
+#   Can select from 'feature_type' in samples.tsv, or any column in units.tsv excluding 'sample' and 'unit'.
+#
+# reference:
+#   label: A single element/label from 'split_by' labels. Used as reference Seurat object
+#   assay_name: Which assay to use a reference assay for integration?
+#     Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
+#
+# query:
+#   label: One or more labels from 'split_by' labels. Used as query Seurat object
+#   assay_name: which assay to use a query assay for integration?
+#     Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
+#     
+# new_slot_name: Name of the new assay/slot to create in Seurat object during integration. Must be unique.
+#   Best option use 'split_by' value and referece 'label' delimited by '.'
+#
+# norm_method: nNrmalization method to perform on reference and query assays prior to Seurat integration.
+#   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
+#   Suggested methods for integrating only GEX: 'log' or 'sct'.
+#   Suggested method for integrating only ATAC: 'lsi'.
+#   Suggested method for integrating GEX and ATAC together: 'log'. 
+#
+# integrate_dims: Range of dimensions to use for integration stap.
+#
+# umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
+integrate:
+  activate: true
+  memory_MB: null
+  atac_integrate_embeddings: true
+  groups:
+    integrated_0:
+      split_by: meta_batch
+      reference:
+        label: batch1
+        assay_name: Gene.Expression
+      query:
+        label: batch2
+        assay_name: Gene.Expression
+      norm_method: sct
+      integrate_dims:
+      - 1
+      - 30
+
+
+# Coembed rna and atac data
+# activate: Coembed rna and atac data instead of integrating/transforming data?
+#   Similar in concept to integration workflow, but doesn't transform ATAC data or create "integrated" slot.
+#   Coembedding rule will create a new Seurat object for the comembeding rule.
+#   If True, 
+#     1. Use RNA Gene Expression counts
+#     2. Impute ATAC Gene Activity Scores from Gene Expression counts
+#     3. Coembed UMAPs
+#     Ref: https://satijalab.org/seurat/articles/atacseq_integration_vignette.html
+#   If False,
+#     Skips coembedding rule
+#
+# reference: group to use as reference data for coembedding
+#
+# type: Which object to look for data in? Can select an assay in unitegrated or integrated Seurat objects.
+#
+# slot_name: assay name to use, '.' delimited. Any valid assay from unintegrated or integrated objects.
+#
+# norm_method: normalization method for assay selected in 'slot_name'
+#
+# reduction: reduction performed on assay selected in 'slot_name'
+coembed:
+  activate: false
+  groups:
+    integrated_0:
+      split_by: meta_batch
+      reference:
+        label: batch1
+        assay_name: Gene.Expression
+      query:
+        label: batch2
+        assay_name: Gene.Expression
+
+chooser:
+  groups:
+    unintegrated_0:
+      npcs: 25
+    unintegrated_1:
+      npcs: 20
+    unintegrated_2:
+      npcs: 20
+    unintegrated_3:
+      npcs: 20
+    integrated_0:
+      npcs: 25
+    integrated_1:
+      npcs: 20
+  resolutions:
+    - 0.8
+    - 1
+    - 1.2
+    - 1.4
+    - 1.6
+    - 1.8
+    - 2
+    - 4
+    - 6
+    - 8
+    - 12
+    - 16
+  silhouette:
+    - silhouette
+    - frequency_grouped
+    - silhouette_grouped
+
+
+
+# Community detection and graphing
+# groups: Each group to perform clustering.
+#   If provided, group names must match 'groups' section of 'normalization' or 'integration' sections.
+#   If not provided, clustering will be performed on all assays using default values from Seurat methods.
+#
+# neighbor_method: use Seurat's graph-based shared nearest neighbor detection ['shared']
+#   or weighted nearest neighbor ['weighted']
+#   - Shared nearest neighbor graph is suitable for most applications using single modality.
+#   - Weighted neratest neighbor graph is useful for multimodal analyses
+#       (GEX+ATAC multiome, CITE-Seq, etc)
+#   - Note: weighted nearest neighbor method requires umap (tsne not supported by Seurat)
+# assay_name: Which Seurat assay(s) to use. Seurat assay names are '.' delimited.
+#   Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
+#
+# reduction: Which reduction(s) to use to build graphs for 'snn' or 'wsnn'
+#   Order must match order in 'assay_name'
+#   Currently supported reductions:
+#   - 'pca' for all assays except ATAC Peaks
+#   - 'lsi' for ATAC peaks
+#
+# umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
+#   Order must match order in 'assay_name'
+#
+# resolution: Single numeric value to use as resolution parameter for group.
+# Example 1: defaults
+# cluster:
+#   activate: true
+#   groups: null
+#
+# Example 2: manual param selection
+# cluster:
+#   activate: true
+#   groups:
+#     unintegrated_0:
+#       neighbor_method: shared
+#       assay_name: Gene.Expression
+#       reduction: pca
+#       umap_dims:
+#       - null
+#       - null
+#       resolution: null
+#     coembeded_0:
+#       neighbor_method: shared
+#       assay_name: Gene.Expression
+#       reduction: pca
+#       umap_dims:
+#       - null
+#       - null
+#       resolution: null
+
+# Fix later
+# Weighted snn is activated only for multimodal analysis
+# Set to false for single modality
+weighted_nn:
+  activate: false
+  groups:
+    wnn_0:
+      neighbor_method: weighted
+      input_groups:
+      - unintegrated_0 # corresponds to SCT
+      # assay_name:
+      # - Gene.Expression # or SCT
+      # - Peaks
+      reduction:
+      - pca
+      umap_dims:
+      - - 1
+        - 25
+      - - 2
+        - 20
+      resolution: 0.8
+
+# differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
+# can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
+diff_analysis:
+  activate: true
+  groups:
+    unintegrated_0:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: null
+      test_use: null
+      latent_vars: null
+    integrated_0:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: null
+      test_use: null
+      latent_vars: null
+
+# Choose guide options:
+# build - build initial version of guide.rst from config/template_guide.rst
+# render - render guide.html
+# etc - do nothing
+# NOTE:
+# 1. After building the initial guide.rst, you need to manually check input & output file paths
+# 2. Set to "etc" if the guide file is not needed
+# 3. Set to "etc" if main workflow has not run yet (no 'results' directory)
+guide: "etc" # set to "build", "render", or "etc"

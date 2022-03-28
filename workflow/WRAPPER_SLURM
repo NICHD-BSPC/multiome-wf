@@ -1,0 +1,45 @@
+#!/bin/bash
+#SBATCH --job-name="multiome"
+#SBATCH --partition="norm"
+#SBATCH --time=24:00:00
+
+set -euo pipefail
+
+# Before you start,
+# CHECK CONFIGFILE PATH!!!
+
+# make logdir
+if [[ ! -e logs ]]; then mkdir -p logs; fi
+
+# Run snakemake
+(
+    time snakemake \
+    --snakefile Snakefile \
+    -p \
+    --directory $PWD \
+    -k \
+    --rerun-incomplete \
+    --jobname "s.{rulename}.{jobid}.sh" \
+    -j 999 \
+    --cluster-config config/other-setup/clusterconfig.yaml \
+    --cluster 'sbatch {cluster.prefix} --cpus-per-task={threads}  --output=logs/{rule}.o.%j --error=logs/{rule}.e.%j' \
+    --use-conda \
+    --configfile config/multiome-config/config.yaml \
+    --latency-wait=300 \
+    --max-jobs-per-second 1 \
+    --max-status-checks-per-second 0.01 \
+    "$@"
+    ) > "Snakefile.log" 2>&1
+
+set +u
+SNAKE_PID=$!
+
+finish(){
+    echo 'Stopping running snakemake job.'
+    kill -SIGINT $SNAKE_PID
+    exit 0
+}
+trap finish SIGTERM
+
+wait $SNAKE_PID
+

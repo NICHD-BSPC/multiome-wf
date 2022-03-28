@@ -1,0 +1,212 @@
+---
+title: "Finding Markers"
+output:
+    html_document:
+            keep_md: yes
+            toc: true
+            toc_float: true
+            code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    warning=FALSE,
+    message=FALSE,
+    results='hide'
+    )
+
+```
+
+```{r packages_and_functions, include=FALSE}
+library(Signac)
+library(Seurat)
+library(knitr)
+library(future)
+set.seed(1234)
+
+source('common.R')
+```
+
+## Parallelization
+
+```{r parallelize, include=FALSE}
+
+# Assign the number of cores for parallelization
+ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+options(future.globals.maxSize=40000 * 1024^2,
+        mc.cores=ncpus)
+
+# Parallelize the run
+plan("multicore", workers=ncpus)
+
+
+```
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+```{r variables}
+config_path = params[['config']]
+
+```
+
+
+## Read in data
+
+Read in Seurat object.
+
+```{r input}
+seurat = readRDS(params[['seurat_in']])
+cat('Input seurat object: \n')
+print(seurat)
+
+config = yaml::read_yaml(file = config_path)
+```
+
+
+## Find markers
+
+```{r get_analysis_group}
+# target = basename(params[['seurat_in']])
+# target = gsub("^(.*).clustered_data.rds", "\\1", target)
+# print("Choosing for group:")
+# print(target)
+# 
+# groups = config[['diff_analysis']][['groups']]
+# 
+# idx = which(names(groups) %in% target)
+#  
+# if (length(idx) == 0) {
+#     print("Group is not present in config's normalize groups list.")
+#     q()
+# } else if (length(idx) > 1) {
+#     print("You are trying to normalize group/assay multiple times. Please fix.")
+#     q()
+# }
+
+group = config[['diff_analysis']][['groups']][[ params[["seurat"]] ]]
+group_name = params[["seurat"]]
+print('Current group:')
+print(group_name)
+
+```
+
+
+```{r find_markers}
+cluster_idents = group[['cluster_idents']]
+if (is.null(cluster_idents)) {
+  ident_name = "seurat_clusters"
+} else {
+  ident_name = cluster_idents
+}
+
+# should only have one resolution column that is copied to "seurat_clusters"
+# except for weighted nearest neighbor objects
+pattern = ".*wsnn_res\\.[0-9]+.*"
+idx = grep(pattern = pattern, x = names(seurat@meta.data))
+if (length(idx) > 0) {
+  print("Weighted snn idents identical to cluster_idents?")
+} else {
+  pattern = ".*snn_res\\.[0-9]+.*"
+  idx = grep(pattern = pattern, x = names(seurat@meta.data))
+  print("Shared nn idents identical to cluster_idents?")
+}
+
+# check if all identical. Not necessary but helpful
+print(all(seurat@meta.data[,ident_name] == seurat@meta.data[,idx]))
+
+
+# fix later, add loop to this section to support multiple assays/slots in a single object.
+# Ex: "Gene.Expression" with "data" slot, "SCT" with "scale.data"
+# Ex: "Peaks" with "data", "GeneActivity" with "data"
+if (length(ident_name) > 0) {
+  print("finding markers for:")
+  print(ident_name)
+  
+  Idents(object = seurat) <- ident_name
+  head(Idents(object = seurat))
+  
+  if (is.null(group[['slot']])) {
+    slot_use = "data"
+  } else {
+    slot_use = group[['slot']]
+  }
+  
+  # set default values if they are null in config.yaml
+  if (is.null(group[['assay']])) {
+    targets = c("pca", "lsi")
+    idx = grep(paste(targets,collapse="|"), names(seurat@reductions))
+    red_use = names(seurat@reductions)[idx]
+    assay_use = seurat@reductions[[red_use]]@assay.used
+  } else {
+    assay_use = group[['assay']]
+    assay_present = any(names(seurat@assays) %in% assay_use)
+    
+    if (assay_present) {
+      matrix_use = GetAssayData(object = seurat,
+                                assay = assay_use,
+                                slot = slot_use)
+      if (nrow(matrix_use) == 0 && ncol(matrix_use) == 0) {
+        print("Assay and slot defined in config file is empty! Quiting.")
+        q()
+      }
+    }
+  }
+  if (is.null(group[['min_pct']])) {
+    min_pct = 0.1
+  } else {
+    min_pct = group[['min_pct']]
+  }
+  if (is.null(group[['test_use']])) {
+    test_use = "wilcox"
+  } else {
+    test_use = group[['test_use']]
+  }
+
+  # fix later:
+  # Warning: 'latent.vars' is only used for the following tests: negbinom, poisson, MAST, LR
+  markers_df = FindAllMarkers(
+    object = seurat,
+    assay = assay_use,
+    slot = slot_use,
+    min.pct = min_pct,
+    test.use = test_use,
+    latent.vars = group[['latent_vars']]
+  )
+
+  markers_df$group = rep(ident_name, nrow(markers_df))
+  markers_df$assay = rep(assay_use, nrow(markers_df))
+  markers_df$slot = rep(slot_use, nrow(markers_df))
+}
+
+markers_df = markers_df[markers_df$p_val_adj <= 0.05,]
+
+```
+
+
+## Save Seurat object
+
+```{r save}
+print('Writing markers list to file:')
+
+write.table(x = markers_df, file = params[['markers_out']], 
+            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+
+print('Done saving markers table')
+```
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+
+```
+
+

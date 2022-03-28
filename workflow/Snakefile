@@ -1,0 +1,960 @@
+import pandas as pd
+import numpy as np
+import os
+
+##### for interactive debugging
+# import yaml
+# with open("config/multiome-config/config.yaml", 'r') as stream:
+#      config = yaml.safe_load(stream)
+
+
+##### load config and sample sheets #####
+configfile: "config/multiome-config/config.yaml"
+
+
+# configuration = "config/config.yaml"
+# workflow.configfiles generates a list
+# in this case, starts with ["config/config.yaml"]
+# any files in snakemake --configfile are added by "list.insert(0, x)"
+# so snakemake --configfile test.yaml test1.yaml will return:
+# ["test1.yaml", "test.yaml", "config/config.yaml"]
+configuration = workflow.configfiles[0]
+
+
+# print(workflow.configfiles)   # uncomment for testing
+# print(configuration)      # uncomment for testing
+
+# using Rmarkdown outputs as guide/report
+# report: "report/workflow.rst"
+
+# Allow users to fix the underlying OS via singularity.
+singularity: "docker://continuumio/miniconda3"
+
+
+samples = pd.read_table(config["samples"]).set_index(["sample", "replicate"], drop=False)
+# samples.index.names = ["sample"]
+samples.index.names = ["sample_id", "replicate_id"]
+samples.index = samples.index.set_levels(
+    [i.astype(str) for i in samples.index.levels]
+)  # enforce str in index
+# print(samples)
+
+# assays = pd.read_table(config["assays"]).set_index("sample", drop=False)
+# assays.index.names = ["sample"]
+# # print(assays)
+
+
+
+# Set chooser variables
+resolutions = config['chooser']['resolutions']
+chooser_sil = config['chooser']['silhouette']
+
+# Fix later:
+# Add some check to ensure within config.yaml sections,
+# "groups" dict keys are consistent with previous rules/sections
+
+
+##### wildcard constraints #####
+
+# fix later
+# wildcard_constraints:
+#     sample="|".join(samples.index),
+
+
+####### helpers ###########
+
+def is_activated(xpath):
+    """Rule selected rule?"""
+    c = config
+    for entry in xpath.split("/"):
+        c = c.get(entry, {})
+    return bool(c.get("activate", False))
+
+def get_anno_rmd(wildcards):
+    if config["ANNOTATION"] == "EnsDb":
+        annofile='annotation_ensdb.Rmd'
+    else:
+        annofile='annotation_gtf.Rmd'
+    return annofile
+
+def get_tenx_type(wildcards):
+    """Get matrix type (column name) from sample sheet."""
+    cols = ['HDF5_Multiple_Assays', 'RDS_Multiple_Assays', 'Gene.Expression', 'Peaks', 'TF']
+    # df = samples.loc[wildcards.sample, cols] # does not account for replicates
+    if wildcards.replicate == 'nan':
+        samp_mask = samples["sample"]==wildcards.sample
+        df = samples[samp_mask]
+    else:
+        samp_mask = samples["sample"]==wildcards.sample
+        rep_mask = samples["replicate"]==wildcards.replicate
+        df = samples[samp_mask & rep_mask]
+    df = df.loc[:,cols].dropna(axis=1)
+    tenx_type = df.columns.to_list()
+    return tenx_type
+
+def get_tenx(wildcards):
+    """Get filtered matrix (hdf5/rds file or mex directory) path from sample sheet."""
+    cols = ['HDF5_Multiple_Assays', 'RDS_Multiple_Assays', 'Gene.Expression', 'Peaks', 'TF']
+    # df = samples.loc[wildcards.sample, cols] # does not account for replicates
+    if wildcards.replicate == 'nan':
+        samp_mask = samples["sample"]==wildcards.sample
+        df = samples[samp_mask]
+    else:
+        samp_mask = samples["sample"]==wildcards.sample
+        rep_mask = samples["replicate"]==wildcards.replicate
+        df = samples[samp_mask & rep_mask]
+    df = df.loc[:,cols].dropna(axis=1)
+    tenx_path = df.values.flatten().tolist()
+    return tenx_path
+
+def get_tsv_path(xpath):
+    if os.path.exists(xpath):
+        return xpath
+    else:
+        return ""
+
+def get_groups(xpath):
+    """Get group names from selected config section"""
+    c = config
+    groups = c.get(xpath, {}).get("groups", {})
+    group_names = list(groups.keys())
+    return group_names
+
+def get_assays(xpath, assay_type=None):
+    """Get assay names from selected config section.
+    If using group integrate, need to specify assay_type"""
+    c = config
+    groups = c.get(xpath, {}).get("groups", {})
+    # group_vals is a list of dict_values
+    group_vals = list(groups.values())
+    assay_names = []
+    if assay_type is None:
+        for x in group_vals:
+            # get dict for given group values
+            assay_name = x.get("assay_name", {})
+            assay_names.append(assay_name)
+    else:
+        for x in group_vals:
+            # get dict for given group values
+            assay_name = x.get(assay_type, {}).get("assay_name", {})
+            assay_names.append(assay_name)
+    return assay_names
+
+
+####### rule inputs ###########
+
+def get_coembed_input(wildcards):
+    """If present, select seurat object to for rule input."""
+    if is_activated("integrate"):
+        seurat_obj = [
+        "results/process/unintegrated.rds",
+        "results/process/integrated.rds"
+        ]
+    else:
+        seurat_obj = [
+        "results/process/unintegrated.rds"
+        ]
+    return seurat_obj
+
+def get_cluster_inputs(wildcards):
+    seurat = wildcards.seurat
+    r = re.compile(seurat)
+    unintegrated_list = get_groups("normalize")
+    matches = list(filter(r.match, unintegrated_list))
+    if (len(matches) > 0):
+        seurat_obj = "results/normalize_reduce_dims/{seurat}/{seurat}.rds"
+    else:
+        seurat_obj = "results/integrate/{seurat}/{seurat}.rds"
+    return seurat_obj
+
+def get_diff_test_input(wildcards):
+    seurat = wildcards.seurat
+    r = re.compile(seurat)
+    weighted_nn_list = get_groups("weighted_nn")
+    matches = list(filter(r.match, weighted_nn_list))
+    if (len(matches) > 0):
+        seurat_obj = "results/wnn/{seurat}/clustered_data.rds"
+    else:
+        seurat_obj = "results/cluster/{seurat}/clustered_data.rds"
+    return seurat_obj
+
+def determine_input():
+    if config["macs2"]["run"] == "Y":
+        return "results/add_macs_peaks/seurat.rds"
+    elif config["macs2"]["run"] == "N":
+        return "results/merge_zinba/seurat.rds"
+    else:
+        raise ValueError("Incorrect macs2 configuration - set 'Y' or 'N'")
+
+
+####### valid inputs ##########
+
+def get_snn_targets():
+    # Gather files for clustering. 
+    # Either shared nearest neighbor or 
+    # weighted nearest neighbor methods.
+    unintegrated_list = get_groups("normalize")
+    snn_targets = unintegrated_list[:] # copy values not reference
+    # # for filtering out "MACS" assays, if needed
+    # unintegrated_assays = get_groups("normalize")
+    # snn_assays = unintegrated_assays[:]
+    if config["macs2"]["run"] == "N":
+        from itertools import compress
+        # snn_targets.remove("unintegrated_2")
+        # find any unitegrated assays containing "MACS"
+        assays_list = get_assays("normalize")
+        # subset snn_targets based on logicals checking "MACS"
+        idx = [item != "MACS" for item in assays_list]
+        snn_targets = list(compress(snn_targets, idx))
+    if is_activated("integrate"):
+        integrated_list = get_groups("integrate")
+        if config["macs2"]["run"] == "N":
+            # find any reference/query assays containing "MACS"
+            assays_ref = get_assays("integrate", assay_type = "reference")
+            idx_ref = np.array([item != "MACS" for item in assays_ref])
+            assays_query = get_assays("integrate", assay_type = "query")
+            idx_query = np.array([item != "MACS" for item in assays_query])
+            # numpy compare, retain 'false' if idx_ref or idx_query has a false
+            idx = list(idx_ref & idx_query)
+            integrated_list = list(compress(integrated_list, idx))
+        snn_targets.extend(integrated_list)
+    if is_activated("coembed"):
+        coembed_list = get_groups("coembed")
+        snn_targets.extend(coembed_list)
+        # fix later as with 'if config["macs2"] == "N"'
+        # coembed_assays = get_assays("coembed")
+        # snn_assays.extend(coembed_assays)
+    return snn_targets
+
+snn_targets = get_snn_targets()
+
+
+def get_valid_groups():
+    # it's easy to accidentally add analysis groups for optional rules
+    # this filters out out groups that don't match across groups
+    # get activations and groups for each config section:
+    a = {}
+    d = {}
+    for i in config.keys():
+        # print(i)
+        if isinstance (config[i], dict) or isinstance (config[i], OrderedDict):
+            # print("is")
+            c = config[i]
+            if "activate" in c.keys():
+                a[i] = c['activate']
+                # print(c.keys())
+                d[i] = c['groups']
+        else:
+            # print("not")
+            d[i] = None
+    dd = {key:val for key, val in d.items() if val != None}
+    for key, value in a.items():
+        if not value:
+            del dd[key]
+    if is_activated("weighted_nn"):
+        # print("weighted_nn activated")
+        dw = dd['weighted_nn']
+        del dd['weighted_nn']
+    dd['normalize'] = config['normalize']['groups']
+    df = pd.DataFrame.from_dict(dd)
+    g = {}
+    for i in df.columns:
+        # print(i)
+        targets = snn_targets[:]
+        if is_activated("weighted_nn"):
+            targets.extend(list(dw.keys()))
+        df_filter = df.loc[[item in targets for item in df.index], :]
+        df_filter = df_filter.dropna(subset=[i]).index
+        df_filter =df_filter.unique().to_list()
+        g[i] = df_filter
+    if is_activated("weighted_nn"):
+        h = {}
+        for key, value in dw.items():
+            h[key] = dw[key]['input_groups']
+        for key, value in h.items():
+            if not all([item in targets for item in h['wnn_0']]):
+                del h[key]
+        if bool(h):
+            g['weighted_nn'] = list(h.keys())
+    valid_groups = g
+    return valid_groups
+
+valid_groups = get_valid_groups()
+
+print(valid_groups)    # uncomment for testing
+
+####### cluster inputs ########
+
+# gather files for shared nearest neighbor analysis
+cluster_input = []
+cluster_input.extend(
+    expand(
+        "results/cluster/{seurat}/clustered_data.rds",
+        seurat=snn_targets
+    )
+)
+
+if is_activated("weighted_nn"):
+    cluster_input.extend(
+        expand(
+            "results/wnn/{seurat}/clustered_data.rds",
+            seurat=valid_groups['weighted_nn']
+        )
+    )
+
+# print("cluster_input")
+# print(cluster_input)
+
+####### all inputs ############
+
+def all_input(wildcards):
+    wanted_input = []
+
+    if is_activated("diff_analysis"):
+        wanted_input.extend(
+            expand(
+                "results/diff_analysis/{seurat}/markers.tsv",
+                seurat=valid_groups['diff_analysis']
+            )
+        )
+
+    # gather path to combine as many seurat objects as possible
+    wanted_input.append(
+        "results/combine/seurat_combined.rds"
+    )
+
+    # Downstream analyses following chooseR, append to 'wanted_input' here.
+    # other cool stuff here...
+
+    if config["guide"] == "build":
+        wanted_input.append(
+            "../report/guide.rst"
+        )
+    elif config["guide"] == "render":
+        wanted_input.append(
+            "../report/guide.html"
+        )
+
+    return wanted_input
+
+
+####### rules ###########
+
+rule all:
+    input:
+        all_input
+
+
+
+rule build_annotation:
+    """
+    This rule builds annotation from EnsDb or generic GTF
+    'peaks' input used as placeholder. Reference in annotation_gtf.Rmd'
+    commented out.
+    Fix later : add something like "len(params.genome) == 1"
+    "len(params.genome) == 1" only useful for ATAC Peaks annotation.
+    Does not impact sample['genome'] where multi-species is supported.
+    """
+    input:
+        markdown = get_anno_rmd,
+    output:
+        html = "results/build_annotation/report.html",
+        anno_atac = "results/build_annotation/annotation.rds",
+    params:
+        anno_file = config["ANNO_FILE"],
+        genome = samples['genome'].unique().tolist()[0],
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                anno_atac = "{output.anno_atac}",
+                anno_file = "{params.anno_file}",
+                genome = "{params.genome}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                output_file = "{output.html}")'
+        """
+
+rule create_seurat:
+    """
+    Creates a seurat object with associated assays.
+    Include a 'wildcards.units' in unlikely case of multiple technical reps.
+    """
+    input:
+        markdown = "create_seurat.Rmd",
+        tenx = get_tenx,
+        annotation = "results/build_annotation/annotation.rds",
+    output:
+        html = "results/create_seurat/{sample}-{replicate}.report.html",
+        seurat = "results/create_seurat/{sample}-{replicate}.seurat_raw.rds"
+    params:
+        tenx_type = get_tenx_type,
+        scriptdir = "scripts",
+        sample_tsv = config["samples"],
+        aggregates_tsv = get_tsv_path(config["aggregates"]),
+        assays_tsv = get_tsv_path(config["assays"]),
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                wc_sample = "{wildcards.sample}",
+                wc_replicate = "{wildcards.replicate}",
+                tenx = "{input.tenx}",
+                annotation = "{input.annotation}",
+                seurat = "{output.seurat}",
+                tenx_type = "{params.tenx_type}",
+                scriptdir = "{params.scriptdir}",
+                sample_tsv = "{params.sample_tsv}",
+                aggregates_tsv = "{params.aggregates_tsv}",
+                assays_tsv = "{params.assays_tsv}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                output_file = "{output.html}" )'
+        """
+
+rule qc:
+    """
+    Filters cell counts based on user-supplied column names present in Seurat metadata.
+    Saves pre- and post-filtered violin plots if user wants to generate report later.
+
+    Do this step individually, in case need to re-run QC/filtering with diff params.
+    Little bit of I/O overhead worth it.
+    """
+    input:
+        markdown = "qc.Rmd",
+        seurat_in = "results/create_seurat/{sample}-{replicate}.seurat_raw.rds",
+        config = ancient(configuration),
+    output:
+        html = "results/qc/{sample}-{replicate}.report.html",
+        seurat_out = "results/qc/{sample}-{replicate}.seurat_qc.rds",
+    params:
+        scriptdir = "scripts",
+        intermediates_dir="results/qc/{sample}-{replicate}",
+        outdir = "results/qc"
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                intermediates_dir = "{params.intermediates_dir}",
+                output_dir = "{params.outdir}",
+                output_file = "{output.html}" )'
+        """
+
+rule merge_zinba:
+    """
+    Merge seurat objects from QC in case of skipping macs2 peakcalling
+    """
+    input:
+        markdown = "merge_zinba.Rmd",
+        seurats = expand(
+            "results/qc/{sample}-{replicate}.seurat_qc.rds",
+            zip,
+            sample = samples["sample"].tolist(),
+            replicate = samples["replicate"].tolist()
+            ),
+        annotation = "results/build_annotation/annotation.rds"
+    output:
+        html = "results/merge_zinba/report.html",
+        seurat= "results/merge_zinba/seurat.rds"
+    threads: 12
+    shell:
+        """
+        Rscript -e 'params=list(
+            seurats="{input.seurats}",
+            seurat="{output.seurat}",
+            annotation="{input.annotation}");
+        rmarkdown::render("{input.markdown}",
+        params=params,
+        output_file="{output.html}" )'
+        """
+
+rule merge_macs_prep:
+    """
+    Merge section:
+    Combines all samples in samples.tsv into a single Seurat object.
+    This improves consistency across all assays/samples.
+    If multiple peaks files from select_peaks rule are found, performs granges reduction.
+    Note that NA are imputed for cells lacking counts data.
+    Example: Cells containing only GEX data will have NA for all ATAC peaks and vice versa.
+
+    Peakcalling section:
+    ZINBA: Combine peaks if needed
+    MACS: Call peaks on full data set
+    """
+    input:
+        markdown = "merge_macs_prep.Rmd",
+        seurats = expand(
+            "results/qc/{sample}-{replicate}.seurat_qc.rds",
+            zip,
+            sample = samples["sample"].tolist(),
+            replicate = samples["replicate"].tolist()
+            ),
+        annotation = "results/build_annotation/annotation.rds",
+        config = ancient(configuration),
+    output:
+        html = "results/merge_macs_prep/report.html",
+        seurat = "results/merge_macs_prep/seurat.rds",
+        bed = "results/merge_macs_prep/Multiome.bed",
+    params:
+        genome = samples['genome'].unique().tolist()[0],
+        fragments = samples['fragments'].dropna().tolist(),
+        scriptdir = "scripts",
+    threads: 12
+    shell:
+        # File name written by Signac::SplitFragmentsBy() is variable, add cmd to rename
+        """Rscript -e 'params = list(
+                seurats = "{input.seurats}",
+                annotation = "{input.annotation}",
+                config = "{input.config}",
+                seurat = "{output.seurat}",
+                genome = "{params.genome}",
+                fragments = "{params.fragments}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                output_file = "{output.html}" )';
+        """
+        """
+        fragments_bed=($(find results/merge_macs_prep -name *.bed))
+        if [[ ! ${{#fragments_bed[@]}} == 1 ]]
+        then
+            echo "config['macs']['split_frags_by'] choice generates more than 1 output bed file."
+            echo "Please set 'split_frags_by' to a samples.tsv column shared across all ATAC/Multiome samples."
+        elif [[ ! ${{fragments_bed[0]}} -ef results/merge_macs_prep/Multiome.bed ]]
+        then
+            echo "Output bed file is not named 'Multiome.bed', which is required for 'macs2' rule. Renaming."
+            mv ${{fragments_bed[0]}} {output.bed}
+        fi
+        """
+
+rule macs2:
+    """
+    This rule runs macs2 in command line
+    """
+    input:
+        bed = "results/merge_macs_prep/Multiome.bed",
+    output:
+        tsvgz = "results/macs2/macspeaks.tsv.gz",
+        tbi = "results/macs2/macspeaks.tsv.gz.tbi",
+        peak = "results/macs2/NA_peaks.narrowPeak",
+    params:
+        tsv = "results/macs2/macspeaks.tsv"
+    # threads: os.environ.get("SLURM_CPUS_PER_TASK", 8)   # uses 8 CPUs if $SLURM_CPUS_PER_TASK is not set
+    threads: 12
+    shell:
+        # NOTE: parallel takes input using {} and :::
+        # {} in snakemake is problematic. Use {{}} for something else if you need it.
+        "set +o pipefail; "
+        "sort -k 1,1 -k 2 -V -s --parallel={threads} {input.bed} | grep 'chr' | uniq > {params.tsv} && "
+        "sort -k 1,1 -k 2 -V -s --parallel={threads} {input.bed} | grep -v 'chr' | uniq >> {params.tsv} && "
+        "bgzip --threads {threads} < {params.tsv} > {output.tsvgz} && "
+        "parallel --max-procs={threads} "
+            "'tabix -p bed --zero-based --force --begin 2 --end 3 {{}}' ::: {output.tsvgz} && "
+        "parallel --max-procs={threads} "
+            "'macs2 callpeak -t {{}} -f BED --nomodel --outdir results/macs2' ::: {output.tsvgz}"
+
+rule add_macs_peaks:
+    """
+    This rule merges macs2-called peaks to seurat
+    """
+    input:
+        peak = "results/macs2/NA_peaks.narrowPeak",
+        seurat = "results/merge_macs_prep/seurat.rds",
+        markdown = "add_macs_peaks.Rmd",
+        annotation = "results/build_annotation/annotation.rds",
+    output:
+        html = "results/add_macs_peaks/report.html",
+        seurat = "results/add_macs_peaks/seurat.rds",
+    params:
+        genome = samples['genome'].unique().tolist()[0],
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                seurat = "{input.seurat}",
+                seurat_out = "{output.seurat}",
+                peak = "{input.peak}",
+                annotation = "{input.annotation}",
+                genome = "{params.genome}" );
+            rmarkdown::render("{input.markdown}",
+            params=params,
+            output_file = "{output.html}")'
+        """
+
+rule normalize_reduce_dims:
+    """
+    Pre-process unitegrated data.
+    Splits Seurat object from combine_seurat into a list of Seurat objects,
+    each object containing 1 assay. Checks for and removes imputed zero values
+    generated during combine_seruat step to retain only 'true' counts,
+    (the imputed zeros are very problematic).
+    For each assay, perform log, sct or lsi normalization. One norm per assay.
+    Linear and non-linear dimensional reductions are stored in unique dim red key:
+    using format: paste0(assay_name, "_", reduction_type)
+    Example("gene.expression_pca").
+    Rule returns a list of Seurat objects, each element containing one assay.
+    Exception is when 2 assays have identical cells (Multiome, CITE-Seq),
+    in which case, will the list element will be a seruat object containing
+    all assays with equal cell count (Seurat object with 2 assays.)
+    Fix later: This behavior should probably be changed to ensure
+    each output list element contains Seurat object with one and only one assay.
+    Fix later: If each list element contains only one assay,
+    possibly change dim reduction keys to 'pca/lsi' or 'umap' for easy access
+    in downstream rules easier to fix. Check if this is viable.
+    """
+    input:
+        markdown = "normalize_reduce_dims.Rmd",
+        seurat_in = determine_input(),
+        config = ancient(configuration),
+    output:
+        html = "results/normalize_reduce_dims/{seurat}/{seurat}.report.html",
+        seurat_out = "results/normalize_reduce_dims/{seurat}/{seurat}.rds",
+        output_dir = directory("results/normalize_reduce_dims/{seurat}")
+    params:
+        scriptdir = "scripts",
+        intermediates_dir="results/normalize_reduce_dims/intermediates_dir/{seurat}",
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                output_dir="{output.output_dir}",
+                intermediates_dir = "{params.intermediates_dir}",
+                output_file = "{output.html}" )'
+        """
+
+rule integrate:
+    """
+    Perform one or more integration based on sample.tsv or units.tsv columns.
+    Note that imputed zeros from combine_seruat rule are note used for integration.
+    Fix later: check if imputed zeros still exist and possibly remove from the
+    pre- and/or post-integrated objects.
+    Add more columns to sample.tsv or units.tsv for new integration combinations.
+    Returns list of Seurat objects, each object contains one integration.
+    """
+    input:
+        markdown = "integrate.Rmd",
+        seurat_in = determine_input(),
+        config = ancient(configuration),
+    output:
+        html = "results/integrate/{seurat}.report.html",
+        seurat_out = "results/integrate/{seurat}.rds",
+    threads: 32
+    shell:
+        """Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                output_file = "{output.html}" )'
+        """
+
+# if is_activated("coembed"):
+#     """
+#     Coembed dimensional reductions.
+#     Really is only useful for non-multiome combination of GEX and ATAC matrices.
+#     Returns list with one element: a Seurat object containg GEX-ATAC coembeded
+#     object.
+#     Example use case: integrate 2 GEX batches (ion integrate rule), integrate
+#     integrate 2 Peaks batches (integrate rule), then coembed the integrated.GEX 
+#     and integrated.Peaks matrices.
+#     Fix later: metadata looks odd when samples plotted. likely need to re-level
+#     or update metadata columns after coembedding.
+#     """
+#     rule coembed:
+#         input:
+#             get_coembed_input,
+#         output:
+#             "results/process/coembed.rds",
+#         # conda:
+#         #     "../envs/coembed.yaml"
+#         log:
+#             "results/logs/coembed.log",
+#         script:
+#             "scripts/coembed.R"
+
+rule chooser_paral:
+    """
+    Runs chooseR
+    """
+    input:
+        markdown = "chooser_paral.Rmd",   # chooser - parallelized
+        seurat_in = get_cluster_inputs,
+        config = ancient(configuration),
+    output:
+        html = "results/chooser_run/{seurat}/res_{res}/report.html",
+        output_dir = directory("results/chooser_run/{seurat}/res_{res}"),
+        calculation_rds = expand("results/chooser_run/{{seurat}}/{sil}_{{res}}.rds", sil=chooser_sil),
+        seurat_rds = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
+    params:
+        results_path = "results/chooser_run/{seurat}",
+        seurat_out = "{seurat}",
+        res = "{res}",
+        scriptdir="scripts",
+        intermediates_dir = "results/chooser_run/intermediates_dir/{seurat}/res_{res}",
+    threads: 12
+    conda:
+        "chooser/env.yaml"
+    shell:
+        """Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                calculation_outs = "{output.calculation_rds}",
+                seurat_rds = "{output.seurat_rds}",
+                seurat_out = "{params.seurat_out}",
+                results_path = "{params.results_path}",
+                res = "{params.res}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = params,
+                intermediates_dir = "{params.intermediates_dir}",
+                output_dir = "{output.output_dir}",
+                output_file = "{output.html}")'
+        """
+
+rule chooser_aggr:
+    """
+    Plots chooseR results
+    """
+    input:
+        markdown = 'chooser_aggr.Rmd',      # chooser - results
+        sil_obj = expand('results/chooser_run/{{seurat}}/{sil}_{res}.rds',
+                        sil=chooser_sil,
+                        res=resolutions),
+        config = ancient(configuration)
+        # fix later, buggy:
+        # seurat_obj = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
+    output:
+        html = "results/chooser_plot/{seurat}/report.html",
+        output_dir = directory("results/chooser_plot/{seurat}"),
+        seurat_rds = "results/chooser_plot/{seurat}/clustered_data.rds",
+        choice_rds = "results/chooser_plot/{seurat}/choice.rds",
+    params:
+        resolutions = resolutions,
+        res_path = "results/chooser_run/{seurat}",
+        new_path = "results/chooser_plot/{seurat}",
+        seurat = "{seurat}",
+        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
+    conda:
+        "chooser/env.yaml"
+    threads: 12
+    shell:
+        """
+        Rscript -e 'params = list(
+            sil_obj="{input.sil_obj}",
+            results_path="{params.res_path}",
+            new_path = "{params.new_path}",
+            config = "{input.config}",
+            seurat = "{params.seurat}",
+            seurat_out = "{output.seurat_rds}",
+            choice_out = "{output.choice_rds}" );
+        rmarkdown::render("{input.markdown}",
+            params = params,
+            intermediates_dir = "{params.intermediates_dir}",
+            output_dir = "{output.output_dir}",
+            output_file = "{output.html}")'
+        """
+
+rule cluster:
+    """
+    Cluster each unintegrated or integrated assay based on Chooser results
+    """
+    input:
+        markdown = "cluster.Rmd",      # chooser - results
+        seurat_in = get_cluster_inputs,
+        res_choice = "results/chooser_plot/{seurat}/choice.rds",
+        config = ancient(configuration),
+    output:
+        html = "results/cluster/{seurat}/report.html",
+        output_dir = directory("results/cluster/{seurat}"),
+        seurat_out = "results/cluster/{seurat}/clustered_data.rds",
+        barcodes_out = "results/cluster/{seurat}/barcodes.rds",
+    params:
+ #      seurat = "{seurat}",
+        intermediates_dir = "results/cluster/intermediates_dir/{seurat}",
+    threads: 12
+    shell:
+        """
+        Rscript -e 'params = list(
+            seurat_in = "{input.seurat_in}",
+            config = "{input.config}",
+            res_choice = "{input.res_choice}",
+            seurat = "{wildcards.seurat}",
+            seurat_out = "{output.seurat_out}",
+            barcodes_out = "{output.barcodes_out}" );
+        rmarkdown::render("{input.markdown}",
+            params = params,
+            intermediates_dir = "{params.intermediates_dir}",
+            output_dir = "{output.output_dir}",
+            output_file = "{output.html}")'
+        """
+
+rule weighted_nn:
+    """
+    Runs weighted nearest neighbor analysis,
+    assumues cell names for each assay are identical.
+    Currently only one WNN analysis supported.
+    """
+    input:
+        markdown = "weighted_nn.Rmd",
+        seurats = expand(
+            "results/cluster/{seurat}/clustered_data.rds",
+            seurat=snn_targets
+        ),
+        config = ancient(configuration),
+    output:
+        html = "results/wnn/{seurat}/report.html",
+        seurat_out = "results/wnn/{seurat}/clustered_data.rds",
+        barcodes_out = "results/wnn/{seurat}/barcodes.rds",
+    params:
+#       seurat = "{seurat}",
+        scriptdir = "scripts",
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                seurats = "{input.seurats}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}",
+                barcodes_out = "{output.barcodes_out}",
+                seurat = "{wildcards.seurat}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                output_file = "{output.html}")'
+        """
+
+rule diff_analysis:
+    """
+    Runs differential testing for specified assays.
+    """
+    input:
+        markdown = "diff_analysis.Rmd",
+        seurat_in = get_diff_test_input,
+        config = ancient(configuration),
+    output:
+        html = "results/diff_analysis/{seurat}/report.html",
+        output_dir = directory("results/diff_analysis/{seurat}"),
+        markers_out = "results/diff_analysis/{seurat}/markers.tsv",
+    params:
+        scriptdir = "scripts",
+        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
+    threads: 32
+    shell:
+        """Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                markers_out = "{output.markers_out}",
+                seurat = "{wildcards.seurat}",
+                scriptdir = "{params.scriptdir}" );
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                intermediates_dir = "{params.intermediates_dir}",
+                output_dir = "{output.output_dir}",
+                output_file = "{output.html}")'
+        """
+
+rule combine:
+    """
+    Merge all Seurat objects created during rules cluster and weighted_nn.
+    Input  objects have 1 normalized, scaled assay, dim. reduction,
+    cluster identities from SNN and/or WNN community detection.
+    Merges non-greedily: if all cell barcodes in 2 objects identical merge objects.
+    If unique cell barcodes exist in either object, objects not merged.
+    """
+    input:
+        markdown = "combine.Rmd",
+        seurats = cluster_input,
+        config = ancient(configuration),
+    output:
+        html = "results/combine/report.html",
+        seurat_out = "results/combine/seurat_combined.rds",
+    threads: 12
+    shell:
+        """Rscript -e 'params = list(
+                seurats = "{input.seurats}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}" );
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                output_file = "{output.html}")'
+        """
+
+# rule finish:
+#     """
+#     Copy finalized seurat objects and markers.tsv files to a common output dir.
+#     """
+#     input:
+#     output:
+#     threads: 12
+#     shell:
+
+
+# Add downstream analyses here with combined object.
+# Be sure to append output file to "wanted_input" list.
+######################################################
+
+rule build_guide:
+    """
+    Builds initial version of guide.rst
+    """
+    input:
+        "config/other-setup/guide_template.rst"
+    output:
+        "../report/guide.rst"
+    params:
+        sampletable = config["samples"]
+    shell:
+        # returns guide.rst with report.html file paths in the results directory
+        """
+        find results -print | grep report.html > reportlist.txt
+        cat {params.sampletable} | tr '[:space:]' '[\n*]' | grep / > cellrangerlist.txt
+        while read p
+        do
+            if [[ "$p" == "Downstream output reports" ]]
+            then
+                echo "$p\n" >> {output}
+                while read l
+                do
+                    # update result name
+                    result_name=$(dirname "$l" | sed 's/results\///')
+                    line="$l"
+                    # escape bash variables by doubling them
+                    echo "- \`${{result_name}} <${{line}}>\`_\n" >> {output}
+                done < reportlist.txt
+            elif [[ "$p" == "Cellranger output directory" ]]
+            then
+                echo "$p\n" >> {output}
+                while read f
+                do
+                    file='- `cellranger_output <'"$f"'>`_\n'
+                    echo "$file" >> {output}
+                done < cellrangerlist.txt
+            elif [[ "$p" == ":local:" ]]
+            then
+                echo "\t:local:" >> {output}
+            else
+                echo "$p" >> {output}
+            fi
+        done < {input}
+        rm reportlist.txt cellrangerlist.txt
+        """
+
+rule render_guide:
+    """
+    Renders guide.rst
+    """
+    input:
+        css = "config/other-setup/style.css",
+        rst = "../report/guide.rst"
+    output:
+        "../report/guide.html"
+    shell:
+        "rst2html5 --stylesheet {input.css} -q {input.rst} {output}"  # returns guide.html
+

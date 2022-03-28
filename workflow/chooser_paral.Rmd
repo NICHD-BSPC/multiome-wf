@@ -1,0 +1,360 @@
+---
+title: "chooseR"
+output:
+    html_document:
+        keep_md: yes
+        toc_float: true
+        toc: true
+        code_folding: hide
+
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE,
+                      message=FALSE,
+                      results='hide',
+                      echo=FALSE)
+```
+
+## Activate conda env
+
+Ensure getting all the packages in `requirements.txt` installed and running `activate conda ./env`
+
+```{r packages_and_functions, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(Signac)
+library(Seurat)
+library(knitr)
+library(Matrix)
+library(cluster)
+library(purrr)
+# library(future)
+# library(parallel)
+
+set.seed(1327)  # added to remove unwanted randomness
+
+# Set correct paths
+source("chooser_var.R")
+```
+
+
+## Set parallelization
+
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+
+
+```{r variables}
+config_path = params[['config']]
+res <- as.numeric(params[["res"]])
+```
+
+
+## Load Seurat object
+
+- **Input data** = RDS file storing a **seurat object** (before SCTransform & PCA)
+
+
+```{r load_data}
+config = yaml::read_yaml(file = config_path)
+
+# Read a QC-ed seuat object
+obj <- readRDS(params[["seurat_in"]])
+
+# Move active assay to Gene.Expression
+# Satija's naming
+# if ("RNA" %in% names(obj)) {
+#     DefaultAssay(obj) <- "RNA"
+
+    # Chris' naming
+# } else if ("Gene.Expression" %in% names(obj)) {
+#     DefaultAssay(obj) <- "Gene.Expression"
+#     obj <- RenameAssays(obj, Gene.Expression="RNA")
+# }
+
+# Explore the output
+obj
+
+```
+
+## Run SCTransform
+
+SCTransform and PCA preformed in previous rules (normalize and/or integrate)
+
+```{r sctransform}
+# 
+# # Add pseudocount 0.01 to seurat's expression count matrix
+# # (avoids errors from missing or infinite values)
+# obj@assays$RNA@counts <- as(obj@assays$RNA@counts + 0.01,  # adds pseudocount
+#                             "dgCMatrix")                   # coerces to the original matrix type (dgCMatrix)
+# 
+# 
+# # Explore the output
+# kable(obj@assays$RNA@counts[1:5, 1:3])
+# 
+# 
+# 
+# # Run SCTransform
+# obj <- SCTransform(obj)
+# 
+# 
+# # Explore the matrix
+# obj
+# 
+```
+
+
+## Run PCA
+
+```{r pca}
+# 
+# 
+# 
+# # Run PCA
+# obj <- RunPCA(obj)
+# 
+```
+
+
+## Set variables
+
+```{r set_variables}
+
+# Define the number of PCs to use, and which assay and reduction to use.
+# We recommend testing a broad range of resolutions
+# For more on picking the correct number of PCs, see:
+# https://satijalab.org/seurat/v3.1/pbmc3k_tutorial.html
+# npcs <- obj@commands$RunPCA.SCT@params$npcs
+# assay <- "SCT"
+# reduction <- "pca"
+
+
+# target = basename(params[['seurat_out']])
+# target = gsub("^(.*).clustered_data.rds", "\\1", target)
+target <- params[["seurat_out"]]   # changed by Mira
+## #  print("Choosing for group:")
+cat(target)
+
+groups = config[['chooser']][['groups']]
+
+idx = which(names(groups) %in% target)
+ 
+if (length(idx) == 0) {
+    cat("Group is not present in config's normalize groups list.")
+    q()
+} else if (length(idx) > 1) {
+    cat("You are trying to normalize group/assay multiple times. Please fix.")
+    q()
+}
+
+group_name = names(groups)[idx]
+cat('Current group:')
+cat(group_name)
+
+group = groups[[idx]]
+
+# determined by ElbowPlots from normalize/integrate rules
+npcs = group[['npcs']]
+
+cat('npcs')
+cat(npcs)
+
+targets = c("pca", "lsi")
+idx = grep(paste(targets,collapse="|"), names(obj@reductions))
+reduction = names(obj@reductions)[idx]
+
+# npcs = ncol(obj[[reduction]]@cell.embeddings)
+assay = obj[[reduction]]@assay.used
+
+# Create a directory for output plots
+# create sample subdir - May be multiple chooseR scripts running at once.
+results_path = params[['results_path']]
+cat(results_path)
+
+system(paste0("mkdir -p ./", results_path))
+
+```
+
+## Run chooseR
+
+- **Input = seurat object (after SCTransform and PCA)**
+
+
+```{r chooser}
+
+
+
+# Run pipeline
+message(paste0("Clustering ", res, "..."))
+message("\tFinding ground truth...")
+
+# "Truths" will be stored at glue::glue("{reduction}.{assay}_res.{res}")
+obj <- find_clusters(obj,
+                   npcs=npcs,
+                   reduction = reduction,
+                   assay = assay,
+                   resolution = res)
+
+
+# Extract cluster info
+# Code changed from
+# clusters <- obj[[glue::glue("{reduction}.{assay}_res.{res}")]]
+
+
+
+
+# Now perform iterative, sub-sampled clusters (returns a data frame)
+results <- multiple_cluster(obj,
+                          n = nIter,
+                          npcs = npcs,
+                          res = res,
+                          reduction = reduction,
+                          assay = assay)
+
+
+
+# Explore the clusters (first 5 rows and columns)
+kable(results[1:5, 1:5])
+dim(results)
+
+
+
+# Extract sampled barcodes
+sampled.cells <- results$cell
+
+# Explore the number of sampled cells
+length(sampled.cells)
+
+# Now calculate the co-clustering frequencies
+message(paste0("Tallying ", res, "..."))
+
+# This is the more time efficient vectorisation
+# However, it exhausts vector memory for (nearly) all datasets
+# matches <- purrr::map(columns, find_matches, df = results)
+# matches <- purrr::reduce(matches, `+`)
+
+# CR change:
+results = results[,-1]
+columns <- colnames(results)
+# columns <- colnames(results)[-1]
+
+mtchs <- matrix(0, nrow = dim(results)[1], ncol = dim(results)[1])
+
+i <- 1 # Counter
+
+for (col in columns) {
+message(paste0("\tRound ", i, "..."))
+mtchs <- Reduce("+", list(
+  mtchs,
+  find_matches(col, df = results)
+))
+i <- i + 1
+}
+
+
+
+message(paste0("Scoring ", res, "..."))
+# Original code: # returns class "tibble", all cols type "double"
+# matches <- dplyr::mutate_all(
+# dplyr::as_tibble(matches),
+# function(x) dplyr::if_else(Re(x) > 0, percent_match(x), 0)
+# )
+# Converted to (by Mira): # returns class "matrix" of type "double"
+mtchs <- apply(as.data.table(mtchs),
+               2,
+               function(x) dplyr::if_else(Re(x) > 0, percent_match(x), 0))
+
+# Sometimes next line causes error for some reason
+# mtchs[1:5, 1:5]
+print("Scores:")
+print(dim(mtchs))
+
+
+# Now calculate silhouette scores
+message(paste0("Silhouette ", res, "..."))
+
+# Subset the seurat obj by sampled cells
+sampled.obj <- obj[, sampled.cells]
+
+# Extract clusters from the sampled seurat
+clusters <- unlist(sampled.obj[[glue::glue("{reduction}.{assay}_res.{res}")]])
+
+# Compute silhouette width
+# NOTE: cluster::silhouette() requires
+# either dist (distance matrix) or dmatrix (dissimilarity matrix)
+sil <- cluster::silhouette(
+    x =as.integer(clusters),   # integer vector of the initial cluster
+    dmatrix=as.matrix(cluster::daisy(mtchs))  # distance matrix
+)
+
+
+# Save the silhouette object
+saveRDS(sil, paste0(results_path, "/silhouette_", res, ".rds"))
+
+# Finally, calculate grouped metrics
+message(paste0("Grouping ", res, "..."))
+
+
+# Compute group scores by passing a data table and clusters
+grp <- group_scores(as.data.table(mtchs), clusters)
+
+
+# Ocassionally the sil is returned NA by the function cluster::silhouette() when
+# - the size of input dataset is small and/or
+# - the resolution is too high
+# tryCatch() is applied in order to avoid possible errors under this condition
+sil <- tryCatch(
+
+    # Code to run (will return a data frame containing cluster, avg_sil, and res)
+    expr = { group_sil(sil, res) },
+
+    # If sil is returned NA by cluster::silhouette(),
+    # an empty data frame is created
+    error = function(e) {
+        message("\n\n")
+        message("Computing sil has failed due to missing sil!")
+        message("This returns an empty data frame.")
+        return(data.frame())
+    }
+    )
+
+
+```
+
+## Save objects
+
+
+```{r save}
+
+
+
+
+saveRDS(grp, paste0(results_path, "/frequency_grouped_", res, ".rds"))   # short (seconds)
+saveRDS(sil, paste0(results_path, "/silhouette_grouped_", res, ".rds"))  # short (seconds)
+saveRDS(sampled.obj, paste0(results_path, "/seurat_obj_", res, ".rds"))   # takes nearly 20min
+
+
+
+
+```
+
+
+
+## Session info
+
+```{r session_info}
+
+sessionInfo()
+
+```
+
+

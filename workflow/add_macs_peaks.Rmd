@@ -1,0 +1,174 @@
+---
+title: "Peakcalling - II"
+output:
+    html_document:
+            keep_md: yes
+            toc: true
+            toc_float: true
+            code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    warning=FALSE,
+    message=FALSE,
+    results='hide'
+    )
+
+```
+
+```{r packages_and_functions, include=FALSE}
+library(Signac)
+library(Seurat)
+library(GenomeInfoDb)
+library(knitr)
+library(future)
+library(GenomicRanges)
+set.seed(1234)
+
+source('common.R')
+```
+
+## Parallelization
+
+```{r parallelize, include=FALSE}
+
+# Assign the number of cores for parallelization
+ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+options(future.globals.maxSize=40000 * 1024^2,
+        mc.cores=ncpus)
+
+# Parallelize the run
+plan("multicore", workers=ncpus)
+
+
+```
+
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+```{r variables}
+
+anno_path <- params[['annotation']]
+genome <- params[['genome']]
+fragpath <- params[['fragments']]
+peaks <- params[['peak']]   # macs2 peak (.narrowPeak)
+```
+
+
+## Read in data
+
+Read seurat and annotation
+
+```{r input}
+seurat <- readRDS(params[["seurat"]])
+
+cat('Input seurat: \n')
+print(seurat)
+
+annotation <- readRDS(anno_path)
+```
+
+
+## Importing MACS2-called peaks
+
+- Blacklist datasets are provided by Signac package. For more info, see [this](https://satijalab.org/signac/reference/index.html)
+
+- Currently adds MACS peaks to an assay called MACS. Probably would make workflow more interpretable if user chooses only one method, ZINBA or MACS, in config. If this is the case, overwrite Peaks assay with MACS counts (see comments below).
+
+```{r macs}
+# set effective genome size for MACS2
+# and
+# Remove peaks on nonstandard chromosomes and in genomic blacklist regions
+# blacklist_hg38_unified: blacklist dataset included in Signac package
+# More blacklist datasets: blacklist_mm10, blacklist_ce10, blacklist_ce11,
+# blacklist_dm3, blacklist_dm6, blacklist_hg19, blacklist_hg38
+if (genome == 'mm10') {
+    effective_size = 1.87+09
+    blacklist = blacklist_mm10
+} else if (genome == 'hg38') {
+    effective_size = 2.7e+09
+    blacklist = blacklist_hg38_unified
+}
+
+
+peak.df <- read.table(peaks)
+peaks <- GRanges(peak.df[,1], IRanges(peak.df[,2], peak.df[,3]))
+
+
+levels(seqnames(peaks))
+
+peaks <- keepStandardChromosomes(peaks, pruning.mode = "coarse")
+peaks <- subsetByOverlaps(x = peaks, ranges = blacklist, invert = TRUE)
+
+print("# peaks after filtering:")
+print(length(peaks))
+
+# Quantify counts in each peak
+peak_counts <- FeatureMatrix(fragments=Fragments(seurat),
+                              features=peaks,
+                              cells=colnames(seurat))
+
+
+# seurat object may contain a Fragments object
+if (is.null(Fragments(seurat))) {
+# Add a new assay with the called peak to the seurat object
+    seurat[["MACS"]] <- CreateChromatinAssay(counts=peak_counts,
+                                             fragments=fragpath,
+                                             annotation=annotation)
+} else {
+    # seurat object may contain cells/barcodes that do not have peaks
+    # split object, add macs peaks, combine
+    cells_use = lapply(seq_along(Fragments(seurat)), function(x) {
+        cells = names(Fragments(seurat)[[x]]@cells)
+        return(cells)
+    })
+    cells_use = unique(Reduce("c", cells_use))
+    
+    # seurat object has same number of cells as MACS peak count matrix?
+    if (length(cells_use) == length(colnames(seurat))) {
+        seurat[["MACS"]] <- CreateChromatinAssay(
+            counts=peak_counts, 
+            fragments=Fragments(seurat),
+            annotation=annotation)        
+    } else {
+        seurat_peaks = subset(x = seurat, cells = cells_use)
+        
+        seurat_no_peaks = subset(x = seurat, cells = cells_use, invert = TRUE)
+        
+        seurat_peaks[["MACS"]] <- CreateChromatinAssay(
+            counts=peak_counts, 
+            fragments=Fragments(seurat_peaks),
+            annotation=annotation)
+        
+        seurat = merge(seurat_no_peaks, seurat_peaks)
+    }
+}
+```
+
+## Save Seurat object
+
+```{r save}
+print('Updated Seurat object:')
+print(seurat)
+
+saveRDS(object=seurat, file=params[['seurat_out']])
+print('Done saving seurat object.')
+```
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+```
+
+
+

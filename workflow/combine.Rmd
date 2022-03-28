@@ -1,0 +1,390 @@
+---
+title: "Combine Processed Seurats"
+output:
+    html_document:
+            keep_md: yes
+            toc: true
+            toc_float: true
+            code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    warning=FALSE,
+    message=FALSE,
+    results='hide'
+    )
+
+```
+
+```{r packages_and_functions, include=FALSE}
+library(Signac)
+library(Seurat)
+library(knitr)
+library(future)
+set.seed(1234)
+
+source('common.R')
+```
+
+## Parallelization
+
+```{r parallelize, include=FALSE}
+
+# Assign the number of cores for parallelization
+ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+options(future.globals.maxSize=40000 * 1024^2,
+        mc.cores=ncpus)
+
+# Parallelize the run
+plan("multicore", workers=ncpus)
+```
+
+
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+```{r variables}
+seurat_paths = unlist(strsplit(params[['seurats']], " "))
+    
+config_path = params[["config"]]
+
+seurat_out = params[["seurat_out"]]
+```
+
+
+## Read in data
+
+For input file paths listed in samples.tsv, we'll read in data from files in one of the following formats: 'HDF5', 'MEX', or 'RDS'.
+If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse matrices ('dgCMatrix') will be created.
+'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
+
+```{r config_input}
+config = yaml::read_yaml(config_path)
+
+groups <- names(config$normalize$groups)
+
+
+
+
+assay_list = sapply(seq_along(groups), function(x){
+  group = groups[x]
+  assay_c = config$normalize$groups[[group]]$assay_name
+  return(assay_c)
+})
+
+norm_list = sapply(seq_along(groups), function(x){
+  group = groups[x]
+  norm_c = config$normalize$groups[[group]]$norm_method
+  return(norm_c)
+})
+
+if (config$integrate$activate) {
+  groups_int = names(config$integrate$groups)
+
+  assay_list_int = rep("integrate", length(groups_int))
+  
+  norm_list_int = sapply(seq_along(groups_int), function(x){
+    group = groups_int[x]
+    norm_c = config$integrate$groups[[group]]$norm_method
+    return(norm_c)
+  })
+  
+  groups = c(groups, groups_int)
+  assay_list = c(assay_list, assay_list_int)
+  norm_list = c(norm_list, norm_list_int)
+  
+  rm(groups_int, assay_list_int, norm_list_int)
+}
+
+if (config$coembed$activate) {
+  # fix later
+}
+
+if (config$weighted_nn$activate) {
+  groups_wnn = names(config$weighted_nn$groups)
+
+  assay_list_wnn = rep("wnn", length(groups_wnn))
+  
+  norm_list_wnn = rep("wnn", length(groups_wnn))
+  
+  groups = c(groups, groups_wnn)
+  assay_list = c(assay_list, assay_list_wnn)
+  norm_list = c(norm_list, norm_list_wnn)
+  
+  rm(groups_wnn, assay_list_wnn, norm_list_wnn)
+}
+
+# Select correct analysis depending on macs2 setting
+if (config$macs == 'N') {
+    index <- assay_list != "MACS"
+    groups <- groups[index]
+    assay_list <- assay_list[index]
+    norm_list <- norm_list[index]
+}
+
+
+
+
+
+# Raise an error if macs2 configuration is incorrect
+if (!(config$macs %in% c("Y", "N"))) {
+    stop("macs2 is incorrectly configured. Double-check macs in the config.yaml file.")
+}
+
+
+
+groups
+assay_list
+norm_list
+```
+
+```{r input}
+
+# fix later:
+# export barcode list from all seurat objects output 
+# from rules "cluster" and "weighted_nn"
+# but for testing, rading in each object to get barcodes is OK
+barcodes_list = lapply(seq_along(seurat_paths), function(x) {
+  # current_path = seurat_paths[x]
+  # obj = readRDS(current_path)
+  # barcodes = colnames(obj)
+  
+  current_path = seurat_paths[x]
+  barcodes = readRDS(file.path(dirname(current_path), "barcodes.rds"))
+  return(barcodes)
+})
+
+barcodes_list = lapply(barcodes_list, sort)
+
+# check which objs have the same barcodes
+bc_counts = unique(
+  sapply(barcodes_list, length)
+)
+
+seurat_list = list()
+list_n = 1
+
+for (x in seq_along(bc_counts)) {
+  bc_count = bc_counts[x]
+  
+  cat("\ncombining objects with the following barcode counts")
+  print(bc_count)
+  # get an index of which seurat objects has the same # barcodes
+  idx = which(sapply(barcodes_list, length) == bc_count)
+  # subset into current barcode #s
+  bc_sub = barcodes_list[idx]
+  
+  paths_sub = seurat_paths[idx]
+  groups_sub = groups[idx]
+  assay_sub = assay_list[idx]
+  norm_sub = norm_list[idx]
+  
+  cat(paths_sub, groups_sub, assay_sub, norm_sub)
+  
+  seq_sub = seq(1:length(paths_sub))
+  
+  # In bc vecotrs of equal length, are call constituent bc's identiecal too?
+  if ( all(sapply(X = bc_sub[-1], FUN = identical, bc_sub[[1]])) ) {
+    
+    idys = grep("sct", norm_sub)
+    if (length(idys) > 0) {
+      idy = idys[1]
+    } else {
+      idy = 1
+    }
+    
+    # if an object contains sct, use that first
+    paths_c = paths_sub[idy]
+    groups_c = groups_sub[idy]
+    assay_c = assay_sub[idy]
+    norm_c = norm_sub[idy]
+    
+    cat(paths_c, groups_c, assay_c, norm_c)
+    
+    seurat_main = readRDS(paths_c)
+    
+    #update dim reduction names before mergino objects
+    for (r in seq_along(seurat_main@reductions)) {
+      dr_name = paste(
+        seurat_main@reductions[[r]]@assay.used,
+        names(seurat_main@reductions)[r],
+        sep = "_")
+      names(seurat_main@reductions)[r] = dr_name
+      Key(object = seurat_main[[dr_name]]) = dr_name
+    }
+    
+    colnames_use = colnames(seurat_main)
+    
+    # if any remaining assays exist, add to seurat object
+    if (length(seq_sub) > 1) {
+      # idy: either first object containing sct assay (if present) or first object
+      remaining = seq_sub[-idy]
+      
+      paths_r = paths_sub[remaining]
+      groups_r = groups_sub[remaining]
+      assay_r = assay_sub[remaining]
+      norm_r = norm_sub[remaining]
+      
+      cat(paths_r, groups_r, assay_r, norm_r)
+      
+      for (i in seq_along(remaining)) {
+        # i=2 #testing
+        paths_c = paths_r[i]
+        groups_c = groups_r[i]
+        assay_c = assay_r[i]
+        norm_c = norm_r[i]
+        
+        cat(paths_c, groups_c, assay_c, norm_c)
+        
+        
+        seurat_add = readRDS(paths_c)
+        
+        if (any(grepl("integrated", names(seurat_add@reductions)))) {
+          # integrating embedding of peaks does not rename assay to "integrate"
+          if (seurat_add@active.assay == "integrated") {
+            assay_new = groups_c
+          } else {
+            # fix later:
+            # possibly use 'make.names(groups_c)'
+            assay_new = paste(groups_c,
+                              seurat_add@active.assay,
+                              sep = "_")
+          }
+        } else {
+          assay_new = seurat_add@active.assay
+          # assay_new = paste(seurat_add@active.assay,
+          #                   groups_c,
+          #                   sep = "_")
+        }
+        
+        # do not transfer assay if object is "wnn", which only adds Dim Reducs
+        if (!any(names(seurat_add@reductions) %in% "wnn_umap")) {
+          if (any(names(seurat_main@assays) %in% assay_new)) {
+            # if assays exist, overwrite (to keep nomalized and scaled slots)
+            seurat_main[[seurat_add@active.assay]] = NULL
+            seurat_main[[assay_new]] = seurat_add[[seurat_add@active.assay]]
+          } else {
+            # if not exist, just add new assay
+            seurat_main[[assay_new]] = seurat_add[[seurat_add@active.assay]]
+          }
+        }
+        
+        if (any(grepl("integrated", names(seurat_add@reductions)))) {
+          Key(seurat_main[[assay_new]]) = assay_new
+        }
+        
+        # if object contains wnn, remove all other dim reductions,
+        # they are dups from other objects
+        if ( any(grepl("wnn_umap", names(seurat_add@reductions))) ) {
+          for (j in rev(seq_along(names(seurat_add@reductions)))) {
+            dr_c = names(seurat_add@reductions)[j]
+            print(dr_c)
+            if (!dr_c == "wnn_umap") {
+              seurat_add@reductions[[dr_c]] = NULL
+            }
+          }
+        }
+        
+        for (r in seq_along(seurat_add@reductions)) {
+          if (any(grepl("integrated", names(seurat_add@reductions))) && 
+              names(seurat_add@reductions)[r] != "umap") {
+            dr_name = gsub("integrated", groups_c, names(seurat_add@reductions)[r])
+            names(seurat_add@reductions)[r] = dr_name
+            Key(object = seurat_add[[dr_name]]) = dr_name
+            # next line is needed for transferring to new seurat assay
+            seurat_add@reductions[[r]]@assay.used = assay_new
+            
+          } else if (any(grepl("integrated", names(seurat_add@reductions))) && 
+                     names(seurat_add@reductions)[r] == "umap") {
+            dr_name = paste(
+              groups_c,
+              names(seurat_add@reductions)[r],
+              sep = "_")
+            names(seurat_add@reductions)[r] = dr_name
+            Key(object = seurat_add[[dr_name]]) = dr_name
+            seurat_add@reductions[[r]]@assay.used = assay_new
+            
+          } else if (names(seurat_add@reductions)[r] == "wnn_umap") {
+            dr_name = gsub("wnn", groups_c, names(seurat_add@reductions)[r])
+            names(seurat_add@reductions)[r] = dr_name
+            Key(object = seurat_add[[dr_name]]) = dr_name
+          } else {
+            dr_name = paste(
+              seurat_add@reductions[[r]]@assay.used,
+              names(seurat_add@reductions)[r],
+              sep = "_")
+            names(seurat_add@reductions)[r] = dr_name
+            Key(object = seurat_add[[dr_name]]) = dr_name
+          }
+          
+          # dr_transfer = names(seurat_add@reductions)[r]
+          seurat_main[[dr_name]] = seurat_add[[dr_name]]
+        }
+        
+        # transfer clustering metadata
+        ident_pattern = "snn_res\\.[0-9]+.*"
+        idc = grep(ident_pattern, names(seurat_add@meta.data))
+        if (length(idc) > 0) {
+            clust_column = names(seurat_add@meta.data)[idc]
+            if (any(grepl("wsnn", clust_column))) {
+                idw = which(grepl("wsnn", clust_column))
+                clust_column = clust_column[idw]
+                col_name_new = gsub("wsnn", groups_c, clust_column)
+            } else if (grepl("integrated", clust_column)) {
+                col_name_new = gsub("integrated", groups_c, clust_column)
+            } else {
+              col_name_new = clust_column
+            }
+        }
+        
+		    # Re-order seurat_add metadata rows based on seurat_main colnames
+        rows.add <- colnames_use
+        meta.add <- seurat_add@meta.data[rows.add, ]
+        seurat_main = AddMetaData(
+            object = seurat_main, 
+            metadata = meta.add[,clust_column], 
+            col.name = col_name_new
+        )
+
+      }
+    }
+  } else {
+    #fix later:
+    # do something if 2 seurat objects have equal # barcodes, bc's not identical
+    #sapply(X = bc_sub[-1], FUN = identical, bc_sub[1])
+  }
+  seurat_list[[list_n]] = seurat_main
+  list_n = list_n + 1
+}
+
+```
+
+
+
+## Save Seurat object
+
+```{r save, results='asis'}
+cat('Updated Seurat object:')
+print(seurat_list)
+
+saveRDS(object=seurat_list, file=seurat_out)
+cat('Done saving seurat object.')
+```
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+
+```
+
+

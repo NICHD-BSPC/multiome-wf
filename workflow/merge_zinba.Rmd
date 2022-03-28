@@ -1,0 +1,249 @@
+---
+title: "Merge Following QC"
+output:
+    html_document:
+            keep_md: yes
+            toc: true
+            toc_float: true
+            code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    warning=FALSE,
+    message=FALSE,
+    results='hide'
+    )
+```
+
+```{r packages_and_functions, include=FALSE}
+library(GenomeInfoDb)
+library(Signac)
+library(Seurat)
+library(future)
+
+source('common.R')
+```
+
+## Design of this script 
+
+This script is designed as a replacement of the three rules below in the snakemake pipeline:    
+
+- `merge_macs_prep`
+- `macs`
+- `add_macs_peaks`
+
+
+This script is executed if macs2 is unset in the pipeline. Given that, this script includes essential steps from `merge_macs_prep` and `add_macs_peaks`.
+
+## Parallelization
+
+```{r future_parallelization, include=TRUE}
+# Assign the number of cores for parallelization
+ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+options(future.globals.maxSize=48000 * 1024^2,
+        mc.cores=ncpus)
+
+# Parallelize the run
+plan("multicore", workers=ncpus)
+
+```
+
+
+
+
+## Set variables
+
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+
+```{r variables}
+seurat_inputs = unlist(strsplit(params[['seurats']], ' '))
+cat('Input Seurat objects: \n')
+print(seurat_inputs)
+
+
+
+
+
+
+```
+
+
+## Read in data
+
+Read in all Seurat objects and combine in a list.
+
+```{r input}
+# Import seurat objects
+seurat_list <- lapply(seq_along(seurat_inputs), function(x){
+	s_in = readRDS(seurat_inputs[x])
+	return(s_in)
+})
+cat('Input sample list: \n')
+print(seurat_list)
+
+# Import annotation (GRanges object)
+annotation <- readRDS(params[["annotation"]])
+```
+
+## Update ZINBA peak coordinates (if necessary)
+
+- Peaks are called by ZINBA during the cellranger-arc run (saved in `atac_peaks.bed`). See more info about [cellranger-arc-mediated peak calling](https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/peaks)
+
+We will check if there are more than one sample with a Peaks assay, and if so, take the union of all loci and update peak x cell matrix. Unless all peaks have the same genomic coordinates, downstream processing fails. A better way to do handle this is to use cellranger-arc aggr, which merges peaks across samples and re-counts fragments which those loci.
+
+```{r update_zinba_peaks}
+# any peaks present?
+peaks_idx = sapply(seq_along(seurat_list), function(x) {
+    idx = any(names(seurat_list[[x]]) %in% 'Peaks')
+    return(idx)
+})
+
+# peaks present in more >1 sample? If so, update peaks coords across samples
+if (sum(peaks_idx, na.rm = TRUE) > 1) {
+    
+    # make a list of all peaks coords
+    peaks = lapply(seq_along(peaks_idx), function(x) {
+        if (peaks_idx[x]) {
+            regions = seurat_list[[x]][['Peaks']]@ranges
+            return(regions)
+        } else {
+            regions = NA
+        }
+        return(NA)
+    })
+    
+    # merge all peak coords
+    idx = which(!is.na(peaks))
+    peaks = peaks[idx]
+    merged_peaks = GenomicRanges::reduce(Reduce("c", peaks))
+    print('Updated peaks for use with all Peaks X Cells matrices:')
+    print(merged_peaks)
+    
+    # update seurat objects in list only if the have peaks
+    seurat_list = lapply(seq_along(seurat_list), function(x) {
+        seurat = seurat_list[[x]]
+        
+        if (peaks_idx[x]) {
+            print('peaks before updating coords:')
+            print(head(rownames(seurat[['Peaks']])))
+                
+            peak_counts <- FeatureMatrix(fragments=Fragments(seurat),
+                                         features=merged_peaks,
+                                         cells=colnames(seurat))
+            
+            new_peaks <- Signac::CreateChromatinAssay(
+                counts = peak_counts, 
+                fragments = Fragments(seurat),
+                annotation = annotation
+            )
+            
+            # set to non-Peaks assay
+            # even single-assay Peaks kit from 10X Genomics will 
+            # have Gene.Activity and/or TF assays
+            assay_names = names(seurat)
+            assay_idx = !names(seurat) %in% "Peaks"
+            
+            # overwrite existing Peaks assay with single sample peaks
+            seurat[['Peaks']] = new_peaks
+            
+            # if (length(assay_names[assay_idx]) > 0) {
+            #     assay_use = assay_names[assay_idx][1]
+            #     DefaultAssay(seurat) = assay_use
+            #     
+            #     seurat[['Peaks']] = NULL
+            #     seurat$nCount_Peaks = NULL
+            #     seurat$nFeature_Peaks = NULL
+            #     seurat[['Peaks']] = new_peaks
+            # } else {
+            #     seurat[['Peaks']] = new_peaks
+            # }
+            
+            print('peaks after updating coords:')
+            print(head(rownames(seurat[['Peaks']])))
+            print(head(seurat@meta.data))
+        }
+        
+        return(seurat)
+    })
+} else {
+    print('Not updating ZINBA peaks. 0-1 Peaks X Cells matrices in samples.')
+}
+```
+
+
+
+## Merge all individual seurat objects into joint object
+
+
+```{r merge}
+if (length(seurat_list) == 1) {
+	seurat = seurat_list[[1]]
+} else if (length(seurat_list) == 2) {
+	seurat = merge(seurat_list[[1]], seurat_list[[2]])
+} else if (length(seurat_list) > 2) {
+	seurat = merge(seurat_list[[1]], seurat_list[2:length(seurat_list)])
+}
+
+if (any(names(seurat@assays) %in% 'Gene.Expression')) {
+	DefaultAssay(seurat) = 'Gene.Expression'
+}
+
+# for some reason, ChromatinAssay class are coerced to Assay class
+if (any(names(seurat) %in% 'Peaks')) {
+	seurat[['Peaks']] = as.ChromatinAssay(seurat[['Peaks']], annotation = annotation)
+	
+	# seurat[['Peaks']]@annotation <- params[["annotation"]]
+	
+	# fragments slot is a list of objects of Fragments class
+	i = 1
+	for (x in seq_along(seurat_list)) {
+	    seurat_obj = seurat_list[[x]]
+	    if (any(names(seurat_obj) %in% 'Peaks')) {
+	        cat('\nPeaks found in:', x, '\n')
+	        if (length(Fragments(seurat_obj)) == 1) {
+	            seurat[['Peaks']]@fragments[[i]] = Fragments(seurat_obj)[[1]]
+	        } else if (length(Fragments(seurat_obj)) > 1) {
+	            # fix later. Below creates nested list of frag objects
+	            # seurat[['Peaks']]@fragments[[i]] = Fragments(seurat_obj)
+	        }
+	        i = i + 1
+	    }
+	}
+	
+	seurat[['Peaks']]@fragments
+
+	print('updated peaks assay')
+	print(seurat[['Peaks']])
+	# print(seurat[['Peaks']]@fragments[[1]]@path)
+	# print(seurat[['Peaks']]@fragments[[1]]@hash)
+	# print(head(seurat[['Peaks']]@fragments[[1]]@cells))
+}
+
+cat('Merged, unintegrated Seurat object: \n')
+print(seurat)
+```
+
+
+
+## Save Seurat object
+
+```{r save}
+print('Updated Seurat object:')
+print(seurat)
+
+saveRDS(seurat, params[['seurat']])
+print('Done saving seurat object.')
+```
+
+
+## Session Info
+
+```{r session_info}
+sessionInfo()
+```
+
+
+

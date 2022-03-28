@@ -1,0 +1,544 @@
+---
+title: "chooseR"
+output:
+    html_document:
+        keep_md: yes
+        toc_float: true
+        toc: true
+        code_folding: hide
+
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE,
+                      message=FALSE,
+                      results='hide',
+                      echo=FALSE)
+```
+
+## Activate conda env
+
+Ensure getting all the packages in `requirements.txt` installed and running `activate conda ./env`
+
+```{r packages_and_functions, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(Signac)
+library(Seurat)
+library(knitr)
+library(Matrix)
+# library(future)
+library(data.table)
+# library(parallel)
+
+set.seed(1327)  # added to remove unwanted randomness
+
+# Set correct paths
+source("chooser_var.R")
+```
+
+
+## Set parallelization
+
+
+
+
+
+```{r parallelize, include=FALSE}
+
+# Assign the number of cores for parallelization
+# ncpus <- future::availableCores()
+
+# Adjust max memory allowed
+# options(future.globals.maxSize=96000 * 1024^2,
+#         mc.cores=ncpus)
+
+# Parallelize the run
+# plan("multicore", workers=ncpus)
+
+# setDTthreads(threads=ncpus)
+```
+
+
+```{r variables}
+results_path <- params[['results_path']]
+new_path <- params[['new_path']]
+snakemake.config <- yaml::read_yaml(params[['config']])
+resolutions <- as.character(unlist(snakemake.config$chooser$resolutions))
+
+
+# Only for interactive testing
+# snakemake.config <- yaml::read_yaml('config/config.yaml')
+# results_path <- "results/chooser_run/integrated_0"   # delete later
+# new_path <- "results/chooser_plot"
+# resolutions <- as.character(unlist(snakemake.config$chooser$resolutions))
+# params <- list(seurat="integrated_0")
+```
+
+
+## Silhouette score {.tabset .tabset-pills}
+
+```{r prep_plot}
+
+
+# Create silhouette plot
+# Read in scores and calculate CIs
+scores <- lapply(paste0(results_path, "/silhouette_grouped_", resolutions, ".rds"), function(x) {
+
+            sil <- readRDS(x)
+            if (ncol(sil) == 3) { return(sil) }})
+
+
+
+scores_merged <- do.call("rbind", scores)
+
+# CR remove zeros in 'avg_sil' column, otherwise boot_median thorws error:
+ # Error in bca.ci(boot.out, conf, index[1L], L = L, t = t.o, t0 = t0.o,  : 
+ #  estimated adjustment 'w' is infinite 
+meds <- scores_merged %>%
+    group_by(res) %>%
+    mutate(n_clusters=n()) %>%
+    ungroup() %>%
+    group_by(res)
+
+try_boot_median <- function(x){
+  outs = tryCatch(
+    boot_median(x), 
+    error=function(e) {
+      message(paste("Can't calculate CI for res:", c_res))
+      message("Error:")
+      message(e)
+      return(NA)
+    }
+  )
+  return(outs)
+}
+
+res_list = c()
+boot_list = list()
+n_clusters_list = c()
+
+all_res = unique(meds$res)
+for (x in seq_along(all_res)) {
+  c_res = all_res[x]
+  c_meds = meds[meds$res == c_res,]
+  
+  res_list[x] = c_res
+  
+  # if this keeps failing, use try/catch
+  # return vector of length 3, names: c("low_med", "med", "high_med")
+  
+  boot_list[[x]] = try_boot_median(c_meds$avg_sil)
+
+  n_clusters_list[x] = mean(c_meds$n_clusters)
+}
+
+boot_list1 = lapply(boot_list, unlist)
+
+# if all boot_median() inputs are virtually identical,
+# returns non-warning output:
+# > try_boot_median(c_meds$res)
+# [1] "All values of t are equal to  16 \n Cannot calculate confidence intervals"
+# $low_med
+# NULL
+# 
+# $med
+# NULL
+# 
+# $high_med
+# NULL
+idx = sapply(seq_along(boot_list1), function(x) {
+  c_boot = boot_list1[[x]]
+  c_cond = any(is.na(c_boot)) || any(is.null(c_boot))
+  return(c_cond)
+})
+idx_loc = which(idx)
+
+if (length(idx > 0)) {
+  boot_mat = do.call("rbind", boot_list1[!idx])
+  res_list = res_list[!idx]
+  n_clusters_list = n_clusters_list[!idx]
+  
+  # idy = which(boot_mat[,1] == min(boot_mat[,1]))
+  # boot_min = boot_mat[idy,1]
+  # boot_mins = rep(boot_min, 3)
+  # names(boot_mins) = colnames(boot_mat)
+  # 
+  # for (i in seq_along(idx_loc)) {
+  #   c_idx = idx_loc[i]
+  #   # print(i)
+  #   boot_list1[[c_idx]] = boot_mins
+  # }
+}
+
+if (length(idx_loc) == length(boot_list1) || nrow(boot_mat) == 0) {
+  print("All calculated confidence intervals had errors.")
+  print("Using default resolution for Seurat community detection.")
+  threshold <- 0
+  choice <- 0.8
+} else {
+  print("Using optimal community dection res determined by iterative clustering.")
+  
+  # fix later: direct creation of data.table instead of coercing df to dt
+  # boot_df = as.data.frame(do.call("rbind", boot_list1))
+  boot_df = as.data.frame(boot_mat)
+  meds = data.frame(res_list, boot_df, n_clusters_list)
+  names(meds) = c("res", names(boot_df), "n_clusters")
+  meds = as.data.table(meds)
+  
+  # problematic if boot_median gives error
+  # meds %>%
+  #     dplyr::summarize(boot=list(boot_median(avg_sil)),
+  #                      n_clusters=mean(n_clusters)) %>%
+  #     mutate(boot = map(boot, ~ as.data.frame(.x))) %>%
+  #     unnest(boot) %>%
+  #     as.data.table()
+  
+  if (!dir.exists(new_path)) {   # for testing outside snakemake
+    
+    dir.create(new_path) }
+  
+  writexl::write_xlsx(meds, paste0(new_path, "/median_ci.xlsx"))
+  
+  # Find thresholds
+  threshold <- max(meds$low_med)
+  
+  # Find a resolution from a record whose med is greater than the threshold and n_clusters is max
+  # choice <- as.character(as.data.table(meds)[med >= threshold,][n_clusters == max(n_clusters),]$res)
+  
+  # sometimes edge case where multiple res's above threshold w/same n_clusters
+  # possible_choices = meds[med >= threshold,][n_clusters == max(n_clusters),]
+  
+  # avoid edge case where high CI value is less that CI median:
+  # > meds
+  #    res    low_med        med   high_med n_clusters
+  # 1: 0.8  0.0000010 0.05245167  0.5524517          4
+  # 2: 1.0  0.0000000 0.32798014  0.5936476          6
+  # 3: 1.2  0.0000000 0.32798014  0.5519590          6
+  # 4: 1.4 -0.2499185 0.00000000 -0.2499185          7
+  possible_choices = meds[med >= threshold,][med <= high_med][n_clusters == max(n_clusters),]
+  if (nrow(possible_choices) == 1) {
+    choice <- possible_choices$res
+  } else if (nrow(possible_choices) > 1) {
+    # if multiple, take res with highest median CI. Might be best criteria
+    choice <- possible_choices[med == max(med),][abs(low_med) == max(abs(low_med)),]$res
+  }
+  
+}
+
+meds <- as.data.frame(meds)
+
+```
+
+### Silhouette distribution
+
+```{r plot, results='asis'}
+
+# And plot!
+ggplot(meds, aes(factor(res), med)) +
+  geom_crossbar(
+    aes(ymin = low_med, ymax = high_med),
+    fill = "grey",
+    size = 0.25
+  ) +
+  geom_hline(aes(yintercept = threshold), colour = "blue") +
+  geom_vline(aes(xintercept = as.character(choice)), colour = "red") +
+  geom_jitter(
+    data = scores_merged,
+    aes(factor(res), avg_sil),
+    size = 0.35,
+    width = 0.15
+  ) +
+  scale_x_discrete("Resolution") +
+  scale_y_continuous(
+    "Silhouette Score",
+    expand = c(0, 0),
+    limits = c(-1, 1),
+    breaks = seq(-1, 1, 0.25),
+    oob = scales::squish
+  ) +
+  cowplot::theme_minimal_hgrid() +
+  theme(
+    axis.title = element_text(size = 8),
+    axis.text = element_text(size = 7),
+    axis.line.x = element_line(colour = "black"),
+    axis.line.y = element_line(colour = "black"),
+    axis.ticks = element_line(colour = "black"),
+  )
+
+ggsave(
+  filename = paste0(new_path, "/silhouette_distribution_plot.png"),
+  dpi = 300,
+  height = 3.5,
+  width = 3.5,
+  units = "in"
+)
+
+```
+
+### Dot plot
+
+```{r dot_plot, results='asis'}
+
+# Finally, a dot plot of silhouette scores to help identify less robust clusters
+# The initial pipe is to order the clusters by silhouette score
+scores_merged %>%
+  dplyr::filter(res == choice) %>%
+  dplyr::arrange(dplyr::desc(avg_sil)) %>%
+  dplyr::mutate_at("cluster", ordered, levels = .$cluster) %>%
+  ggplot(aes(factor(cluster), avg_sil)) +
+    geom_point() +
+    scale_x_discrete("Cluster") +
+    scale_y_continuous(
+      "Silhouette Score",
+      expand = c(0, 0),
+      limits = c(-1, 1),
+      breaks = seq(-1, 1, 0.25),
+      oob = scales::squish
+    ) +
+    cowplot::theme_minimal_grid() +
+    theme(
+      axis.title = element_text(size = 8),
+      axis.text = element_text(size = 7),
+      axis.line.x = element_line(colour = "black"),
+      axis.line.y = element_line(colour = "black"),
+      axis.ticks = element_line(colour = "black"),
+    )
+
+ggsave(
+  filename = paste0(new_path, "/silhouette_point_plot_", choice, ".png"),
+  dpi = 300,
+  height = 3.5,
+  width = 3.5,
+  units = "in"
+)
+
+
+```
+
+
+## Co-clustering
+
+## Results {.tabset}
+
+```{r coclustering}
+
+# First is a cluster average co-clustering heatmap
+# Read the data
+grp <- readRDS(paste0(results_path, "/frequency_grouped_", choice, ".rds"))
+
+
+
+# As the data is symmetrical, we do not need the upper triangle
+grp <- grp %>%
+    spread(key='cell_2', value='avg_percent') %>%
+    column_to_rownames(var="cell_1") %>%
+    select(str_sort(colnames(.), numeric = T))
+
+grp[lower.tri(grp)] <- NA
+
+grp <- grp %>%
+    rownames_to_column(var="cell_1") %>%
+    gather(key="cell_2", value="avg_percent", -cell_1)
+
+
+
+grp$cell_1 <- factor(grp$cell_1, levels = unique(grp$cell_1))
+grp$cell_2 <- factor(grp$cell_2, levels = unique(grp$cell_1))
+
+
+```
+
+### Heatmap
+
+```{r heatmap, results='asis'}
+
+# And plot!
+plot <- ggplot(grp, aes(factor(cell_1), cell_2, fill = avg_percent)) +
+  geom_tile() +
+  scale_x_discrete("Cluster", expand = c(0, 0)) +
+  scale_y_discrete(
+    "Cluster",
+    limits = rev(levels(grp$cell_2)),
+    expand = c(0, 0)
+  ) +
+  scale_fill_distiller(
+    " ",
+    limits = c(0, 1),
+    breaks = c(0, 0.5, 1),
+    palette = "RdYlBu",
+    na.value = "white"
+  ) +
+  coord_fixed() +
+  theme(
+    axis.ticks = element_line(colour = "black"),
+    axis.text = element_text(size = 6),
+    axis.title = element_text(size = 8),
+    legend.text = element_text(size = 7),
+    legend.position = c(0.9, 0.9)
+  ) +
+  guides(fill = guide_colorbar(barheight = 3, barwidth = 1))
+
+ggsave(
+  plot = plot,
+  filename = paste0(new_path, "/coclustering_heatmap_", choice, ".png"),
+  dpi = 300,
+  height = 3.5,
+  width = 3.5,
+  units = "in"
+)
+
+plot
+
+```
+
+
+
+
+```{r silhouette_score}
+
+# Import seurat
+obj <- readRDS(paste0(results_path, "/seurat_obj_", choice, ".rds"))
+
+
+# Let's add the silhouette scores to the Seurat object!
+sil_scores <- readRDS(paste0(results_path, "/silhouette_", choice, ".rds"))
+sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
+
+
+
+colnames(sil_scores) <- c("sil_score")
+obj <- AddMetaData(obj, metadata = sil_scores)
+
+# Let's visualise the selected cluster
+# If your data has known  clusters, you could also visualise those!
+# Remember, truths are in "glue({reduction}.{assay}_res.{choice})"
+# Seurat Changes color scheme if you order your data, so we provide
+# the following helper function to restore defaults
+gg_color <- function(n) {
+  hues <- seq(15, 375, length = n + 1)
+  colours <- hcl(h = hues, c = 100, l = 65)[1:n]
+  return(colours)
+}
+
+
+```
+
+### UMAP
+
+```{r umap, results='asis'}
+npcs <- snakemake.config[['chooser']][['groups']][[ params[['seurat']] ]]$npcs
+
+# target <- gsub("^(.*).clustered_data.rds", "\\1", target)
+# groups <- snake.config[['chooser']][['groups']]
+# idx <- which(names(groups) %in% target)
+
+
+targets <- c("pca", "lsi")
+idx <- grep(paste(targets,collapse="|"), names(obj@reductions))
+reduction <- names(obj@reductions)[idx]
+assay <- obj[[reduction]]@assay.used
+
+if (grepl("lsi", reduction)) {
+  npcs_min = 2
+} else {
+  npcs_min = 1
+}
+
+# uwot fails with less that 50 cells
+# https://github.com/satijalab/seurat/issues/4312
+if (nrow(obj@reductions[[reduction]]) >= 50 ) {
+  umap_method = "uwot"
+} else {
+  umap_method = "umap-learn"
+}
+
+obj <- RunUMAP(obj,
+               dims = npcs_min:npcs,
+               reduction = reduction,
+               assay = assay,
+               umap.method = umap_method
+)
+
+plot <- DimPlot(
+  obj,
+  reduction = "umap",
+  group.by = glue::glue("{reduction}.{assay}_res.{choice}"),
+  pt.size = 0.5,
+  # cols = gg_color(6) # Only necessary if you have ordered your clusters
+)
+
+ggsave(
+  plot = plot,
+  filename = paste0(results_path, "/", choice, "_cluster_umap.png"),
+  dpi = 300,
+  height = 5,
+  width = 5,
+  units = "in"
+)
+
+plot
+
+```
+
+### UMAP with the silouette scores
+
+```{r umap_silscores, results='asis'}
+
+# We also find it useful to visualise the silhouette scores on the UMAP!
+plot <- FeaturePlot(
+  obj,
+  "sil_score",
+  reduction = "umap",
+  pt.size = 0.5,
+  min.cutoff = -1,
+  max.cutoff = 1
+) +
+  scale_colour_distiller(
+    palette = "RdYlBu",
+    labels = c(-1, 0, 1),
+    breaks = c(-1, 0, 1),
+    limits = c(-1, 1)
+  )
+
+
+plot
+
+ggsave(
+  plot = plot,
+  filename = paste0(new_path, "/", choice, "_silhouette_umap.png"),
+  dpi = 300,
+  height = 5,
+  width = 5,
+  units = "in"
+)
+
+```
+
+## Save the clustered seurat object
+
+```{r save}
+
+# Save original data, with optimal neighbor resolution
+outdir = file.path(".", "results", "chooser_plot", params[["seurat"]])
+if (!dir.exists(outdir)) {
+  dir.create(outdir, recursive = TRUE)
+}
+
+saveRDS(obj, params[["seurat_out"]])
+cat('Done saving seurat object.')
+
+saveRDS(choice, params[["choice_out"]])
+cat('Done saving optimal resolution for community detection')
+```
+
+
+## Session info
+
+```{r session_info}
+
+sessionInfo()
+
+```
+

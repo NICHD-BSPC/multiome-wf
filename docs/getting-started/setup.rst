@@ -1,0 +1,111 @@
+
+.. _setup:
+
+Setting up a project
+====================
+
+The general steps to use `multiome-wf` in a new project are:
+
+1. **Installation:** download the repository to your local system, into the place 
+where you want to perform the data analysis.
+2. **Configure:** set up samples.tsv table for experiments and edit configuration file.
+Optionally, set up aggregates.tsv for cellranger-aggr barcode/library mapping and assays.tsv
+if you calculated custom count matrices.
+3. **Run:** activate environment and run the Snakemake file either locally or on a cluster
+
+
+1. Installation
+---------------
+
+Conda
+^^^^^
+
+The main prerequisite for `multiome-wf` is `conda
+<https://docs.conda.io/en/latest/>`_, with the `bioconda
+<https://bioconda.github.io>`_ channel set up and the `mamba
+<https://github.com/mamba-org/mamba>`_ drop-in replacement for conda.
+
+If you have not done so already, install conda or miniconda and then mamba into your base environment. See links above for details.
+
+Clone Repository
+^^^^^^^^^^^^^^^^
+
+Clone this repository into a project directory, using the following command:
+
+.. code-block:: bash
+
+    git clone git@...
+
+Enter the top directory and create an environment based on an environment YAML file:
+
+.. code-block:: bash
+
+    cd project
+    mamba env create --prefix ./env --file env.yaml
+
+Since we specify a YAML environment file, be sure to use 'mamba env create' instead of the more common 'mambe create' command.
+
+.. note::
+
+    `multiome-wf` is tested and heavily used on Linux.
+
+    It is likely to work on macOS as long as all relevant conda packages are
+    available for macOS -- though this is not tested.
+
+    It will **not** work on Windows due to a general lack of support of Windows
+    in bioinformatics tools.
+
+2. Configure
+------------
+
+This step takes the most effort. The first time you set up a project it
+will take some time to understand the configuration system.
+
+See :ref:`config` for more.
+
+3. Run
+------
+
+Activate the main environment and go to the workflow you want to run. For
+example if you have configured a scRNA-seq run, then do:
+
+.. code-block:: bash
+
+    conda activate ./env
+
+and run the following:
+
+.. code-block:: bash
+
+    snakemake --dryrun
+
+If all goes well, this should print a list of jobs to be run.
+
+You can run locally, but this is NOT recommended. To run locally, choose the
+number of CPUs you want to use with the ``-j`` argument as is standard for
+Snakemake.
+
+.. warning::
+
+    If you haven't made any changes to the Snakefiles, be aware that the
+    default configuration needs a lot of RAM. Adjust the Snakefiles
+    accordingly if you don't have enough RAM available (search for "Xmx" to
+    find the Java args that set memory).
+
+.. code-block:: bash
+
+    # run locally (not recommended)
+    snakemake --use-conda -j 8
+
+and then monitor the various jobs that will be submitted on your behalf. See
+:ref:`cluster` for more details on this.
+
+Other clusters will need different configuration, but everything is standard
+Snakemake. The Snakemake documentation on `cluster execution
+<https://snakemake.readthedocs.io/en/stable/executing/cluster.html>`_ and
+`cloud execution
+<https://snakemake.readthedocs.io/en/stable/executing/cloud.html>`_ can be
+consulted for running on your particular system.
+
+You can typically run simultaneous workflows when they are in different
+directories; see :ref:`overview-wf` for details.
