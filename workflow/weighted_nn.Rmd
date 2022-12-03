@@ -73,7 +73,7 @@ print('Current group:')
 print(group_name)
 
 targets = group[['input_groups']]
-idx = grepl(pattern = paste(targets, collapse = "|"), seurat_inputs)
+idx = grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
 seurat_inputs = seurat_inputs[idx]
 
 print('Seurat objects in use:')
