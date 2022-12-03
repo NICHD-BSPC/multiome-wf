@@ -271,25 +271,42 @@ chooser:
 # Fix later
 # Weighted snn
 weighted_nn:
-  activate: true
-  groups:
-    wnn_0:
-      neighbor_method: weighted
-      input_groups:
+activate: true
+groups:
+  wnn_0:
+    neighbor_method: weighted
+    input_groups:
       - unintegrated_0 # corresponds to SCT
       - unintegrated_1 # corresponds to Peaks
-      # assay_name:
-      # - Gene.Expression # or SCT
-      # - Peaks
-      reduction:
-      - pca
-      - lsi
-      umap_dims:
-      - - 1
-        - 25
-      - - 2
-        - 20
-      resolution: 0.8
+    # assay_name:
+    # - Gene.Expression # or SCT
+    # - Peaks
+    reduction:
+    - pca
+    - lsi
+    umap_dims:
+    - - 1
+      - 25
+    - - 1
+      - 20
+    resolution: 0.8
+  wnn_1:
+    neighbor_method: weighted
+    input_groups:
+      - integrated_0 # corresponds to SCT
+      - integrated_1 # corresponds to Peaks
+    # assay_name:
+    # - Gene.Expression # or SCT
+    # - Peaks
+    reduction:
+    - integrated_pca
+    - integrated_lsi
+    umap_dims:
+    - - 1
+      - 25
+    - - 1
+      - 20
+    resolution: 0.8
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
@@ -332,6 +349,13 @@ diff_analysis:
       test_use: 'LR'
       latent_vars: 'nCount_Peaks'
     wnn_0:
+      cluster_idents: seurat_clusters
+      assay: SCT
+      slot: data
+      min_pct: null
+      test_use: null
+      latent_vars: null
+    wnn_1:
       cluster_idents: seurat_clusters
       assay: SCT
       slot: data

@@ -276,10 +276,19 @@ for (x in seq_along(bc_counts)) {
             seurat_main[[assay_new]] = seurat_add[[seurat_add@active.assay]]
           }
         }
-        
+
+
         if (any(grepl("integrated", names(seurat_add@reductions)))) {
-          Key(seurat_main[[assay_new]]) = assay_new
+          tryCatch(
+              expr={
+                  Key(seurat_main[[assay_new]]) = assay_new
+              },
+              error=function(e) {
+                  seurat_main[[assay_new]] <- seurat_add[[seurat_add@active.assay]]  # add a new assay if absent
+                  Key(seurat_main[[assay_new]]) = assay_new
+            })
         }
+
         
         # if object contains wnn, remove all other dim reductions,
         # they are dups from other objects
