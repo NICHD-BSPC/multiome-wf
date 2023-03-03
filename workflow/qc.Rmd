@@ -86,11 +86,12 @@ For example, we can select cells with Gene.Expression n_Features outside of 3 sd
 
 
 ```{r qc}
-remove_outliers <- config[['qc']][['remove_outliers']]
-outlier_method <- config[['qc']][['rm_outliers_method']]
-meta_labels <- config[['qc']][['meta_labels']]
-lower <- unlist(config[['qc']][['lower']])
-upper <- unlist(config[['qc']][['upper']])
+
+remove_outliers = config[['qc']][['remove_outliers']]
+outlier_method = config[['qc']][['rm_outliers_method']]
+meta_labels = config[['qc']][['meta_labels']]
+lower = unlist(config[['qc']][['lower']])
+upper = unlist(config[['qc']][['upper']])
 
 print(remove_outliers)
 print(outlier_method)
@@ -117,14 +118,12 @@ if (any(names(seurat@meta.data) %in% meta_labels)) {
 }
 
 
-Vln.list <- list()
 ######
 # vis and filter
 ######
 if (features_present) {
 	# visualize disributions before filter
-	Vln.list[['before_filtering']] <-
-        VlnPlot(
+	VlnPlot(
 		object = seurat,
 		features = meta_labels,
 		ncol = length(meta_labels),
@@ -194,7 +193,7 @@ if (features_present) {
 			# Much like R's subset function, subset.Seurat is designed for interactive use only
 			# https://github.com/satijalab/seurat/issues/1053
 			expr <- FetchData(object = seurat, vars = var_name)
-			seurat_filtered = seurat[, which(x = expr > var_val)]
+			seurat = seurat[, which(x = expr > var_val)] # modified by Mira
 		}
 		rm(i)
 		
@@ -204,22 +203,21 @@ if (features_present) {
 			var_val = max_list[[i]]
 			print(var_val)
 
-			expr <- FetchData(object = seurat_filtered, vars = var_name)
-			seurat_filtered = seurat_filtered[, which(x = expr < var_val)]
+			expr <- FetchData(object = seurat, vars = var_name)   # modified by Mira
+			seurat = seurat[, which(x = expr < var_val)]  # modified by Mira
 		}
 	}
 
 	# visualize after subsetting
-	Vln.list[['after_filtering']] <-
-        VlnPlot(
-            object = seurat_filtered,
-            features = meta_labels,
-            ncol = length(meta_labels),
-            pt.size = 0,
-            group.by = 'orig.ident'
-        ) & theme(axis.title.x=element_blank(),
-                  axis.text.x=element_blank(),
-                  axis.ticks.x=element_blank())
+	VlnPlot(
+		object = seurat,   # modified by Mira
+		features = meta_labels,
+		ncol = length(meta_labels),
+		pt.size = 0,
+		group.by = 'orig.ident'
+	) & theme(axis.title.x=element_blank(),
+	          axis.text.x=element_blank(),
+	          axis.ticks.x=element_blank())
 
 	# ggsave(
 	# 	filename = snakemake@output[['vln_post_qc']],
@@ -228,7 +226,6 @@ if (features_present) {
 	# 	units = "in"
 	# )
 
-	seurat = seurat_filtered
 	
 	print('Done filtering seurat object for each cellranger output.')
 	print(seurat)
@@ -237,6 +234,8 @@ if (features_present) {
 	print('Seurat object without filtering.')
 	print(seurat)
 }
+
+
 ```
 
 ## QC plot - before filtering
