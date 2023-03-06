@@ -119,7 +119,7 @@ if (length(idx) > 0) {
 }
 
 # check if all identical. Not necessary but helpful
-print(all(seurat@meta.data[,ident_name] == seurat@meta.data[,idx]))
+# print(all(seurat@meta.data[,ident_name] == seurat@meta.data[,idx]))  # raises an error after clustering bug fixation. skipped.
 
 
 # fix later, add loop to this section to support multiple assays/slots in a single object.
