@@ -104,6 +104,12 @@ if (nrow(obj@reductions[[reduction]]) >= 50 ) {
 ## 
 
 ```{r cluster}
+
+# Assign a name of metadata column for new cluster (e.g. "integrated_1_snn_res.0.8")
+cluster_colname <- paste0(params[['seurat']],
+                          paste0('_snn_res.', res_use))
+
+
 print("Calling FindNeighbors.")
 obj <- FindNeighbors(
   object = obj,
@@ -122,6 +128,10 @@ obj <- FindClusters(
 )
 
 print('Finished finding neighbors for this assay.')
+
+# Ensure that the cluster is given correct name in the metadata
+obj@meta.data[[cluster_colname]] <- obj$seurat_clusters
+
 ```
 
 ## Visiualize
