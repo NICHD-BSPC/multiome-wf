@@ -2,7 +2,6 @@
 title: "QC"
 output:
     html_document:
-        keep_md: yes
         toc: true
         toc_float: true
         code_folding: hide
@@ -11,8 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 
 ```
@@ -40,7 +38,6 @@ options(future.globals.maxSize=48000 * 1024^2,
 plan("multicore", workers=ncpus)
 
 ```
-
 
 
 
@@ -121,9 +118,11 @@ if (any(names(seurat@meta.data) %in% meta_labels)) {
 ######
 # vis and filter
 ######
+
+Vln.list <- list()
 if (features_present) {
 	# visualize disributions before filter
-	VlnPlot(
+	Vln.list[['before_filtering']] <- VlnPlot(
 		object = seurat,
 		features = meta_labels,
 		ncol = length(meta_labels),
@@ -133,12 +132,6 @@ if (features_present) {
 	          axis.text.x=element_blank(),
 	          axis.ticks.x=element_blank())
 
-	# ggsave(
-	# 	filename = snakemake@output[['vln_pre_qc']],
-	# 	width = 4 * length(meta_labels),
-	# 	height = 6,
-	# 	units = "in"
-	# )
 
 	if (remove_outliers) {
 		print("removing outliers")
@@ -209,7 +202,7 @@ if (features_present) {
 	}
 
 	# visualize after subsetting
-	VlnPlot(
+	Vln.list[['after_filtering']] <- VlnPlot(
 		object = seurat,   # modified by Mira
 		features = meta_labels,
 		ncol = length(meta_labels),
@@ -241,7 +234,7 @@ if (features_present) {
 ## QC plot - before filtering
 
 
-```{r print_plot_I}
+```{r print_plot_I, results='asis'}
 
 print(Vln.list[['before_filtering']])
 
@@ -250,7 +243,7 @@ print(Vln.list[['before_filtering']])
 ## QC plot - after filtering
 
 
-```{r print_plot_II}
+```{r print_plot_II, results='asis'}
 
 print(Vln.list[['after_filtering']])
 
