@@ -1,0 +1,6 @@
+snakemake_profile/
+env/
+workflow/.snakemake/
+workflow/results/
+
+
