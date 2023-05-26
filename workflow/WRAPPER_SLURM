@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="multiome"
+#SBATCH --job-name="multiome-wf"
 #SBATCH --partition="norm"
 #SBATCH --time=24:00:00
 
@@ -8,30 +8,57 @@ set -euo pipefail
 # Before you start,
 # CHECK CONFIGFILE PATH!!!
 
+
 # make logdir
 if [[ ! -e logs ]]; then mkdir -p logs; fi
+
+# Set $SNAKEMAKE_PROFILE
+SNAKEMAKE_PROFILE="../snakemake_profile"
+
+# If the SNAKEMAKE_PROFILE is unavailable, clone it from HPC's github repository
+if [ ! -d $SNAKEMAKE_PROFILE ]
+then
+    echo "snakemake_profile is cloned from HPC GitHub to ../snakemake_profile!"
+    git clone https://github.com/NIH-HPC/snakemake_profile.git ../snakemake_profile
+fi
+
+
+
+# use SNAKEMAKE_PROFILE if one is set in the environment variables
+if [ -z "$LCDBWF_SNAKEMAKE_PROFILE" ]; then
+    if [ -z "$SNAKEMAKE_PROFILE" ]; then
+        # no snakemake profile found
+        PROFILE_CMD=""
+        echo "No environment variable SNAKEMAKE_PROFILE or LCDBWF_SNAKE_PROFILE found."
+        echo "snakemake will run in single job."
+    else
+        # generic SNAKEMAKE_PROFILE found
+        PROFILE_CMD="--profile $SNAKEMAKE_PROFILE"
+    fi
+else
+    # LCDBWF_SNAKEMAKE_PROFILE found, this takes priority if both profile variables are set
+    PROFILE_CMD="--profile $LCDBWF_SNAKEMAKE_PROFILE"
+fi
 
 # Run snakemake
 (
     time snakemake \
-    --snakefile Snakefile \
     -p \
     --directory $PWD \
     -k \
+    --restart-times 3 \
     --rerun-incomplete \
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
-    --cluster-config config/other-setup/clusterconfig.yaml \
-    --cluster 'sbatch {cluster.prefix} --cpus-per-task={threads}  --output=logs/{rule}.o.%j --error=logs/{rule}.e.%j' \
     --use-conda \
-    --configfile config/multiome-config/config.yaml \
+    # --configfile config/config.yaml \   # if set, it overwrites your `configfile` in the Snakefile
+    $PROFILE_CMD \
     --latency-wait=300 \
     --max-jobs-per-second 1 \
     --max-status-checks-per-second 0.01 \
     "$@"
     ) > "Snakefile.log" 2>&1
 
-set +u
 SNAKE_PID=$!
 
 finish(){
@@ -42,4 +69,3 @@ finish(){
 trap finish SIGTERM
 
 wait $SNAKE_PID
-
