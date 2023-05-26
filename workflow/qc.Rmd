@@ -39,15 +39,6 @@ plan("multicore", workers=ncpus)
 
 ```
 
-```{r params, eval=FALSE}
-params = list(
-    seurat_in = "results/create_seurat/toydataset-nan.seurat_raw.rds",
-    config = "config/multiome-config/config.yaml",
-    seurat_out = "results/qc/toydataset-nan.seurat_qc.rds",
-    scriptdir = "scripts"
-    )
-
-```
 
 
 ## Set variables
