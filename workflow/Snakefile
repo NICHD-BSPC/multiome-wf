@@ -756,7 +756,7 @@ rule chooser_aggr:
         new_path = "results/chooser_plot/{seurat}",
         intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
     conda:
-        "chooser/requirements.txt"
+        "chooser/env.yaml"
     threads: 12
     resources:
         mem_mb=1024 * 150,
