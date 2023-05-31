@@ -302,8 +302,8 @@ weighted_nn:
       # - Gene.Expression # or SCT
       # - Peaks
       reduction:
-      - integrated_pca
-      - integrated_lsi
+        - integrated_pca
+        - integrated_lsi
       umap_dims:
         - - 1
           - 25
