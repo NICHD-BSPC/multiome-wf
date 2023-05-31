@@ -398,9 +398,9 @@ rule create_seurat:
         assays_tsv = get_tsv_path(config["assays"]),
     threads: 12
     resources:
-        mem_mb=1024 * 200,   # 1024 * 400 (400G) for real multiome dataset
-        disk_mb=1024 * 100,  # 1024 * 200 (200G) for real multiome dataset
-        runtime=60 * 12
+        mem_mb=1024 * 200,
+        disk_mb=1024 * 200,  # 1024 * 200 (200G) for real multiome dataset
+        runtime=720      # minutes
     shell:
         """Rscript -e 'params = list(
                 wc_sample = "{wildcards.sample}",
