@@ -6,3 +6,5 @@ workflow/results/
 workflow/logs/
 workflow/Snakefile.log
 *_files/
+*.out
+*.pdf
