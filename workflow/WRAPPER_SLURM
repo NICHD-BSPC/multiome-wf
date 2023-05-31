@@ -12,32 +12,27 @@ set -euo pipefail
 # make logdir
 if [[ ! -e logs ]]; then mkdir -p logs; fi
 
-# Set $SNAKEMAKE_PROFILE
-SNAKEMAKE_PROFILE="../snakemake_profile"
 
-# If the SNAKEMAKE_PROFILE is unavailable, clone it from HPC's github repository
-if [ ! -d $SNAKEMAKE_PROFILE ]
-then
-    echo "snakemake_profile is cloned from HPC GitHub to ../snakemake_profile!"
-    git clone https://github.com/NIH-HPC/snakemake_profile.git ../snakemake_profile
-fi
+# Prerequisite for biowulf users
+# 1. Run `git clone https://github.com/NIH-HPC/snakemake_profile.git /data/$USER/snakemake_profile`
+# 2. Add `$MULTIOMEWF_SNAKEMAKE_PROFILE="/data/$USER/snakemake_profile"` to your bash config file (`~/.bashrc`)
+# 3. Run `source ~/.bashrc`
+# 4. Ensure to set `--configfile` to correct path 
 
-
-
-# use SNAKEMAKE_PROFILE if one is set in the environment variables
-if [ -z "$LCDBWF_SNAKEMAKE_PROFILE" ]; then
+# use MULTIOMEWF_SNAKEMAKE_PROFILE if one is set in the environment variables
+if [ -z "$MULTIOMEWF_SNAKEMAKE_PROFILE" ]; then
     if [ -z "$SNAKEMAKE_PROFILE" ]; then
         # no snakemake profile found
         PROFILE_CMD=""
-        echo "No environment variable SNAKEMAKE_PROFILE or LCDBWF_SNAKE_PROFILE found."
+        echo "No environment variable SNAKEMAKE_PROFILE or MULTIOMEWF_SNAKEMAKE_PROFILE found."
         echo "snakemake will run in single job."
     else
         # generic SNAKEMAKE_PROFILE found
         PROFILE_CMD="--profile $SNAKEMAKE_PROFILE"
     fi
 else
-    # LCDBWF_SNAKEMAKE_PROFILE found, this takes priority if both profile variables are set
-    PROFILE_CMD="--profile $LCDBWF_SNAKEMAKE_PROFILE"
+    # MULTIOME_SNAKEMAKE_PROFILE found, this takes priority if both profile variables are set
+    PROFILE_CMD="--profile $MULTIOMEWF_SNAKEMAKE_PROFILE"
 fi
 
 # Run snakemake
@@ -51,7 +46,7 @@ fi
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
     --use-conda \
-    # --configfile config/config.yaml \   # if set, it overwrites your `configfile` in the Snakefile
+    --configfile config/multiome-config/config.yaml \
     $PROFILE_CMD \
     --latency-wait=300 \
     --max-jobs-per-second 1 \
