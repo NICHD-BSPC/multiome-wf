@@ -1,6 +1,8 @@
 snakemake_profile/
 env/
+docs/
 workflow/.snakemake/
 workflow/results/
-
-
+workflow/logs/
+workflow/Snakefile.log
+*_files/
