@@ -45,36 +45,37 @@ plan("multicore", workers=ncpus)
 ```
 
 
+
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
 ```{r variables}
-seurat_inputs = unlist(strsplit(params[['seurats']], ' '))
+seurat_inputs <- unlist(strsplit(params[['seurats']], ' '))
 cat('Input Seurat objects: \n')
 print(seurat_inputs)
 
-config_path = params[['config']]
+config_path <- params[['config']]
 ```
 
 ```{r input_config}
-config = yaml::read_yaml(file = config_path)
+config <- yaml::read_yaml(file = config_path)
+
+toydataset <- config[['dataset_size']][['toydataset']]
 ```
 
 
 ```{r get_analysis_group}
-# groups = config[['weighted_nn']][['groups']]
-# group = groups[[1]]
 
-group = config[['weighted_nn']][['groups']][[ params[["seurat"]] ]]
+group <- config[['weighted_nn']][['groups']][[ params[["seurat"]] ]]
 
-group_name = params[["seurat"]]
+group_name <- params[["seurat"]]
 print('Current group:')
 print(group_name)
 
-targets = group[['input_groups']]
-idx = grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
-seurat_inputs = seurat_inputs[idx]
+targets <- group[['input_groups']]
+idx <- grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
+seurat_inputs <- seurat_inputs[idx]
 
 print('Seurat objects in use:')
 print(seurat_inputs)
@@ -86,7 +87,7 @@ Read in Seurat objects.
 
 ```{r input_seurat}
 seurat_list <- lapply(seq_along(seurat_inputs), function(x){
-	s_in = readRDS(seurat_inputs[x])
+	s_in <- readRDS(seurat_inputs[x])
 	return(s_in)
 })
 cat('Input sample list: \n')
@@ -98,35 +99,31 @@ print(seurat_list)
 
 
 ```{r cluster}
-# assay_names = group[['assay_name']]
-# 
-# print('assay names')
-# print(assay_names)
 
-reductions = group[['reduction']]
+reductions <- group[['reduction']]
 
 print('reductions')
 print(reductions)
 
-umap_dims = group[['umap_dims']]
+umap_dims <- group[['umap_dims']]
 print('dimension range')
 print(umap_dims)
 
 if (!any(is.integer(unlist(umap_dims)))) {
-    dims_list = lapply(seq_along(assay_name), function(x) {
-        u_seq = 1:50
+    dims_list <- lapply(seq_along(assay_name), function(x) {
+        u_seq <- 1:50
         return(u_seq)
     })
 } else {
     if (is.list(umap_dims)) {
-        dims_list = lapply(seq_along(umap_dims), function(x) {
-            u = umap_dims[[x]]
-            u_seq = seq(from = u[1], to = u[2])
+        dims_list <- lapply(seq_along(umap_dims), function(x) {
+            u <- umap_dims[[x]]
+            u_seq <- seq(from = u[1], to = u[2])
             return(u_seq)
         })
     } else {
-        dims_list = dim_vals_to_list(
-            dim_vals = umap_dims
+        dims_list <- dim_vals_to_list(
+            dim_vals <- umap_dims
         )
     }
 }
@@ -134,33 +131,33 @@ if (!any(is.integer(unlist(umap_dims)))) {
 print('dims_list dims')
 print(dims_list)
 
-res = group[['resolution']]
+res <- group[['resolution']]
 
 if (is.null(res)) {
-    res = 0.8
+    res <- 0.8
 }
 
 print('resolution')
 print(res)
 
 # weighted nearest neirbor required both matrices to have equal barcodes
-common_names = intersect(colnames(seurat_list[[1]]), colnames(seurat_list[[2]]))
+common_names <- intersect(colnames(seurat_list[[1]]), colnames(seurat_list[[2]]))
 
 if (length(common_names) > 0) {
     print('Common barcodes found for selected assays. Starting weighted NN graphing')
     
     # sort seurat list to be sure
-    reducs_present = lapply(seq_along(seurat_list), function(x) {
-        dr_names = names(seurat_list[[x]]@reductions)
-        idx = !(dr_names %in% "umap")
-        dr_names = dr_names[idx]
+    reducs_present <- lapply(seq_along(seurat_list), function(x) {
+        dr_names <- names(seurat_list[[x]]@reductions)
+        idx <- !(dr_names %in% "umap")
+        dr_names <- dr_names[idx]
         return(dr_names)
     })
     print('reductions present in each seurat object')
     print(reducs_present)
     
-    idx = sapply(seq_along(reductions), function(x) {
-        idy = which(reductions %in% reducs_present[[x]])
+    idx <- sapply(seq_along(reductions), function(x) {
+        idy <- which(reductions %in% reducs_present[[x]])
         return(idy)
     })
     print(idx)
@@ -170,53 +167,63 @@ if (length(common_names) > 0) {
         q()
     }
     
-    seurat_list = seurat_list[idx]
+    seurat_list <- seurat_list[idx]
     
     # keep only cells/barcodes common to both data sets
     # some may have been removed during qc, etc
-    seurat_list[[1]] = subset(seurat_list[[1]],
+    seurat_list[[1]] <- subset(seurat_list[[1]],
                               cells = common_names)
-    seurat_list[[2]] = subset(seurat_list[[2]],
+    seurat_list[[2]] <- subset(seurat_list[[2]],
                               cells = common_names)
     
     # extract 
-    reduction1 = reductions[1]
-    assay_used1 = seurat_list[[1]]@reductions[[reduction1]]@assay.used
-    assay1 = seurat_list[[1]]@assays[[assay_used1]]
-    dr1 = seurat_list[[1]][[reduction1]]
-    dr1_name = paste0(reduction1, assay_used1)
+    reduction1 <- reductions[1]
+    assay_used1 <- seurat_list[[1]]@reductions[[reduction1]]@assay.used
+    assay1 <- seurat_list[[1]]@assays[[assay_used1]]
+    dr1 <- seurat_list[[1]][[reduction1]]
+    dr1_name <- paste0(reduction1, assay_used1)
     
-    reduction2 = reductions[2]
-    assay_used2 = seurat_list[[2]]@reductions[[reduction2]]@assay.used
-    assay2 = seurat_list[[2]]@assays[[assay_used2]]
-    dr2 = seurat_list[[2]][[reduction2]]
-    dr2_name = paste0(reduction2, assay_used2)
+    reduction2 <- reductions[2]
+    assay_used2 <- seurat_list[[2]]@reductions[[reduction2]]@assay.used
+    assay2 <- seurat_list[[2]]@assays[[assay_used2]]
+    dr2 <- seurat_list[[2]][[reduction2]]
+    dr2_name <- paste0(reduction2, assay_used2)
     
-    seurat = seurat_list[[1]]
-    seurat[[assay_used2]] = assay2
+    seurat <- seurat_list[[1]]
+    seurat[[assay_used2]] <- assay2
     
     # seurat = merge(seurat_list[[1]], seurat_list[[2]])
-    seurat[[dr1_name]] = dr1
-    seurat[[dr2_name]] = dr2
+    seurat[[dr1_name]] <- dr1
+    seurat[[dr2_name]] <- dr2
     
-    reduc_list = list(dr1_name, dr2_name)
+    reduc_list <- list(dr1_name, dr2_name)
+
+    if (toydataset) {
+        k.nn <- 5
+        k.range <- 50
+    } else {
+        k.nn <- 20         # Seurat default for FindMultiModalNeighbors
+        k.range <- 200     # Seurat default for FindMultiModalNeighbors
+    }
     
     seurat <- FindMultiModalNeighbors(
         object = seurat,
         reduction.list = reduc_list,
-        dims.list = dims_list
+        dims.list = dims_list,
+        k.nn=k.nn,
+        knn.range=k.range
     )
     
     print('finished finding multimodal neighbor')
     
-    seurat = RunUMAP(
+    seurat <- RunUMAP(
         object = seurat,
         nn.name = "weighted.nn",
         reduction.name = "wnn_umap",
         reduction.key = "wnnUMAP_"
     )
-    
-    seurat = FindClusters(
+
+    seurat <- FindClusters(
         object = seurat,
         graph.name = "wsnn",
         algorithm = 3,
@@ -254,6 +261,7 @@ plot
 ## Save Seurat object
 
 ```{r save}
+
 # save main seurat object
 saveRDS(object=seurat, file=params[['seurat_out']])
 print('Done saving seurat object.')
