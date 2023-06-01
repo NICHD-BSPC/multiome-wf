@@ -65,7 +65,16 @@ If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse ma
 
 ```{r input}
 obj = readRDS(obj_input)
-res_use = readRDS(choice_input)
+
+
+# Set resolution to the previously computed (by chooser) or defined value
+if (params[['res_use']] != "") {
+  res_use <- params[['res_use']]
+} else {
+  res_use <- readRDS(choice_input)
+}
+
+
 
 cat('Input Seurat object:')
 print(obj)
