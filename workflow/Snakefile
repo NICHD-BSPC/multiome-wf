@@ -400,7 +400,7 @@ rule create_seurat:
     resources:
         mem_mb=1024 * 200,
         disk_mb=1024 * 200,  # 1024 * 200 (200G) for real multiome dataset
-        runtime=720      # minutes
+        runtime=60 * 12      # minutes
     shell:
         """Rscript -e 'params = list(
                 wc_sample = "{wildcards.sample}",
