@@ -43,9 +43,6 @@ plan("multicore", workers=ncpus)
 ```
 
 
-
-
-
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
@@ -64,7 +61,7 @@ If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse ma
 'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
 
 ```{r input}
-obj = readRDS(obj_input)
+obj <- readRDS(obj_input)
 
 
 # Set resolution to the previously computed (by chooser) or defined value
@@ -74,7 +71,10 @@ if (params[['res_use']] != "") {
   res_use <- readRDS(choice_input)
 }
 
-
+# Convert to numeric of the resolution is still a character obj
+if (!is.numeric(res_use)) {
+    res_use <- as.numeric(res_use)
+}
 
 cat('Input Seurat object:')
 print(obj)
@@ -176,6 +176,7 @@ plot
 ## Save Seurat object
 
 ```{r save, results='asis'}
+
 cat('Updated Seurat object:')
 print(obj)
 
