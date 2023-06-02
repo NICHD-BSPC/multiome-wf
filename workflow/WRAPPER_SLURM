@@ -54,13 +54,13 @@ fi
     "$@"
     ) > "Snakefile.log" 2>&1
 
-SNAKE_PID=$!
-
-finish(){
-    echo 'Stopping running snakemake job.'
-    kill -SIGINT $SNAKE_PID
-    exit 0
-}
-trap finish SIGTERM
-
-wait $SNAKE_PID
+# SNAKE_PID=$!
+# 
+# finish(){
+    # echo 'Stopping running snakemake job.'
+    # kill -SIGINT $SNAKE_PID
+    # exit 0
+# }
+# trap finish SIGTERM
+# 
+# wait $SNAKE_PID
