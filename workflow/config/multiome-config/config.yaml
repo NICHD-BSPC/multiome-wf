@@ -56,7 +56,7 @@ qc:
 # Determine whether or not to run macs2 (Y or N)
 # If run macs, which metadata column to split fragments by (currently, any columns in 'samples.tsv' supported)
 macs2:
-  run: "Y"
+  run: "N"
   group_fragments_by: genome # feature_type
 
 
