@@ -8,3 +8,5 @@ workflow/Snakefile.log
 *_files/
 *.out
 *.pdf
+test_data/tenx_atac/
+test_data/tenx_rna/
