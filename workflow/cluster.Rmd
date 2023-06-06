@@ -65,7 +65,7 @@ obj <- readRDS(obj_input)
 
 
 # Set resolution to the previously computed (by chooser) or defined value
-if (params[['res_use']] != "") {
+if (!is.null(params[['res_use']])) {
   res_use <- params[['res_use']]
 } else {
   res_use <- readRDS(choice_input)

@@ -56,7 +56,7 @@ qc:
 # Determine whether or not to run macs2 (Y or N)
 # If run macs, which metadata column to split fragments by (currently, any columns in 'samples.tsv' supported)
 macs2:
-  run: "N"
+  run: "Y"
   group_fragments_by: genome # feature_type
 
 
@@ -219,7 +219,9 @@ chooser:
     - frequency_grouped
     - silhouette_grouped
 
-
+cluster:
+  resolution: 0.6  # Set to null if you're taking advantage of chooser
+                     # Go to `weighted_nn` & `resolution` to set the same resolution
 
 # Community detection and graphing
 # groups: Each group to perform clustering.
@@ -274,16 +276,13 @@ chooser:
 # Fix later
 # Weighted snn
 weighted_nn:
-  activate: true
+  activate: false
   groups:
     wnn_0:
       neighbor_method: weighted
       input_groups:
         - unintegrated_0 # corresponds to SCT
         - unintegrated_1 # corresponds to Peaks
-      # assay_name:
-      # - Gene.Expression # or SCT
-      # - Peaks
       reduction:
         - pca
         - lsi
@@ -292,24 +291,21 @@ weighted_nn:
           - 25
         - - 1
           - 20
-      resolution: 0.8
-    wnn_1:
-      neighbor_method: weighted
-      input_groups:
-        - integrated_0 # corresponds to SCT
-        - integrated_1 # corresponds to Peaks
-      # assay_name:
-      # - Gene.Expression # or SCT
-      # - Peaks
-      reduction:
-        - integrated_pca
-        - integrated_lsi
-      umap_dims:
-        - - 1
-          - 25
-        - - 1
-          - 20
-      resolution: 0.8
+      resolution: 0.6
+      # wnn_1:
+      # neighbor_method: weighted
+      # input_groups:
+      # - integrated_0 # corresponds to SCT
+      # - integrated_1 # corresponds to Peaks
+      # reduction:
+      # - integrated_pca
+      # - integrated_lsi
+      # umap_dims:
+      # - - 1
+      # - 25
+      # - - 1
+      # - 20
+      # resolution: 0.6
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc

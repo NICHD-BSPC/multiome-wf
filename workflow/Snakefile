@@ -821,7 +821,7 @@ rule cluster:
         barcodes_out = "results/cluster/{seurat}/barcodes.rds",
     params:
         intermediates_dir = "results/cluster/intermediates_dir/{seurat}",
-        res_use = "0.6"    # Set clustering resolution here (e.g. "0.6") if you want to manually assign
+        res_use = config["cluster"]["resolution"]
     threads: 12
     resources:
         mem_mb=1024 * 100,
