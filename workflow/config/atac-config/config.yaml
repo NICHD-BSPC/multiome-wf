@@ -39,10 +39,10 @@ qc:
   remove_outliers: true
   rm_outliers_method: sd
   meta_labels:
-  - nCount_Gene.Expression
-  - nCount_Peaks
-  - percent.mt
-  - TSS.enrichment
+    - nCount_Gene.Expression
+    - nCount_Peaks
+    - percent.mt
+    - TSS.enrichment
   lower: 
     nCount_Gene.Expression: 100
     nCount_Peaks: 1000
@@ -119,7 +119,7 @@ normalize:
 #
 # umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
 integrate:
-  activate: false
+  activate: true
   memory_MB: null
   atac_integrate_embeddings: true
   groups:
@@ -133,10 +133,18 @@ integrate:
         assay_name: Peaks
       norm_method: lsi
       integrate_dims:
-      - 1
-      - 30
+        - 1
+        - 30
 
-# Coembed rna and atac data
+# Is your input a toy dataset?
+# This question is required to adjust the number of neighbors when integrating datasets
+dataset_size:
+  toydataset: false  # true or false
+  toy_k: 10         # size of the number of neighbors when weighting anchors during integration
+                    # check `https://satijalab.org/seurat/reference/integrateembeddings`
+
+
+  # Coembed rna and atac data
 # activate: Coembed rna and atac data instead of integrating/transforming data?
 #   Similar in concept to integration workflow, but doesn't transform ATAC data or create "integrated" slot.
 #   Coembedding rule will create a new Seurat object for the comembeding rule.
@@ -184,18 +192,8 @@ chooser:
     integrated_1:
       npcs: 20
   resolutions:
+    - 0.6
     - 0.8
-    - 1
-    - 1.2
-    - 1.4
-    - 1.6
-    - 1.8
-    - 2
-    - 4
-    - 6
-    - 8
-    - 12
-    - 16
   silhouette:
     - silhouette
     - frequency_grouped
@@ -252,6 +250,8 @@ chooser:
 #       - null
 #       - null
 #       resolution: null
+cluster:
+  resolution: null  # Set to null if you're taking advantage of chooser
 
 # Fix later
 # Weighted snn
@@ -262,17 +262,14 @@ weighted_nn:
     wnn_0:
       neighbor_method: weighted
       input_groups:
-      - unintegrated_1 # corresponds to Peaks
-      # assay_name:
-      # - Gene.Expression # or SCT
-      # - Peaks
+        - unintegrated_1 # corresponds to Peaks
       reduction:
-      - lsi
+        - lsi
       umap_dims:
-      - - 1
-        - 25
-      - - 2
-        - 20
+        - - 1
+          - 25
+        - - 2
+          - 20
       resolution: 0.8
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
