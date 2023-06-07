@@ -48,8 +48,8 @@ plan("multicore", workers=ncpus)
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
 ```{r variables}
-obj_input = params[['seurat_in']]
-choice_input = params[['res_choice']]
+obj_input <- params[['seurat_in']]
+choice_input <- params[['res_choice']]
 snakemake.config <- yaml::read_yaml(params[['config']])
 ```
 
@@ -65,10 +65,10 @@ obj <- readRDS(obj_input)
 
 
 # Set resolution to the previously computed (by chooser) or defined value
-if (!is.null(params[['res_use']])) {
-  res_use <- params[['res_use']]
-} else {
+if (params[['res_use']] == "None") {
   res_use <- readRDS(choice_input)
+} else {
+  res_use <- params[['res_use']]
 }
 
 # Convert to numeric of the resolution is still a character obj
