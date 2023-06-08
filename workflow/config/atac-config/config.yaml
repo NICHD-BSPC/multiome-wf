@@ -251,7 +251,7 @@ chooser:
 #       - null
 #       resolution: null
 cluster:
-  resolution: null  # Set to null if you're taking advantage of chooser
+  resolution: 0.8  # Set to null if you're taking advantage of chooser
 
 # Fix later
 # Weighted snn
