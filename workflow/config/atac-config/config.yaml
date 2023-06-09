@@ -253,24 +253,6 @@ chooser:
 cluster:
   resolution: 0.8  # Set to null if you're taking advantage of chooser
 
-# Fix later
-# Weighted snn
-# Set to false for single modality
-weighted_nn:
-  activate: false
-  groups:
-    wnn_0:
-      neighbor_method: weighted
-      input_groups:
-        - unintegrated_1 # corresponds to Peaks
-      reduction:
-        - lsi
-      umap_dims:
-        - - 1
-          - 25
-        - - 2
-          - 20
-      resolution: 0.8
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
@@ -305,6 +287,42 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+
+
+# Fix later
+# Weighted snn
+weighted_nn:
+  activate: false
+  groups:
+    wnn_0:
+      neighbor_method: weighted
+      input_groups:
+        - unintegrated_0 # corresponds to SCT
+        - unintegrated_1 # corresponds to Peaks
+      reduction:
+        - pca
+        - lsi
+      umap_dims:
+        - - 1
+          - 25
+        - - 1
+          - 20
+      resolution: 0.6
+    wnn_1:
+      neighbor_method: weighted
+      input_groups:
+        - integrated_0 # corresponds to SCT
+        - integrated_1 # corresponds to Peaks
+      reduction:
+        - integrated_pca
+        - integrated_lsi
+      umap_dims:
+        - - 1
+          - 25
+        - - 1
+          - 20
+      resolution: 0.6
+
 
 # Choose guide options:
 # build - build initial version of guide.rst from config/template_guide.rst

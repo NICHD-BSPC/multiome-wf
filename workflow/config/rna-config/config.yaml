@@ -41,10 +41,10 @@ qc:
   remove_outliers: true
   rm_outliers_method: sd
   meta_labels:
-  - nCount_Gene.Expression
-  - nCount_Peaks
-  - percent.mt
-  - TSS.enrichment
+    - nCount_Gene.Expression
+    - nCount_Peaks
+    - percent.mt
+    - TSS.enrichment
   lower: 
     nCount_Gene.Expression: 100
     TSS.enrichment: 2
@@ -130,8 +130,16 @@ integrate:
         assay_name: Gene.Expression
       norm_method: sct
       integrate_dims:
-      - 1
-      - 30
+        - 1
+        - 30
+
+# Is your input a toy dataset?
+# This question is required to adjust the number of neighbors when integrating datasets
+dataset_size:
+  toydataset: false  # true or false
+  toy_k: 10         # size of the number of neighbors when weighting anchors during integration
+                    # check `https://satijalab.org/seurat/reference/integrateembeddings`
+
 
 
 # Coembed rna and atac data
@@ -182,18 +190,8 @@ chooser:
     integrated_1:
       npcs: 20
   resolutions:
+    - 0.6
     - 0.8
-    - 1
-    - 1.2
-    - 1.4
-    - 1.6
-    - 1.8
-    - 2
-    - 4
-    - 6
-    - 8
-    - 12
-    - 16
   silhouette:
     - silhouette
     - frequency_grouped
@@ -251,27 +249,9 @@ chooser:
 #       - null
 #       resolution: null
 
-# Fix later
-# Weighted snn is activated only for multimodal analysis
-# Set to false for single modality
-weighted_nn:
-  activate: false
-  groups:
-    wnn_0:
-      neighbor_method: weighted
-      input_groups:
-      - unintegrated_0 # corresponds to SCT
-      # assay_name:
-      # - Gene.Expression # or SCT
-      # - Peaks
-      reduction:
-      - pca
-      umap_dims:
-      - - 1
-        - 25
-      - - 2
-        - 20
-      resolution: 0.8
+cluster:
+  resolution: null  # Set to null if you're taking advantage of chooser
+
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
@@ -292,6 +272,40 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+
+# Fix later
+# Weighted snn
+weighted_nn:
+  activate: false
+  groups:
+    wnn_0:
+      neighbor_method: weighted
+      input_groups:
+        - unintegrated_0 # corresponds to SCT
+        - unintegrated_1 # corresponds to Peaks
+      reduction:
+        - pca
+        - lsi
+      umap_dims:
+        - - 1
+          - 25
+        - - 1
+          - 20
+      resolution: 0.6
+    wnn_1:
+      neighbor_method: weighted
+      input_groups:
+        - integrated_0 # corresponds to SCT
+        - integrated_1 # corresponds to Peaks
+      reduction:
+        - integrated_pca
+        - integrated_lsi
+      umap_dims:
+        - - 1
+          - 25
+        - - 1
+          - 20
+      resolution: 0.6
 
 # Choose guide options:
 # build - build initial version of guide.rst from config/template_guide.rst
