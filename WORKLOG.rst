@@ -30,9 +30,13 @@ multiome-wf
         - ``workflow/chooser/env.yaml``
     - multiple bugs fixed when handling toydataset in ``workflow/chooser_paral.Rmd`` and ``workflow/chooser_aggr.Rmd``
 
-2023-06-06
+2023-10-05
 ----------
 
 @Mira0507
+
+- Documentation updated
+    - ``docs/configuration/config.rst`` updated
+    - ``docs/configuration/config-yaml.rst`` updated
 
 
