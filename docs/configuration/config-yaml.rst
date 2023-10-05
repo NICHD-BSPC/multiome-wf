@@ -340,6 +340,31 @@ Integration
               - 1
               - 30
 
+
+Utilization of Toy Dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``dataset_size`` config section
+    
+    Assign the utilization of toy dataset. If dataset size is smaller than default k values in kNN computation during integration, Seurat throws an error. 
+    
+
+    ``toydataset``
+        
+        boolean, set true if input is toy dataset and false otherwise.
+
+    ``toy_k``
+
+        size of the number of neighbors when weighting anchors during integration.
+
+    Example:
+
+    .. code-block:: yaml
+
+        dataset_size:
+            toydataset: true
+            toy_k: 10
+
 Coembedding RNA/ATAC
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -412,6 +437,23 @@ Cluster Optimization
             - frequency_grouped
             - silhouette_grouped
 
+Clustering Resolution
+^^^^^^^^^^^^^^^^^^^^^
+
+``cluster`` config section
+    
+    Set the clustering resolution.
+
+    ``resolution``
+
+        float, set the clustering resolution manually. If set to ``null``, the resolution is determined through the optimization using the ``chooser``.
+
+    Example:
+
+    .. code-block:: yaml
+
+        cluster:
+            resolution: 0.6
 
 Weighted Nearest Neighbor
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -625,6 +667,10 @@ See :ref: `overview-wf` for more detailed examples of config files.
           - 1
           - 30
 
+    dataset_size:
+      toydataset: true  # true or false
+      toy_k: 10   
+
     coembed:
       activate: false
       reference:
@@ -663,6 +709,9 @@ See :ref: `overview-wf` for more detailed examples of config files.
         - silhouette
         - frequency_grouped
         - silhouette_grouped
+
+    cluster:
+      resolution: 0.6
 
     weighted_nn:
       activate: true

@@ -51,11 +51,14 @@ don't need to change anything.
 If you are running on a different cluster, you should inspect the following files:
 
 - `WRAPPER_SLURM`
-- the `config/clusterconfig.yaml` file (see :ref:`clusterconfig`)
-- `lib/cluster_specific.py`. This module currently has a single function that,
-  when called, will inspect the current environment variables and make any
-  necessary changes, returning the temp dir. Other cluster-specific code may go
-  here (see `cluster_specific`)
+- Before Snakemake 7.29:
+    - the `config/clusterconfig.yaml` file (see :ref:`clusterconfig`)
+    - `lib/cluster_specific.py`. This module currently has a single function that,
+      when called, will inspect the current environment variables and make any
+      necessary changes, returning the temp dir. Other cluster-specific code may go
+      here (see `cluster_specific`)
+- After Snakemake 7.29:
+    - Profile config files from the `NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_
 
 The default configuration we provide is specific to the NIH Biowulf cluster.
 To run a workflow on Biowulf, from the top-level project directory, 
@@ -68,7 +71,13 @@ run the following command
 The ``WRAPPER_SLURM`` script submits the main Snakemake process on a separate
 node to avoid any restrictions from running on the head node. That main
 Snakemake process then submits each rule separately to the cluster scheduler.
-As configured in that script, we specify ``config/clusterconfig.yaml`` as
+
+.. _old_cluster_config:
+
+Cluster configuration (Snakemake before 7.29)
+---------------------------------------------
+
+For Snakemake versions before 7.29, we specify ``config/clusterconfig.yaml`` as
 containing the rule-specific cluster arguments.
 
 That script also contains the Snakemake arguments
@@ -85,6 +94,7 @@ This means that each job will be named after the rule and job id (the
 ``--jobname`` arg). The stdout and stderr go to files in ``logs`` and are
 named after the rule, followed by a ``.o`` or ``.e``, followed by the cluster
 job ID (the ``--cluster`` arg).
+
 
 
 .. _cluster_specific:
@@ -122,3 +132,27 @@ describe how to configure cluster-specific settings so that rules will run on
 the correct size node when submitting batch jobs. This is not needed if you are
 running the workflows locally, but you may need to edit the
 `config/clusterconfig.yaml` file found in each workflow directory.
+
+.. _new_cluster_config:
+
+Cluster configuration (Snakemake after 7.29)
+--------------------------------------------
+
+For Snakemake versions after 7.29, we use profile established by 
+`NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_. If you're a first-time user,
+you can setup your profile on NIH's Biowulf as demonstrated below:
+
+.. code-block:: bash
+
+    # Clone the profile repo
+    git clone https://github.com/NIH-HPC/snakemake_profile.git /data/$USER/snakemake_profile
+
+Once the repository is cloned, add ``export MULTIOMEWF_SNAKEMAKE_PROFILE="/data/$USER/snakemake_profile"``
+to your bash configuration file (``~/.bashrc``). 
+
+Update your bash config by running the following command:
+
+.. code-block:: bash
+
+    source ~/.bashrc
+
