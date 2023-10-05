@@ -43,16 +43,13 @@ plan("multicore", workers=ncpus)
 ```
 
 
-
-
-
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
 ```{r variables}
-obj_input = params[['seurat_in']]
-choice_input = params[['res_choice']]
+obj_input <- params[['seurat_in']]
+choice_input <- params[['res_choice']]
 snakemake.config <- yaml::read_yaml(params[['config']])
 ```
 
@@ -64,8 +61,20 @@ If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse ma
 'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
 
 ```{r input}
-obj = readRDS(obj_input)
-res_use = readRDS(choice_input)
+obj <- readRDS(obj_input)
+
+
+# Set resolution to the previously computed (by chooser) or defined value
+if (params[['res_use']] == "None") {
+  res_use <- readRDS(choice_input)
+} else {
+  res_use <- params[['res_use']]
+}
+
+# Convert to numeric of the resolution is still a character obj
+if (!is.numeric(res_use)) {
+    res_use <- as.numeric(res_use)
+}
 
 cat('Input Seurat object:')
 print(obj)
@@ -167,6 +176,7 @@ plot
 ## Save Seurat object
 
 ```{r save, results='asis'}
+
 cat('Updated Seurat object:')
 print(obj)
 

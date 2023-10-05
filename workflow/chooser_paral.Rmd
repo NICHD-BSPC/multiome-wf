@@ -2,7 +2,6 @@
 title: "chooseR"
 output:
     html_document:
-        keep_md: yes
         toc_float: true
         toc: true
         code_folding: hide
@@ -12,9 +11,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE,
-                      message=FALSE,
-                      results='hide',
-                      echo=FALSE)
+                      message=FALSE)
 ```
 
 ## Activate conda env
@@ -41,9 +38,6 @@ source("chooser_var.R")
 ```
 
 
-## Set parallelization
-
-
 
 
 
@@ -61,7 +55,7 @@ res <- as.numeric(params[["res"]])
 
 ## Load Seurat object
 
-- **Input data** = RDS file storing a **seurat object** (before SCTransform & PCA)
+- **Input data** = an RDS file storing a **seurat object** (after SCTransform & PCA)
 
 
 ```{r load_data}
@@ -70,58 +64,10 @@ config = yaml::read_yaml(file = config_path)
 # Read a QC-ed seuat object
 obj <- readRDS(params[["seurat_in"]])
 
-# Move active assay to Gene.Expression
-# Satija's naming
-# if ("RNA" %in% names(obj)) {
-#     DefaultAssay(obj) <- "RNA"
-
-    # Chris' naming
-# } else if ("Gene.Expression" %in% names(obj)) {
-#     DefaultAssay(obj) <- "Gene.Expression"
-#     obj <- RenameAssays(obj, Gene.Expression="RNA")
-# }
 
 # Explore the output
 obj
 
-```
-
-## Run SCTransform
-
-SCTransform and PCA preformed in previous rules (normalize and/or integrate)
-
-```{r sctransform}
-# 
-# # Add pseudocount 0.01 to seurat's expression count matrix
-# # (avoids errors from missing or infinite values)
-# obj@assays$RNA@counts <- as(obj@assays$RNA@counts + 0.01,  # adds pseudocount
-#                             "dgCMatrix")                   # coerces to the original matrix type (dgCMatrix)
-# 
-# 
-# # Explore the output
-# kable(obj@assays$RNA@counts[1:5, 1:3])
-# 
-# 
-# 
-# # Run SCTransform
-# obj <- SCTransform(obj)
-# 
-# 
-# # Explore the matrix
-# obj
-# 
-```
-
-
-## Run PCA
-
-```{r pca}
-# 
-# 
-# 
-# # Run PCA
-# obj <- RunPCA(obj)
-# 
 ```
 
 
@@ -192,7 +138,6 @@ system(paste0("mkdir -p ./", results_path))
 ```{r chooser}
 
 
-
 # Run pipeline
 message(paste0("Clustering ", res, "..."))
 message("\tFinding ground truth...")
@@ -203,13 +148,6 @@ obj <- find_clusters(obj,
                    reduction = reduction,
                    assay = assay,
                    resolution = res)
-
-
-# Extract cluster info
-# Code changed from
-# clusters <- obj[[glue::glue("{reduction}.{assay}_res.{res}")]]
-
-
 
 
 # Now perform iterative, sub-sampled clusters (returns a data frame)
@@ -245,7 +183,6 @@ message(paste0("Tallying ", res, "..."))
 # CR change:
 results = results[,-1]
 columns <- colnames(results)
-# columns <- colnames(results)[-1]
 
 mtchs <- matrix(0, nrow = dim(results)[1], ncol = dim(results)[1])
 
@@ -259,8 +196,6 @@ mtchs <- Reduce("+", list(
 ))
 i <- i + 1
 }
-
-
 
 message(paste0("Scoring ", res, "..."))
 # Original code: # returns class "tibble", all cols type "double"
@@ -282,8 +217,15 @@ print(dim(mtchs))
 # Now calculate silhouette scores
 message(paste0("Silhouette ", res, "..."))
 
+
 # Subset the seurat obj by sampled cells
-sampled.obj <- obj[, sampled.cells]
+if (length(sampled.cells) > 0) {
+    sampled.obj <- obj[, sampled.cells]
+} else {
+    sampled.obj <- obj
+}
+
+
 
 # Extract clusters from the sampled seurat
 clusters <- unlist(sampled.obj[[glue::glue("{reduction}.{assay}_res.{res}")]])
@@ -291,9 +233,13 @@ clusters <- unlist(sampled.obj[[glue::glue("{reduction}.{assay}_res.{res}")]])
 # Compute silhouette width
 # NOTE: cluster::silhouette() requires
 # either dist (distance matrix) or dmatrix (dissimilarity matrix)
-sil <- cluster::silhouette(
-    x =as.integer(clusters),   # integer vector of the initial cluster
-    dmatrix=as.matrix(cluster::daisy(mtchs))  # distance matrix
+sil <- tryCatch(
+    expr= { 
+        cluster::silhouette(
+            x =as.integer(clusters),   # integer vector of the initial cluster
+            dmatrix=as.matrix(cluster::daisy(mtchs)))  # distance matrix
+        },
+    error=function(e) { return(NULL) }
 )
 
 
@@ -305,7 +251,10 @@ message(paste0("Grouping ", res, "..."))
 
 
 # Compute group scores by passing a data table and clusters
-grp <- group_scores(as.data.table(mtchs), clusters)
+grp <- tryCatch(
+    expr={ group_scores(as.data.table(mtchs), clusters) },
+    error=function(e) { NULL }
+    )
 
 
 # Ocassionally the sil is returned NA by the function cluster::silhouette() when
@@ -335,14 +284,9 @@ sil <- tryCatch(
 
 ```{r save}
 
-
-
-
 saveRDS(grp, paste0(results_path, "/frequency_grouped_", res, ".rds"))   # short (seconds)
 saveRDS(sil, paste0(results_path, "/silhouette_grouped_", res, ".rds"))  # short (seconds)
 saveRDS(sampled.obj, paste0(results_path, "/seurat_obj_", res, ".rds"))   # takes nearly 20min
-
-
 
 
 ```

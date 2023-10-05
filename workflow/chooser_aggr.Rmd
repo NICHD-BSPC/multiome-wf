@@ -2,7 +2,6 @@
 title: "chooseR"
 output:
     html_document:
-        keep_md: yes
         toc_float: true
         toc: true
         code_folding: hide
@@ -13,7 +12,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE,
                       message=FALSE,
-                      results='hide',
                       echo=FALSE)
 ```
 
@@ -39,41 +37,12 @@ source("chooser_var.R")
 ```
 
 
-## Set parallelization
-
-
-
-
-
-```{r parallelize, include=FALSE}
-
-# Assign the number of cores for parallelization
-# ncpus <- future::availableCores()
-
-# Adjust max memory allowed
-# options(future.globals.maxSize=96000 * 1024^2,
-#         mc.cores=ncpus)
-
-# Parallelize the run
-# plan("multicore", workers=ncpus)
-
-# setDTthreads(threads=ncpus)
-```
-
-
 ```{r variables}
 results_path <- params[['results_path']]
 new_path <- params[['new_path']]
 snakemake.config <- yaml::read_yaml(params[['config']])
 resolutions <- as.character(unlist(snakemake.config$chooser$resolutions))
 
-
-# Only for interactive testing
-# snakemake.config <- yaml::read_yaml('config/config.yaml')
-# results_path <- "results/chooser_run/integrated_0"   # delete later
-# new_path <- "results/chooser_plot"
-# resolutions <- as.character(unlist(snakemake.config$chooser$resolutions))
-# params <- list(seurat="integrated_0")
 ```
 
 
@@ -96,11 +65,14 @@ scores_merged <- do.call("rbind", scores)
 # CR remove zeros in 'avg_sil' column, otherwise boot_median thorws error:
  # Error in bca.ci(boot.out, conf, index[1L], L = L, t = t.o, t0 = t0.o,  : 
  #  estimated adjustment 'w' is infinite 
-meds <- scores_merged %>%
+meds <- tryCatch(
+    expr={ scores_merged %>%
     group_by(res) %>%
     mutate(n_clusters=n()) %>%
     ungroup() %>%
-    group_by(res)
+    group_by(res) },
+    error=function(e) { NULL }
+)
 
 try_boot_median <- function(x){
   outs = tryCatch(
@@ -119,22 +91,24 @@ res_list = c()
 boot_list = list()
 n_clusters_list = c()
 
-all_res = unique(meds$res)
+all_res <- unique(meds$res)
+
+
 for (x in seq_along(all_res)) {
-  c_res = all_res[x]
-  c_meds = meds[meds$res == c_res,]
+  c_res <- all_res[x]
+  c_meds <- meds[meds$res == c_res,]
   
-  res_list[x] = c_res
+  res_list[x] <- c_res
   
   # if this keeps failing, use try/catch
   # return vector of length 3, names: c("low_med", "med", "high_med")
   
-  boot_list[[x]] = try_boot_median(c_meds$avg_sil)
+  boot_list[[x]] <- try_boot_median(c_meds$avg_sil)
 
-  n_clusters_list[x] = mean(c_meds$n_clusters)
+  n_clusters_list[x] <- mean(c_meds$n_clusters)
 }
 
-boot_list1 = lapply(boot_list, unlist)
+boot_list1 <- lapply(boot_list, unlist)
 
 # if all boot_median() inputs are virtually identical,
 # returns non-warning output:
@@ -148,28 +122,33 @@ boot_list1 = lapply(boot_list, unlist)
 # 
 # $high_med
 # NULL
-idx = sapply(seq_along(boot_list1), function(x) {
-  c_boot = boot_list1[[x]]
-  c_cond = any(is.na(c_boot)) || any(is.null(c_boot))
+
+
+idx <- sapply(seq_along(boot_list1), function(x) {
+  c_boot <- boot_list1[[x]]
+  c_cond <- any(is.na(c_boot)) || any(is.null(c_boot))
   return(c_cond)
 })
-idx_loc = which(idx)
+idx_loc <- tryCatch(
+    expr={ which(idx) },
+    error=function(e) { NULL }
+    )
 
 if (length(idx > 0)) {
-  boot_mat = do.call("rbind", boot_list1[!idx])
-  res_list = res_list[!idx]
-  n_clusters_list = n_clusters_list[!idx]
-  
-  # idy = which(boot_mat[,1] == min(boot_mat[,1]))
-  # boot_min = boot_mat[idy,1]
-  # boot_mins = rep(boot_min, 3)
-  # names(boot_mins) = colnames(boot_mat)
-  # 
-  # for (i in seq_along(idx_loc)) {
-  #   c_idx = idx_loc[i]
-  #   # print(i)
-  #   boot_list1[[c_idx]] = boot_mins
-  # }
+    boot_mat <- do.call("rbind", boot_list1[!idx])
+    res_list <- res_list[!idx]
+    n_clusters_list <- n_clusters_list[!idx]
+
+    # idy = which(boot_mat[,1] == min(boot_mat[,1]))
+    # boot_min = boot_mat[idy,1]
+    # boot_mins = rep(boot_min, 3)
+    # names(boot_mins) = colnames(boot_mat)
+    # 
+    # for (i in seq_along(idx_loc)) {
+    #   c_idx = idx_loc[i]
+    #   # print(i)
+    #   boot_list1[[c_idx]] = boot_mins
+    # }
 }
 
 if (length(idx_loc) == length(boot_list1) || nrow(boot_mat) == 0) {
@@ -235,45 +214,51 @@ meds <- as.data.frame(meds)
 
 ```{r plot, results='asis'}
 
-# And plot!
-ggplot(meds, aes(factor(res), med)) +
-  geom_crossbar(
-    aes(ymin = low_med, ymax = high_med),
-    fill = "grey",
-    size = 0.25
-  ) +
-  geom_hline(aes(yintercept = threshold), colour = "blue") +
-  geom_vline(aes(xintercept = as.character(choice)), colour = "red") +
-  geom_jitter(
-    data = scores_merged,
-    aes(factor(res), avg_sil),
-    size = 0.35,
-    width = 0.15
-  ) +
-  scale_x_discrete("Resolution") +
-  scale_y_continuous(
-    "Silhouette Score",
-    expand = c(0, 0),
-    limits = c(-1, 1),
-    breaks = seq(-1, 1, 0.25),
-    oob = scales::squish
-  ) +
-  cowplot::theme_minimal_hgrid() +
-  theme(
-    axis.title = element_text(size = 8),
-    axis.text = element_text(size = 7),
-    axis.line.x = element_line(colour = "black"),
-    axis.line.y = element_line(colour = "black"),
-    axis.ticks = element_line(colour = "black"),
-  )
+# Plot if the `meds` contains non-zero rows and columns
+if ( !(0 %in% dim(meds)) ) {
+    ggplot(meds, aes(factor(res), med)) +
+      geom_crossbar(
+        aes(ymin = low_med, ymax = high_med),
+        fill = "grey",
+        size = 0.25
+      ) +
+      geom_hline(aes(yintercept = threshold), colour = "blue") +
+      geom_vline(aes(xintercept = as.character(choice)), colour = "red") +
+      geom_jitter(
+        data = scores_merged,
+        aes(factor(res), avg_sil),
+        size = 0.35,
+        width = 0.15
+      ) +
+      scale_x_discrete("Resolution") +
+      scale_y_continuous(
+        "Silhouette Score",
+        expand = c(0, 0),
+        limits = c(-1, 1),
+        breaks = seq(-1, 1, 0.25),
+        oob = scales::squish
+      ) +
+      cowplot::theme_minimal_hgrid() +
+      theme(
+        axis.title = element_text(size = 8),
+        axis.text = element_text(size = 7),
+        axis.line.x = element_line(colour = "black"),
+        axis.line.y = element_line(colour = "black"),
+        axis.ticks = element_line(colour = "black"),
+      )
 
-ggsave(
-  filename = paste0(new_path, "/silhouette_distribution_plot.png"),
-  dpi = 300,
-  height = 3.5,
-  width = 3.5,
-  units = "in"
-)
+    ggsave(
+      filename = paste0(new_path, "/silhouette_distribution_plot.png"),
+      dpi = 300,
+      height = 3.5,
+      width = 3.5,
+      units = "in"
+    )
+
+} else {
+    # Skip plotting if the dimension of `meds` is zero
+    cat("No plot generated!")
+}
 
 ```
 
@@ -283,36 +268,40 @@ ggsave(
 
 # Finally, a dot plot of silhouette scores to help identify less robust clusters
 # The initial pipe is to order the clusters by silhouette score
-scores_merged %>%
-  dplyr::filter(res == choice) %>%
-  dplyr::arrange(dplyr::desc(avg_sil)) %>%
-  dplyr::mutate_at("cluster", ordered, levels = .$cluster) %>%
-  ggplot(aes(factor(cluster), avg_sil)) +
-    geom_point() +
-    scale_x_discrete("Cluster") +
-    scale_y_continuous(
-      "Silhouette Score",
-      expand = c(0, 0),
-      limits = c(-1, 1),
-      breaks = seq(-1, 1, 0.25),
-      oob = scales::squish
-    ) +
-    cowplot::theme_minimal_grid() +
-    theme(
-      axis.title = element_text(size = 8),
-      axis.text = element_text(size = 7),
-      axis.line.x = element_line(colour = "black"),
-      axis.line.y = element_line(colour = "black"),
-      axis.ticks = element_line(colour = "black"),
-    )
+if (!is.null(scores_merged)) {
+    scores_merged %>%
+      dplyr::filter(res == choice) %>%
+      dplyr::arrange(dplyr::desc(avg_sil)) %>%
+      dplyr::mutate_at("cluster", ordered, levels = .$cluster) %>%
+      ggplot(aes(factor(cluster), avg_sil)) +
+        geom_point() +
+        scale_x_discrete("Cluster") +
+        scale_y_continuous(
+          "Silhouette Score",
+          expand = c(0, 0),
+          limits = c(-1, 1),
+          breaks = seq(-1, 1, 0.25),
+          oob = scales::squish
+        ) +
+        cowplot::theme_minimal_grid() +
+        theme(
+          axis.title = element_text(size = 8),
+          axis.text = element_text(size = 7),
+          axis.line.x = element_line(colour = "black"),
+          axis.line.y = element_line(colour = "black"),
+          axis.ticks = element_line(colour = "black"),
+        )
 
-ggsave(
-  filename = paste0(new_path, "/silhouette_point_plot_", choice, ".png"),
-  dpi = 300,
-  height = 3.5,
-  width = 3.5,
-  units = "in"
-)
+    ggsave(
+      filename = paste0(new_path, "/silhouette_point_plot_", choice, ".png"),
+      dpi = 300,
+      height = 3.5,
+      width = 3.5,
+      units = "in"
+    )
+} else {
+    cat("No plot generated!")
+}
 
 
 ```
@@ -331,22 +320,26 @@ grp <- readRDS(paste0(results_path, "/frequency_grouped_", choice, ".rds"))
 
 
 # As the data is symmetrical, we do not need the upper triangle
-grp <- grp %>%
-    spread(key='cell_2', value='avg_percent') %>%
-    column_to_rownames(var="cell_1") %>%
-    select(str_sort(colnames(.), numeric = T))
+if ( !is.null(dim(grp)) ) {
+    grp <- grp %>%
+        spread(key='cell_2', value='avg_percent') %>%
+        column_to_rownames(var="cell_1") %>%
+        select(str_sort(colnames(.), numeric = T))
 
-grp[lower.tri(grp)] <- NA
+    grp[lower.tri(grp)] <- NA
 
-grp <- grp %>%
-    rownames_to_column(var="cell_1") %>%
-    gather(key="cell_2", value="avg_percent", -cell_1)
+    grp <- grp %>%
+        rownames_to_column(var="cell_1") %>%
+        gather(key="cell_2", value="avg_percent", -cell_1)
 
 
 
-grp$cell_1 <- factor(grp$cell_1, levels = unique(grp$cell_1))
-grp$cell_2 <- factor(grp$cell_2, levels = unique(grp$cell_1))
-
+    grp$cell_1 <- factor(grp$cell_1, levels = unique(grp$cell_1))
+    grp$cell_2 <- factor(grp$cell_2, levels = unique(grp$cell_1))
+} else {
+    grp <- NULL
+    print("Results returned NULL!")
+}
 
 ```
 
@@ -355,41 +348,45 @@ grp$cell_2 <- factor(grp$cell_2, levels = unique(grp$cell_1))
 ```{r heatmap, results='asis'}
 
 # And plot!
-plot <- ggplot(grp, aes(factor(cell_1), cell_2, fill = avg_percent)) +
-  geom_tile() +
-  scale_x_discrete("Cluster", expand = c(0, 0)) +
-  scale_y_discrete(
-    "Cluster",
-    limits = rev(levels(grp$cell_2)),
-    expand = c(0, 0)
-  ) +
-  scale_fill_distiller(
-    " ",
-    limits = c(0, 1),
-    breaks = c(0, 0.5, 1),
-    palette = "RdYlBu",
-    na.value = "white"
-  ) +
-  coord_fixed() +
-  theme(
-    axis.ticks = element_line(colour = "black"),
-    axis.text = element_text(size = 6),
-    axis.title = element_text(size = 8),
-    legend.text = element_text(size = 7),
-    legend.position = c(0.9, 0.9)
-  ) +
-  guides(fill = guide_colorbar(barheight = 3, barwidth = 1))
+if ( !is.null(grp) ) {
+    plot <- ggplot(grp, aes(factor(cell_1), cell_2, fill = avg_percent)) +
+      geom_tile() +
+      scale_x_discrete("Cluster", expand = c(0, 0)) +
+      scale_y_discrete(
+        "Cluster",
+        limits = rev(levels(grp$cell_2)),
+        expand = c(0, 0)
+      ) +
+      scale_fill_distiller(
+        " ",
+        limits = c(0, 1),
+        breaks = c(0, 0.5, 1),
+        palette = "RdYlBu",
+        na.value = "white"
+      ) +
+      coord_fixed() +
+      theme(
+        axis.ticks = element_line(colour = "black"),
+        axis.text = element_text(size = 6),
+        axis.title = element_text(size = 8),
+        legend.text = element_text(size = 7),
+        legend.position = c(0.9, 0.9)
+      ) +
+      guides(fill = guide_colorbar(barheight = 3, barwidth = 1))
 
-ggsave(
-  plot = plot,
-  filename = paste0(new_path, "/coclustering_heatmap_", choice, ".png"),
-  dpi = 300,
-  height = 3.5,
-  width = 3.5,
-  units = "in"
-)
+    ggsave(
+      plot = plot,
+      filename = paste0(new_path, "/coclustering_heatmap_", choice, ".png"),
+      dpi = 300,
+      height = 3.5,
+      width = 3.5,
+      units = "in"
+    )
 
-plot
+    print(plot)
+} else {
+    cat("No heatmap generated!")
+}
 
 ```
 
@@ -404,12 +401,15 @@ obj <- readRDS(paste0(results_path, "/seurat_obj_", choice, ".rds"))
 
 # Let's add the silhouette scores to the Seurat object!
 sil_scores <- readRDS(paste0(results_path, "/silhouette_", choice, ".rds"))
-sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
 
 
-
-colnames(sil_scores) <- c("sil_score")
-obj <- AddMetaData(obj, metadata = sil_scores)
+if (!is.null(sil_scores)) {
+    sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
+    colnames(sil_scores) <- c("sil_score")
+    obj <- AddMetaData(obj, metadata = sil_scores)
+} else {
+    print("Silhouette unavailable!")
+}
 
 # Let's visualise the selected cluster
 # If your data has known  clusters, you could also visualise those!
@@ -487,33 +487,36 @@ plot
 ```{r umap_silscores, results='asis'}
 
 # We also find it useful to visualise the silhouette scores on the UMAP!
-plot <- FeaturePlot(
-  obj,
-  "sil_score",
-  reduction = "umap",
-  pt.size = 0.5,
-  min.cutoff = -1,
-  max.cutoff = 1
-) +
-  scale_colour_distiller(
-    palette = "RdYlBu",
-    labels = c(-1, 0, 1),
-    breaks = c(-1, 0, 1),
-    limits = c(-1, 1)
-  )
+if (!is.null(sil_scores)) {
+    plot <- FeaturePlot(
+      obj,
+      "sil_score",
+      reduction = "umap",
+      pt.size = 0.5,
+      min.cutoff = -1,
+      max.cutoff = 1
+    ) +
+      scale_colour_distiller(
+        palette = "RdYlBu",
+        labels = c(-1, 0, 1),
+        breaks = c(-1, 0, 1),
+        limits = c(-1, 1)
+      )
 
+    print(plot)
 
-plot
+    ggsave(
+      plot = plot,
+      filename = paste0(new_path, "/", choice, "_silhouette_umap.png"),
+      dpi = 300,
+      height = 5,
+      width = 5,
+      units = "in"
+    )
 
-ggsave(
-  plot = plot,
-  filename = paste0(new_path, "/", choice, "_silhouette_umap.png"),
-  dpi = 300,
-  height = 5,
-  width = 5,
-  units = "in"
-)
-
+} else {
+    cat("No plot generated!")
+}
 ```
 
 ## Save the clustered seurat object

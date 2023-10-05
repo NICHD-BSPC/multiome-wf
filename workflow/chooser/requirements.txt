@@ -164,3 +164,4 @@ bioconductor-biobase
 bioconductor-biocgenerics
 bioconductor-multtest
 r-signac
+umap-learn

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="multiome"
+#SBATCH --job-name="multiome-wf"
 #SBATCH --partition="norm"
 #SBATCH --time=24:00:00
 
@@ -8,38 +8,59 @@ set -euo pipefail
 # Before you start,
 # CHECK CONFIGFILE PATH!!!
 
+
 # make logdir
 if [[ ! -e logs ]]; then mkdir -p logs; fi
+
+
+# Prerequisite for biowulf users
+# 1. Run `git clone https://github.com/NIH-HPC/snakemake_profile.git /data/$USER/snakemake_profile`
+# 2. Add `$MULTIOMEWF_SNAKEMAKE_PROFILE="/data/$USER/snakemake_profile"` to your bash config file (`~/.bashrc`)
+# 3. Run `source ~/.bashrc`
+# 4. Ensure to set `--configfile` to correct path 
+
+# use MULTIOMEWF_SNAKEMAKE_PROFILE if one is set in the environment variables
+if [ -z "$MULTIOMEWF_SNAKEMAKE_PROFILE" ]; then
+    if [ -z "$SNAKEMAKE_PROFILE" ]; then
+        # no snakemake profile found
+        PROFILE_CMD=""
+        echo "No environment variable SNAKEMAKE_PROFILE or MULTIOMEWF_SNAKEMAKE_PROFILE found."
+        echo "snakemake will run in single job."
+    else
+        # generic SNAKEMAKE_PROFILE found
+        PROFILE_CMD="--profile $SNAKEMAKE_PROFILE"
+    fi
+else
+    # MULTIOME_SNAKEMAKE_PROFILE found, this takes priority if both profile variables are set
+    PROFILE_CMD="--profile $MULTIOMEWF_SNAKEMAKE_PROFILE"
+fi
 
 # Run snakemake
 (
     time snakemake \
-    --snakefile Snakefile \
     -p \
     --directory $PWD \
     -k \
+    --restart-times 3 \
     --rerun-incomplete \
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
-    --cluster-config config/other-setup/clusterconfig.yaml \
-    --cluster 'sbatch {cluster.prefix} --cpus-per-task={threads}  --output=logs/{rule}.o.%j --error=logs/{rule}.e.%j' \
     --use-conda \
     --configfile config/multiome-config/config.yaml \
+    $PROFILE_CMD \
     --latency-wait=300 \
     --max-jobs-per-second 1 \
     --max-status-checks-per-second 0.01 \
     "$@"
     ) > "Snakefile.log" 2>&1
 
-set +u
-SNAKE_PID=$!
-
-finish(){
-    echo 'Stopping running snakemake job.'
-    kill -SIGINT $SNAKE_PID
-    exit 0
-}
-trap finish SIGTERM
-
-wait $SNAKE_PID
-
+# SNAKE_PID=$!
+# 
+# finish(){
+    # echo 'Stopping running snakemake job.'
+    # kill -SIGINT $SNAKE_PID
+    # exit 0
+# }
+# trap finish SIGTERM
+# 
+# wait $SNAKE_PID
