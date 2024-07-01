@@ -286,6 +286,10 @@ Integration
 
         See :ref:`samples-table` for more details about how metadata columns are detected.
 
+    ``n_dataset`` field
+
+        integer, the number of datasets to be integrated if more than 2 datasets are integrated.
+
     ``reference`` field
 
         dict. Information about the sample(s) to use as a reference during intergation.
@@ -329,6 +333,7 @@ Integration
           groups:
             integrated_0:
               split_by: meta_batch
+              n_dataset: 4
               reference:
                 label: batch1
                 assay_name: Gene.Expression

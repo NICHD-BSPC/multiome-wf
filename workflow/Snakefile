@@ -699,14 +699,16 @@ rule integrate:
         seurat_out = "results/integrate/{seurat}.rds",
     threads: 32
     resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 24
-        # mem_mb=1024 * 1000,
-        # disk_mb=1024 * 500,
+        # mem_mb=1024 * 100,
+        # disk_mb=1024 * 50,
         # runtime=60 * 24
+        mem_mb=1024 * 300,
+        disk_mb=1024 * 150,
+        runtime=60 * 24
     shell:
-        """Rscript -e 'params = list(
+        """
+        ulimit -u 8192;
+        Rscript -e 'params = list(
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 seurat_out = "{output.seurat_out}" );
@@ -868,14 +870,16 @@ rule weighted_nn:
         scriptdir = "scripts",
     threads: 12
     resources:
-        mem_mb=1024 * 100,
+        mem_mb=1024 * 250,
         disk_mb=1024 * 50,
         runtime=60 * 12
         # mem_mb=1024 * 600,
         # disk_mb=1024 * 300,
         # runtime=60 * 12
     shell:
-        """Rscript -e 'params = list(
+        """
+        ulimit -u 8192;
+        Rscript -e 'params = list(
                 seurats = "{input.seurats}",
                 config = "{input.config}",
                 seurat_out = "{output.seurat_out}",
@@ -904,14 +908,16 @@ rule diff_analysis:
         intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
     threads: 32
     resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 24
-        # mem_mb=1024 * 1000,
-        # disk_mb=1024 * 500,
+        # mem_mb=1024 * 100,
+        # disk_mb=1024 * 50,
         # runtime=60 * 24
+        mem_mb=1024 * 500,
+        disk_mb=1024 * 250,
+        runtime=60 * 24
     shell:
-        """Rscript -e 'params = list(
+        """
+        ulimit -u 8192;
+        Rscript -e 'params = list(
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 markers_out = "{output.markers_out}",

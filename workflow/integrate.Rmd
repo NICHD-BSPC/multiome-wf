@@ -82,6 +82,7 @@ atac_integrate_embeddings <- config[['integrate']][['atac_integrate_embeddings']
 We'll iterate over a single group listed in the 'normalize' section of the yaml config file (Snakemake will choose which assay to use right now). For every group found, we'll look for the selected assay and normalize using a user selected method.
 
 ```{r group}
+
 target <- basename(params[['seurat_out']])
 target <- gsub("^(.*).rds", "\\1", target)
 print("Integrating for group:")
@@ -113,14 +114,21 @@ We'll pick a metadata column in the Seurat object, split the input Seurat object
 
 ```{r params_list}
 split_by <- group[['split_by']]
+n_dataset <- group[['n_dataset']]
 	
-ref_label <- group[['reference']][['label']]
-query_label <- group[['query']][['label']]
-features_use <- c(ref_label, query_label)
-    
-ref_assay <- group[['reference']][['assay_name']]
-query_assay <- group[['query']][['assay_name']]
-assays <- c(ref_assay, query_assay)
+
+# Only for pairwise integration
+if (n_dataset == 2) {
+    ref_label <- group[['reference']][['label']]
+    query_label <- group[['query']][['label']]
+    features_use <- c(ref_label, query_label)
+        
+    ref_assay <- group[['reference']][['assay_name']]
+    query_assay <- group[['query']][['assay_name']]
+    assays <- c(ref_assay, query_assay)
+} else {
+    assays <- rep(group[['reference']][['assay_name']], n_dataset)
+}
     
 # new_assay_name = group[['new_slot_name']]
 norm_method <- group[['norm_method']]
@@ -151,24 +159,26 @@ if (length(seurat_list) == 1) {
 print('list names before subsetting')
 print(seurat_list)
 
-# resulting list from 'SplitObject' may have more elements than want to integrate
-# for each metadata column, subset list for metadata values
-seurat_list <- seurat_list[features_use]
+if (n_dataset == 2) {
+    # resulting list from 'SplitObject' may have more elements than want to integrate
+    # for each metadata column, subset list for metadata values
+    seurat_list <- seurat_list[features_use]
 
-print('list names after subsetting')
-print(seurat_list)
-print(names(seurat_list))
+    print('list names after subsetting')
+    print(seurat_list)
+    print(names(seurat_list))
 
-print('setting default assays')
-assays
+    print('setting default assays')
+    assays
 
-seurat_list <- lapply(seq_along(seurat_list), function(x) {
-    seurat_obj <- seurat_list[[x]]
-    DefaultAssay(seurat_obj) <- assays[x]
-    return(seurat_obj)
-})
+    seurat_list <- lapply(seq_along(seurat_list), function(x) {
+        seurat_obj <- seurat_list[[x]]
+        DefaultAssay(seurat_obj) <- assays[x]
+        return(seurat_obj)
+    })
 
-names(seurat_list) <- features_use
+    names(seurat_list) <- features_use
+}
 
 print('list names after setting default assays')
 print(seurat_list)
@@ -176,6 +186,7 @@ print(seurat_list)
 
 
 ```{r normalize}
+
 # Normalize data
 if (norm_method == 'log') {
     print("Performing log normalization.")
@@ -258,27 +269,23 @@ if (norm_method == 'log') {
     
     # sctransform::vst requires cells (columns) sum up to a value > 0
     # https://github.com/ChristophH/sctransform/issues/86
-    seurat_list <- lapply(seq_along(seurat_list), function(x) {
-        seurat_obj <- seurat_list[[x]]
-        
-        assay <- assays[x]
-        cell_counts <- colSums(seurat_obj[[assay]]@counts)
-        idx <- which(cell_counts == 0)
-        
-        seurat_obj <- subset(seurat_obj, cells = idx, invert = TRUE)
-    })
-    
     print('prepping SCTransform.')
     seurat_list <- lapply(seq_along(seurat_list), function(x) {
         seurat_obj <- seurat_list[[x]]
         
-        assay = assays[x]
+        assay <- assays[x]
+        # Remove zero-counted cells
+        cell_counts <- colSums(seurat_obj[[assay]]@counts)
+        idx <- which(cell_counts == 0)
+        seurat_obj <- subset(seurat_obj, cells = idx, invert = TRUE)
+        # Run SCTransform
         seurat_obj <- SCTransform(
             object = seurat_obj,
             assay = assay
             )
         return(seurat_obj)
     })
+    
     
     print('Finding integration features.')
     features <- SelectIntegrationFeatures(
@@ -413,7 +420,7 @@ if (norm_method == "log") {
 
 } else if (norm_method == "sct") {
     print("Performing SCT integration.")
-    
+
     anchors <- FindIntegrationAnchors(
         object.list = seurat_list,
         dims = integrate_dims,
@@ -445,7 +452,6 @@ if (norm_method == "log") {
     if (atac_integrate_embeddings) {
         print("Integrating embeddings.")
         # integrating only dim reduc embringings is more efficient for sparse ATAC matrices
-        
         anchors <- FindIntegrationAnchors(
             object.list = seurat_list,
             anchor.features = rownames(seurat_list[[1]]),
@@ -457,7 +463,6 @@ if (norm_method == "log") {
         
         # integrate LSI embeddings
         # reduction_name = paste0(tolower(new_assay_name), '_lsi')
-
 
         reduction_name = 'integrated_lsi'
         integrated <- IntegrateEmbeddings(
@@ -533,7 +538,6 @@ ElbowPlot(object = integrated, ndims = max_comps, reduction = reduction_name)
 ## Save Seurat object
 
 ```{r save}
-
 saveRDS(object=integrated, file=params[['seurat_out']])
 print('Done saving list of seurat objects.')
 ```
