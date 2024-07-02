@@ -699,12 +699,12 @@ rule integrate:
         seurat_out = "results/integrate/{seurat}.rds",
     threads: 32
     resources:
-        # mem_mb=1024 * 100,
-        # disk_mb=1024 * 50,
-        # runtime=60 * 24
-        mem_mb=1024 * 300,
-        disk_mb=1024 * 150,
-        runtime=60 * 24
+          mem_mb=1024 * 100,
+          disk_mb=1024 * 50,
+          runtime=60 * 24
+#         mem_mb=1024 * 300,
+#         disk_mb=1024 * 150,
+#         runtime=60 * 24
     shell:
         """
         ulimit -u 8192;
