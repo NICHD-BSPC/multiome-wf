@@ -134,7 +134,7 @@ integrate:
   groups:
     integrated_0:
       # split_by: meta_batch
-      split_by: meta_modality # this has to match the column name of your metadata indicating datasets for integration
+      split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integration
       n_dataset: 4
       reference:
         label: batch1
@@ -148,7 +148,7 @@ integrate:
         - 30
     integrated_1:
       # split_by: meta_batch
-      split_by: meta_modality
+      split_by: meta_geno
       n_dataset: 4
       reference:
         label: batch1
@@ -164,7 +164,7 @@ integrate:
 # Is your input a toy dataset?
 # This question is required to adjust the number of neighbors when integrating datasets
 dataset_size:
-  toydataset: false  # true or false
+  toydataset: true  # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # check `https://satijalab.org/seurat/reference/integrateembeddings`
 
