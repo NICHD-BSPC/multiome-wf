@@ -40,3 +40,55 @@ multiome-wf
     - ``docs/configuration/config-yaml.rst`` updated
 
 
+2024-07-02
+----------
+
+@Mira0507
+
+- conda env tested
+    
+    .. code-block:: yaml
+
+        macs2
+        graphviz
+        r-tidyverse
+        r-base
+        r-seurat
+        r-seuratobject
+        r-signac
+        r-matrix
+        snakemake<8
+        r-hdf5r
+        r-ggplot2
+        r-ggrepel
+        r-plotly
+        r-patchwork
+        r-devtools
+        r-remotes
+        bioconductor-bsgenome.hsapiens.ucsc.hg38
+        bioconductor-biovizbase
+        bioconductor-ensembldb
+        bioconductor-ensdb.hsapiens.v86
+        bioconductor-limma
+        bioconductor-ensdb.mmusculus.v79
+        bioconductor-genomicranges
+        samtools
+        r-data.table
+        bioconductor-rhdf5
+        python
+        pandas
+        rst2html5
+        alabaster
+
+2024-07-03
+----------
+
+@Mira0507
+
+- scripts updated
+    - ``workflow/Snakefile``: ``resources`` in ``diff_analysis`` rule
+    - ``workflow/create_seurat.Rmd``
+        - code cleaned
+        - cleaner printing in rendered files
+    - ``workflow/qc.Rmd``
+        - cleaner printing in rendered files
