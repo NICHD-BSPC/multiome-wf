@@ -1,96 +1,3 @@
-# # read in features from each modality (aka 'feature type') from an h5 file
-# # if more than one feature type / modality, returns a list of modalities, 
-# # each list element containing the feature names for that modality
-# # else returns a character vector containing feature names for the modality.
-# read_10X_h5_features <- function(filename, use.names = TRUE, unique.features = TRUE) {
-# 	if (!requireNamespace('hdf5r', quietly = TRUE)) {
-# 		stop("Please install hdf5r to read HDF5 files")
-# 	}
-# 	if (!file.exists(filename)) {
-# 		stop("File not found")
-# 	}
-# 	infile <- hdf5r::H5File$new(filename = filename, mode = 'r')
-# 	genomes <- names(x = infile)
-# 	output <- list()
-# 	if (hdf5r::existsGroup(infile, 'matrix')) {
-# 		# cellranger version 3
-# 		if (use.names) {
-# 			feature_slot <- 'features/name'
-# 		} else {
-# 			feature_slot <- 'features/id'
-# 		}
-# 	} else {
-# 		if (use.names) {
-# 			feature_slot <- 'gene_names'
-# 		} else {
-# 			feature_slot <- 'genes'
-# 		}
-# 	}
-# 	for (genome in genomes) {
-# 		counts <- infile[[paste0(genome, '/data')]]
-# 		indices <- infile[[paste0(genome, '/indices')]]
-# 		indptr <- infile[[paste0(genome, '/indptr')]]
-# 		shp <- infile[[paste0(genome, '/shape')]]
-# 		features <- infile[[paste0(genome, '/', feature_slot)]][]
-# 		barcodes <- infile[[paste0(genome, '/barcodes')]]
-# 		sparse.mat <- Matrix::sparseMatrix(
-# 			i = indices[] + 1,
-# 			p = indptr[],
-# 			x = as.numeric(x = counts[]),
-# 			dims = shp[],
-# 			giveCsparse = FALSE
-# 		)
-# 		if (unique.features) {
-# 			features <- make.unique(names = features)
-# 		}
-# 		# Split v3 multimodal
-# 		if (infile$exists(name = paste0(genome, '/features'))) {
-# 			types <- infile[[paste0(genome, '/features/feature_type')]][]
-# 			types.unique <- unique(x = types)
-# 			if (length(x = types.unique) > 1) {
-# 				message("Genome ", genome, " has multiple modalities, returning a list of matrices for this genome")
-				
-# 				features = sapply(
-# 						X = types.unique,
-# 						FUN = function(x) {
-# 							return(features[which(x = types == x)])
-# 						},
-# 						simplify = FALSE,
-# 						USE.NAMES = TRUE
-# 					)
-# 			}
-# 		}
-# 		output[[genome]] <- features
-# 	}
-# 	infile$close_all()
-# 	if (length(x = output) == 1) {
-# 		return(output[[genome]])
-# 	} else{
-# 		return(output)
-# 	}
-# }
-
-# # read in named list of 10X Genomics matrices
-# # format must be: Assay:Path/to/matrix/dir
-# # Ex: data_dir = 'Peaks:Path/to/matrix/dir'
-# # returns a list containing a character vector of feature names and character vector of paths to 10X matrices
-# get_10X_feats_and_dirs = function(data_dir) {
-# 	tenx_paths = strsplit(unlist(strsplit(data_dir, ',')), ':')
-	
-# 	tenx_names = lapply(seq_along(tenx_paths), function(x) {
-# 		feature_name = tenx_paths[[x]][1]
-# 	})
-# 	tenx_names = unlist(tenx_names)
-	
-# 	tenx_dir = lapply(seq_along(tenx_paths), function(x) {
-# 		feature_name = tenx_paths[[x]][2]
-# 	})
-# 	tenx_dir = unlist(tenx_dir)
-	
-# 	tenx_list = list(feature_type = tenx_names, feature_dir = tenx_dir)
-# 	return(tenx_list)
-# }
-
 # Addapted from Seurat::Read10X()
 # Now reads in all cellranger/cellranger-atac sparse matrices
 # If only one 'feature type' is included, returns sparse matrix, else returns named list of sparse matrices
@@ -282,7 +189,7 @@ load_10X_features = function(input_path, feature_list = NULL) {
 # lower: user defined hard cutoff for lower limit. If set, 'iqr' and 'sd' methods ignored
 # upper: user defined hard cutoff for upper limit. If set, 'iqr' and 'sd' methods ignored
 # na_rm: if NAs present, exclude prior to calculations?
-find_outliers = function(
+find_outliers <- function(
 	counts,
 	method = 'sd',
 	k = 2.2,
@@ -291,57 +198,52 @@ find_outliers = function(
 	upper = NULL,
 	na_rm = TRUE
 ) {
-	if (all(unique(counts) == 0)) {
-		print('Counts vector all zeros. Returning NA')
-		return(NA)
-	}
+
 	if (method == 'iqr') {
 		# Lower Q
-		q1 = quantile(counts, 0.25, na.rm = na_rm)
+		q1 <- quantile(counts, 0.25, na.rm = na_rm)
 		# q1.s1
 		
 		# Upper Q:
-		q3 = quantile(counts, 0.75, na.rm = na_rm)
+		q3 <- quantile(counts, 0.75, na.rm = na_rm)
 		# q3.s1
 		
 		# k * IQR:
-		whisker = k * IQR(counts, na.rm = na_rm)
+		whisker <- k * IQR(counts, na.rm = na_rm)
 
-		lower_limit = q1 - whisker
-		upper_limit = q3 + whisker
+		lower_limit <- q1 - whisker
+		upper_limit <- q3 + whisker
 	} else if (method == 'sd') {
-		u = mean(counts, na.rm = na_rm)
-		s = sigma * sd(counts, na.rm = na_rm)
+		u <- mean(counts, na.rm = na_rm)
+		s <- sigma * sd(counts, na.rm = na_rm)
 
-		lower_limit = u-s
-		upper_limit = u+s
+		lower_limit <- u-s
+		upper_limit <- u+s
 	}
 	
 	if (is.null(lower)) {
 		if ( lower_limit <= 0 ) {
 			# want > 0, since some functions break with counts == 0
-			feature_min = 0
+			feature_min <- 0
 		} else {
-			feature_min = lower_limit
+			feature_min <- lower_limit
 		}
 	} else {
-		feature_min = lower
+		feature_min <- lower
 	}
 
 	if (is.null(upper)) {
 		if ( upper_limit >= max(counts, na.rm = na_rm) ) {
-			feature_max = max(counts, na.rm = na_rm)
+			feature_max <- max(counts, na.rm = na_rm)
 		} else {
-			feature_max = upper_limit
+			feature_max <- upper_limit
 		}
 	} else {
-		feature_max = upper
+		feature_max <- upper
 	}
 
-	min_max = c(feature_min, feature_max)
-	# print(min_max)
-	names(min_max) = c("min", "max")
-	# print(min_max)
+	min_max <- c(feature_min, feature_max)
+	names(min_max) <- c("min", "max")
 	return(min_max)
 }
 
