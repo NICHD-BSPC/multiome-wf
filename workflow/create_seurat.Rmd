@@ -44,23 +44,6 @@ plan("multicore", workers=ncpus)
 
 ```
 
-
-```{r config}
-params <- list(
-    wc_sample = "toydataset1",
-    wc_replicate = "nan",
-    tenx = "../test_data/tenx_multiome_toy/toy_matrix1.rds",
-    annotation = "results/build_annotation/annotation.rds",
-    seurat = "results/create_seurat/toydataset1-nan.seurat_raw.rds",
-    tenx_type = "RDS_Multiple_Assays",
-    scriptdir = "scripts",
-    sample_tsv = "config/multiome-config/samples.tsv",
-    aggregates_tsv = "config/multiome-config/aggregates.tsv",
-    assays_tsv = "config/multiome-config/assays.tsv"
-    )
-```
-
-
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
