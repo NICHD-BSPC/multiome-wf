@@ -10,3 +10,5 @@ workflow/Snakefile.log
 *.pdf
 test_data/tenx_atac/
 test_data/tenx_rna/
+*.DS_Store
+env*/
