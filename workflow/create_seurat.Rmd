@@ -2,7 +2,6 @@
 title: "Creating Seurat"
 output:
     html_document:
-            keep_md: yes
             toc: true
             toc_float: true
             code_folding: hide
@@ -11,12 +10,13 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(dplyr)
+library(purrr)
 library(Signac)
 library(Seurat)
 library(GenomeInfoDb)
@@ -45,6 +45,20 @@ plan("multicore", workers=ncpus)
 ```
 
 
+```{r config}
+params <- list(
+    wc_sample = "toydataset1",
+    wc_replicate = "nan",
+    tenx = "../test_data/tenx_multiome_toy/toy_matrix1.rds",
+    annotation = "results/build_annotation/annotation.rds",
+    seurat = "results/create_seurat/toydataset1-nan.seurat_raw.rds",
+    tenx_type = "RDS_Multiple_Assays",
+    scriptdir = "scripts",
+    sample_tsv = "config/multiome-config/samples.tsv",
+    aggregates_tsv = "config/multiome-config/aggregates.tsv",
+    assays_tsv = "config/multiome-config/assays.tsv"
+    )
+```
 
 
 ## Set variables
@@ -52,12 +66,12 @@ plan("multicore", workers=ncpus)
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
 ```{r variables}
+
 # input matrix paths
 tenx_features <- unlist(strsplit(params[['tenx_type']], " "))
 tenx_inputs <- unlist(strsplit(params[['tenx']], " "))
 
-print("Loading the following multi-assay or single-assay matrices.")
-print(tenx_features)
+print(paste("Loading the following multi-assay or single-assay matrices:", tenx_features))
 
 
 # get sample/replicate info, and load all tsv files
@@ -68,15 +82,16 @@ wc_replicate <- params[['wc_replicate']]
 sample_info <- readr::read_delim(params[['sample_tsv']], 
                           delim = "\t", escape_double = FALSE, 
                           trim_ws = TRUE)
-# select row that has sample and replicate info
+# select row that match sample and replicate info
 if (wc_replicate == "nan") {
-    idx = sample_info[['sample']] == wc_sample
+    idx <- sample_info[['sample']] == wc_sample
 } else {
-    idx = sample_info[['sample']] == wc_sample & 
+    idx <- sample_info[['sample']] == wc_sample & 
                               sample_info[['replicate']] == wc_replicate
 }
 sample_info <- sample_info[idx, ]
-print(sample_info)
+print("Sample table:")
+print(as.data.frame(sample_info))
 
 # aggregates.tsv info
 if (params[['aggregates_tsv']] != "") {
@@ -97,13 +112,14 @@ if (params[['aggregates_tsv']] != "") {
     } else {
         # select row that has sample and replicate info
         if (wc_replicate == "nan") {
-            idx = aggregates_info[['sample']] == wc_sample
+            idx <- aggregates_info[['sample']] == wc_sample
         } else {
-            idx = aggregates_info[['sample']] == wc_sample & 
+            idx <- aggregates_info[['sample']] == wc_sample & 
                 aggregates_info[['replicate']] == wc_replicate
         }
-        aggregates_info = aggregates_info[idx, ]
-        print(aggregates_info)
+        aggregates_info <- aggregates_info[idx, ]
+        print("Aggregates table:")
+        print(as.data.frame(aggregates_info))
     }
 }
 
@@ -112,8 +128,8 @@ if (params[['assays_tsv']] != "") {
     assays_info <- readr::read_delim(params[['assays_tsv']],
                                      delim = "\t", escape_double = FALSE,
                                      trim_ws = TRUE)
-    
-    cols = c("sample", "replicate", "assay.name", "path")
+
+    cols <- c("sample", "replicate", "assay.name", "path")
     if (nrow(assays_info) == 0) {
         print("Empty assays.tsv file found!")
         print("Please fix or delete assays.tsv")
@@ -127,27 +143,26 @@ if (params[['assays_tsv']] != "") {
     } else {
         # select row that has sample and replicate info
         if (wc_replicate == "nan") {
-            idx = assays_info[['sample']] == wc_sample
+            idx <- assays_info[['sample']] == wc_sample
         } else {
-            idx = assays_info[['sample']] == wc_sample & 
+            idx <- assays_info[['sample']] == wc_sample & 
                 assays_info[['replicate']] == wc_replicate
         }
-        assays_info = assays_info[idx, ]
-        assays_info = na.omit(assays_info)
-        print(assays_info)
+        assays_info <- assays_info[idx, ]
+        assays_info <- na.omit(assays_info)
     }
-    
+
     # append custom count matrices if present
     if (nrow(assays_info) > 0) {
-        tenx_features = c(tenx_features, assays_info[['assay.name']])
-        tenx_inputs = c(tenx_inputs, assays_info[['path']])
+        tenx_features <- c(tenx_features, assays_info[['assay.name']])
+        tenx_inputs <- c(tenx_inputs, assays_info[['path']])
     }
 }
 
 
 # load annotation file
 annotation <- readRDS(params[['annotation']])
-cat('Annotation object: \n')
+print('Annotation object:')
 print(annotation)
 ```
 
@@ -165,7 +180,7 @@ tenx_data <- lapply(seq_along(tenx_features), function(x) {
     tenx_feature <- tenx_features[x]
     tenx_input <- tenx_inputs[x]
     
-    cat('reading in:', tenx_feature, 'matrix from path:', tenx_input, '\n')
+    print(paste('Reading in', tenx_feature, 'matrix from path:', tenx_input))
     if (grepl('.h5', tenx_input)) {
         tenx_data <- Seurat::Read10X_h5(filename = tenx_input)
     } else if (grepl('.rds', tenx_input)) {
@@ -178,27 +193,27 @@ tenx_data <- lapply(seq_along(tenx_features), function(x) {
     }
     
     if (class(tenx_data) != 'list') {
-	tenx_data = list(tenx_data)
+        tenx_data <- list(tenx_data)
     }
     
     # assumes reading in only one 10X matrix that is coerced by Seurat 
     # into sparse matrix
     if (is.null(names(tenx_data)) || length(names(tenx_data)) == 0) {
-      if (length(tenx_data) == 1) {
-        if (tenx_feature == "HDF5_Multiple_Assays" || tenx_feature == "RDS_Multiple_Assays") {
-          cat("\nOne of the files in either HDF5 or RDS columns of 'samples.tsv' only contains a single cell-by-feature matrix!\n\n")
-          cat("Files listed in HDF5 and RDS columns of 'samples.tsv' are for multi-assay files!\n")
-          cat("HDF5 file heirarchy must use 10X Genomics cellranger compatible format.\n")
-          cat("RDS must be a named list of 2 or more 'dgCMatrix' objects, list names corresponding to assay type.\n\n")
-          cat("If cellranger (or similar program) generated the single assay cell-by-feature matrix, please move to any of the following columns in 'samples.tsv': 'Gene.Express', 'Peaks' and/or 'TF' or add to 'assays.tsv'.\n\n")
-          cat("Quiting.\n")
-          q(save = "no")
-        } else {
-          names(tenx_data) <- tenx_feature
+        if (length(tenx_data) == 1) {
+            if (tenx_feature == "HDF5_Multiple_Assays" || tenx_feature == "RDS_Multiple_Assays") {
+                cat("\nOne of the files in either HDF5 or RDS columns of 'samples.tsv' only contains a single cell-by-feature matrix!\n\n")
+                cat("Files listed in HDF5 and RDS columns of 'samples.tsv' are for multi-assay files!\n")
+                cat("HDF5 file heirarchy must use 10X Genomics cellranger compatible format.\n")
+                cat("RDS must be a named list of 2 or more 'dgCMatrix' objects, list names corresponding to assay type.\n\n")
+                cat("If cellranger (or similar program) generated the single assay cell-by-feature matrix, please move to any of the following columns in 'samples.tsv': 'Gene.Express', 'Peaks' and/or 'TF' or add to 'assays.tsv'.\n\n")
+                cat("Quiting.\n")
+                q(save = "no")
+            } else {
+                names(tenx_data) <- tenx_feature
+            }
         }
-      }
     }
-    
+
     return(tenx_data)
 })
 
@@ -209,15 +224,14 @@ tenx_data <- unlist(tenx_data, recursive = FALSE)
 # assay names must be unique per sample
 # e.g. can't read in RNA mat from HDF5 and Gene.Expression cols in 'samples.tsv'
 if (any(duplicated(names(tenx_data)))) {
-    cat("Can't have input matrices for the same assay list in multiple columns of 'samples.tsv'!\n\n")
-    cat("Found duplicate input matrices for the following assays:\n")
+    print("Can't have input matrices for the same assay list in multiple columns of 'samples.tsv'!")
+    print("Found duplicate input matrices for the following assays:\n")
     print(names(tenx_data)[duplicated(names(tenx_data))])
-    cat("\nPlease update the input files listed in 'samples.tsv' and 'assays.tsv'.\n")
-    cat("Quiting.\n")
-    q(save = "no")
+    print("Please update the input files listed in 'samples.tsv' and 'assays.tsv'.")
+    stop(save = "no")
 }
 
-cat(str(tenx_data))
+# print(str(tenx_data))
 
 # # Convert 10X Genomics 'Gene Expression' feature type to 'RNA'
 # # Many Seurat functions look specifically for 'RNA' string in assays
@@ -226,18 +240,17 @@ names(tenx_data) <- make.names(names(tenx_data))
 
 # remove any prefixes added to 10X matrix barcodes upon loading by 
 # Seurat (this isexpected behavior)
-tenx_data_names = names(tenx_data)
-tenx_data = lapply(seq_along(tenx_data), function(x) {
-	m_in = tenx_data[[x]]
-	old_names = colnames(m_in)
-	new_names = gsub('^.*_', '', old_names)
-	colnames(m_in) = new_names
-	return(m_in)
-})
-names(tenx_data) = tenx_data_names
+tenx_data <-  lapply(seq_along(tenx_data), function(x) {
+    m_in <- tenx_data[[x]]
+    old_names <- colnames(m_in)
+    new_names <- gsub('^.*_', '', old_names)
+    colnames(m_in) <- new_names
+    return(m_in)
+}) %>%
+set_names(names(tenx_data))
 
-cat('list names and cell names were updated!')
-cat(str(tenx_data))
+# cat('list names and cell names were updated!')
+# print(str(tenx_data))
 ```
 
 
@@ -247,52 +260,30 @@ We'll convert the list of sparse matrices that was just read into memory and con
 
 ```{r assays}
 # create list of Seurat Assay objects
-
 assay_list <- lapply(seq_along(tenx_data), function(x) {
-	feature_name = names(tenx_data)[x]
-	m_in = tenx_data[[x]]
-	if (feature_name == 'Peaks' && sample_info[['fragments']] != 'None') {
-	    # create ChromAssay for ZINBA 'Peaks' matrix
-	    obj <- Signac::CreateChromatinAssay(
-	        counts = m_in,
-	        sep = c(":", "-"),
-	        fragments = sample_info[['fragments']],
-	        annotation = annotation,
+    feature_name = names(tenx_data)[x]
+    m_in = tenx_data[[x]]
+    # If a table of tagmentation loci (with coordinates and de-duplicated counts) is available,
+    if (feature_name == 'Peaks' && sample_info[['fragments']] != 'None') {
+        # create an obj for ZINBA 'Peaks' matrix
+        obj <- Signac::CreateChromatinAssay(
+            counts = m_in,
+            sep = c(":", "-"),
+            fragments = sample_info[['fragments']],
+            annotation = annotation,
             min.features=-0.1
-	    )
-	    
-	    # Remaining section of if block originally used to create
-	    # matric from common/merged peak coordinates
-	    # Keep for now, delete after cicd fixed
-# 		frags <- Signac::CreateFragmentObject(
-# 			path = sample_info[['fragments']],
-# 			cells = colnames(m_in)
-# 		)
-# 		print(frags)
-# 		
-# 		regions = Signac::StringToGRanges(row.names(m_in), sep = c(":", "-"))
-# 		counts <- FeatureMatrix(
-# 			fragments = frags,
-# 			features = regions,
-# 			cells = colnames(m_in)
-# 		)
-# 
-# 		obj <- Signac::CreateChromatinAssay(
-# 			counts = counts, 
-# 			fragments = frags,
-# 			annotation = annotation,
-#             min.features=-0.1
-# 		)
-	} else if (feature_name == 'Peaks' && sample_info[['fragments']] == 'None') {
-		# fix later, if reading in peaks data from sparse matrix and don't have fragments file
-	} else {
-		counts = m_in
-		obj <- Seurat::CreateAssayObject(counts = counts)
-	}
-	return(obj)
-})
-names(assay_list) = names(tenx_data)
-# print(str(assay_list))
+            )
+
+    # If a table of tagmentation loci (with coordinates and de-duplicated counts) is unavailable,
+    } else if (feature_name == 'Peaks' && sample_info[['fragments']] == 'None') {
+        stop("Fragment file (fragments.tsv.gz) missing! Check your sample table.")
+    } else {
+        # Create an RNA obj
+        obj <- Seurat::CreateAssayObject(counts = m_in)
+    }
+    return(obj)
+}) %>%
+set_names(names(tenx_data))
 ```
 
 
@@ -300,41 +291,48 @@ names(assay_list) = names(tenx_data)
 
 TEMPORARY - maybe keep as permanent feature after testing.
 
-For test data sets, subsets of ATAC data may have many cells in which all peak counts are zero. This is due to the sparsity of scATAC data. This problem will likely arise in other assay/modality types such as CRISPR barcodes.
+For test data sets, subsets of ATAC data may have many cells in which all peak counts are zero. 
+This is due to the sparsity of scATAC data. This problem will likely arise in other assay/modality 
+types such as CRISPR barcodes.
 
-If sample assays have different cells/column names, creation of Seurat objects in next section breaks. So we'll detect cell names that are present in all assays and then select these columns for each assay.
+If sample assays have different cells/column names, creation of Seurat objects in next section breaks. 
+So we'll detect cell names that are present in all assays and then select these columns for each assay.
 
 ```{r filter_cells}
 print('Dimensions of assays before filtering:')
-print(lapply(assay_list, dim))
+df <- as.data.frame(lapply(assay_list, dim))
+rownames(df) <- c('Features', 'Cells')
+print(df)
 
-cells_keep = lapply(seq_along(assay_list), function(x) {
-    assay_use = assay_list[[x]]
-    cells = colnames(assay_use)
+# Create a list storing cell barcodes in each modality
+cells_keep <- lapply(seq_along(assay_list), function(x) {
+    assay_use <- assay_list[[x]]
+    cells <- colnames(assay_use)
     return(cells)
-})
-names(cells_keep) = names(assay_list)
-lapply(cells_keep, length)
+}) %>%
+set_names(names(assay_list))
 
-cells_keep = Reduce('intersect', cells_keep)
+# Print the number of unique barcodes for each modality
+print('Unique barcodes in each modality:')
+lapply(cells_keep, length) %>% as.data.frame()
 
-print('Number of cells to use that are common across all sample assays')
-print(length(cells_keep))
+# Create a vector storing intersecting barcodes across all modalities
+cells_keep <- Reduce('intersect', cells_keep)
 
-assay_names = names(assay_list)
-assay_list = lapply(seq_along(assay_list), function(x) {
-    assay_use = assay_list[[x]]
-    assay_subset = subset(assay_use, cells = cells_keep)
-    # idx = colnames(assay_use) %in% cells_keep
-    # assay_subset = assay_use[, idx]
+print(paste('Number of cells to use that are common across all sample assays:', length(cells_keep)))
+
+# Filter cells based on the intersection
+assay_list <- lapply(seq_along(assay_list), function(x) {
+    assay_use <- assay_list[[x]]
+    assay_subset <- subset(assay_use, cells = cells_keep)
     return(assay_subset)
-})
-names(assay_list) = assay_names
-rm(assay_names)
+}) %>%
+set_names(names(assay_list))
 
 print('Dimensions of assays after filtering:')
-print(lapply(assay_list, dim))
-print(assay_list)
+df <- as.data.frame(lapply(assay_list, dim))
+rownames(df) <- c('Features', 'Cells')
+print(df)
 ```
 
 
@@ -344,27 +342,27 @@ We'll generate a Seurat object with the first element of the 'Assays' list, and 
 
 ```{r seurat}
 # create Seurat object with first assay from list
-seurat = Seurat::CreateSeuratObject(
+seurat <- Seurat::CreateSeuratObject(
        counts = assay_list[[1]],
        project = sample_info[['sample']],
        assay = names(assay_list)[1]
 )
+print("Initial Seurat obj created:")
 print(seurat)
 
 # if any remaining assays exist, add to seurat object
 if (length(assay_list) > 1) {
-	for (i in 2:length(assay_list)) {
-		feature_name = names(assay_list[i])
-		print(feature_name)
-		a_in = assay_list[[i]]
-		print(str(a_in))
-		
-		seurat[[feature_name]] = a_in
-	}
+    for (i in 2:length(assay_list)) {
+        feature_name <- names(assay_list[i])
+        print(paste("Assay added:", feature_name))
+        a_in <- assay_list[[i]]
+        seurat[[feature_name]] <- a_in
+        print(seurat)
+    }
 }
-rm(i)
-print(seurat)
 
+
+# Add the sample info to barcodes
 if (wc_replicate != "nan") {
     seurat <- RenameCells(
         object = seurat,
@@ -378,38 +376,43 @@ if (wc_replicate != "nan") {
 }
 
 # compute gene activities
+# NOTE: 
+# - this step aims to quantify the activity of each gene in the genome by assessing 
+#   the chromatin accessibility associated with the gene
+# - sums the fragments intersecting the gene body and promoter region
 if (any(names(seurat@assays) %in% 'Peaks')) {
-	DefaultAssay(seurat) <- 'Peaks'
-	
-	print("Calculating gene activity")
-	gene_activities <- Signac::GeneActivity(
-		object = seurat,
-		assay = 'Peaks'
-	)
-	print('adding Gene Activity assay to hold gene activity scores')
-	seurat[['Gene.Activity']] = CreateAssayObject(counts = gene_activities)
-	
-	print('adding Nucleosome Signal metadata')
-	seurat <- NucleosomeSignal(seurat)
-	print('adding TSSEnrichment metadata')
-	seurat <- TSSEnrichment(seurat)
+    DefaultAssay(seurat) <- 'Peaks'
+
+    gene_activities <- Signac::GeneActivity(
+        object = seurat,
+        assay = 'Peaks'
+    )
+    print("Assay added: Gene.Activity")
+    seurat[['Gene.Activity']] <- CreateAssayObject(counts = gene_activities)
+
+    print('- adding Nucleosome Signal metadata')
+    seurat <- NucleosomeSignal(seurat)
+    print('- adding TSSEnrichment metadata')
+    seurat <- TSSEnrichment(seurat)
+    print(seurat)
 }
 
 # Stash mito QC stats, not informative unless whole cell GEX
 if (any(names(seurat@assays) %in% 'Gene.Expression')) {
-	mito_assay = 'Gene.Expression'
+    mito_assay <- 'Gene.Expression'
 } else if (any(names(seurat@assays) %in% 'Gene.Activity')) {
-	mito_assay = 'Gene.Activity'
+    mito_assay <- 'Gene.Activity'
 }
 
+# Add mito % to meta.data
 seurat[["percent.mt"]] <- PercentageFeatureSet(
-		object = seurat,
-		pattern = "^[Mm][Tt]-",
-		assay = mito_assay
+    object = seurat,
+    pattern = "^[Mm][Tt]-",
+    assay = mito_assay
 )
 
-kable(head(seurat@meta.data))
-kable(tail(seurat@meta.data))
+print("Metadata columns present:")
+print(colnames(seurat@meta.data))
 
 # May need to add assay keys when creating Seurat objects from Assay object
 # creating new seurat object or coercing from other formats (singlecellexperiment, etc)
@@ -417,33 +420,34 @@ kable(tail(seurat@meta.data))
 # combining multiple seurat objects via merge() or integratedata()
 #    assay names are kept as is after checking for pattern: ^[[:alnum:]]+_$ in assay key
 # for now, keep behavior below, if needed later use assay names w/o converting to lower case.
-for (i in 1:length(names(seurat@assays))) {
-	assay_select = names(seurat@assays)[i]
-	print('Assay:')
-	print(assay_select)
-	print('Assay key:')
-	key = Key(object = seurat[[assay_select]])
-	print(key)
-	print(class(key))
+key.df <- lapply(names(seurat@assays), function(assay_select) {
+    print('Assay:')
+    print(assay_select)
+    print('Assay key:')
+    key <- Key(object = seurat[[assay_select]])
 
-	# Seurat names usually follow make.names() scheme, except for keys in assays
-	# (i.e. seurat@assays$assay$key) which strips whitespace and '.'
-	# Multiplexing Captue > Assay: Multiplexing.Capture > key: multiplexingcapture_
-	
-	if (length(key) == 0) {
-		key = paste0(tolower(assay_select), "_")
-		Key(object = seurat[[assay_select]]) = key
-		print('Assay new key:')
-		new_key = Key(object = seurat[[assay_select]])
-		print(new_key)
-	}
-}
-rm(i)
+    # Seurat names usually follow make.names() scheme, except for keys in assays
+    # (i.e. seurat@assays$assay$key) which strips whitespace and '.'
+    # Multiplexing Captue > Assay: Multiplexing.Capture > key: multiplexingcapture_
+
+    if (length(key) == 0) {
+        key <- paste0(tolower(assay_select), "_")
+        Key(object = seurat[[assay_select]]) <- key
+        print('Assay new key:')
+        new_key <- Key(object = seurat[[assay_select]])
+    }
+
+    data.frame(Assay=assay_select, Key=key)
+}) %>%
+bind_rows()
+
+print("Assay-Key pairs:")
+print(key.df)
 ```
 
 ## Add Metadata to Seurat object
 
-Lets add metadata columns to the Seurat object
+Lets add the following metadata columns to the Seurat object:
 
 ```{r metadata}
 sample_meta <- sample_info[!names(sample_info) %in% 
@@ -451,33 +455,35 @@ sample_meta <- sample_info[!names(sample_info) %in%
                                 'HDF5', 'RDS', 'Gene.Expression', 'Peaks', 'TF', 
                                 'fragments', 'singlecell')]
 
+
+# Add metadata variables based on the sample table
 for (i in 1:length(sample_meta)) {
-	group_name <- names(sample_meta)[i]
-	print(group_name)
-	map_df = data.frame(
-		unit = unlist(sample_info[['sample']]),
-		group_name = unlist(sample_info[[group_name]])
-	)
-	print(map_df)
-	group_elements = plyr::mapvalues(
-		x = seurat$orig.ident, 
-		from = map_df$unit, 
-		to = map_df$group_name
-	)
-	print(head(group_elements))
-	seurat <- AddMetaData(
-		object = seurat, 
-		metadata = group_elements, 
-		col.name = group_name
-	)
+    group_name <- names(sample_meta)[i]
+    print(group_name)
+    map_df <- data.frame(
+        unit = unlist(sample_info[['sample']]),
+        group_name = unlist(sample_info[[group_name]])
+    )
+    group_elements <- plyr::mapvalues(
+        x = seurat$orig.ident, 
+        from = map_df$unit, 
+        to = map_df$group_name
+    )
+    seurat <- AddMetaData(
+        object = seurat, 
+        metadata = group_elements, 
+        col.name = group_name
+    )
 }
-rm(i)
 
 
 # map 10X barcode suffix to library_id
 barcode_suffix <- as.integer(gsub('.*-([0-9]+)$', '\\1', colnames(seurat)))
-print(head(barcode_suffix))
+if (class(barcode_suffix) != "integer") {
+    stop("Barcode suffix is not integer!")
+}
 
+# Add the barcode suffix to metadata
 seurat <- AddMetaData(
     object = seurat,
     metadata = barcode_suffix,
@@ -485,59 +491,56 @@ seurat <- AddMetaData(
 )
 
 if (params[['aggregates_tsv']] != "") {
-    # add any library metadata in aggrates.tsv
+    # add any remaining library metadata in aggrates.tsv
     cols <- c("sample", "replicate", "library_id", "bc_suffix")
-    aggregates_meta = c("library_id")
-    aggregates_meta = c(aggregates_meta, 
-                        colnames(aggregates_info)[!(colnames(aggregates_info) %in% cols)])
+    aggregates_meta <- c(
+        "library_id", 
+        colnames(aggregates_info)[!(colnames(aggregates_info) %in% cols)]
+        )
 
     # if any aggregates col names in seurat, make aggregates colnames unique
-    non_unique = colnames(seurat) %in% aggregates_meta
-    if (length(non_unique) > 1) {
-        idx = which(aggregates_meta %in% non_unique)
-        aggregates_meta
-    }
+#     non_unique <- colnames(seurat) %in% aggregates_meta
+#     if (length(non_unique) > 1) {
+#         idx <- which(aggregates_meta %in% non_unique)
+#         aggregates_meta
+#     }
 
     for (i in 1:length(aggregates_meta)) {
-        group_name = aggregates_meta[i]
+        group_name <- aggregates_meta[i]
         print(group_name)
-        map_df = data.frame(
+        map_df <- data.frame(
             unit = unlist(aggregates_info[['bc_suffix']]),
             group_name = unlist(aggregates_info[[group_name]])
         )
-        print(map_df)
-        group_elements = plyr::mapvalues(
+        group_elements <- plyr::mapvalues(
             x = barcode_suffix, 
             from = map_df$unit, 
             to = map_df$group_name
         )
-        print(head(group_elements))
         # ensure aggregates.tsv metadata names are not duplicates of samples.tsv
         if (group_name %in% colnames(seurat@meta.data)) {
-            group_name = paste0(group_name, ".", i)
+            group_name <- paste0(group_name, ".", i)
         }
-        seurat = AddMetaData(
+        seurat <- AddMetaData(
             object = seurat, 
             metadata = group_elements, 
             col.name = group_name
         )
     }
 }
-# rm(i)
-
-kable(head(seurat@meta.data))
-kable(tail(seurat@meta.data))
+print("First two rows for the metadata prepared:")
+print(head(seurat@meta.data, 2))
 ```
 
 
 ## Save Seurat object
 
-```{r save, results='asis'}
+```{r save}
 cat('Updated Seurat object:')
 print(seurat)
 
 saveRDS(object=seurat, file=params[['seurat']])
-cat('Done saving seurat object.')
+print(paste("Seurat obj saved:", params[['seurat']]))
 ```
 
 
