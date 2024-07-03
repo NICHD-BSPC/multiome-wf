@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(tidyverse)
 library(ggplot2)
 library(Signac)
 library(Seurat)
@@ -39,14 +40,12 @@ plan("multicore", workers=ncpus)
 
 ```
 
-
-
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
 ```{r variables}
-config_path = params[['config']]
+config_path <- params[['config']]
 ```
 
 
@@ -55,11 +54,14 @@ config_path = params[['config']]
 Read in all Seurat objects and combine in a list.
 
 ```{r input}
-seurat = readRDS(params[['seurat_in']])
-cat('Input Seurat object: \n')
-print(seurat)
+# Import input Seurat obj
+seurat <- readRDS(params[['seurat_in']])
+config <- yaml::read_yaml(file = config_path)
 
-config = yaml::read_yaml(file = config_path)
+print(paste("Input Seurat obj path:", params[['seurat_in']]))
+
+print("Imported Seurat obj:")
+print(seurat)
 ```
 
 
@@ -67,169 +69,180 @@ config = yaml::read_yaml(file = config_path)
 
 ```{r impute_metadata}
 
-# Impute NA values (added by Mira)
+# Impute NA values
 # (This step is not needed for full datasets)
-sum(is.na(seurat@meta.data)) # the number of NAs
+print(paste("Number of missing values in metadata:", sum(is.na(seurat@meta.data))))
 seurat@meta.data[is.na(seurat@meta.data)] <- 0  # Impute
 
+print("Missing values have been imputed to zero.")
 ```
 
 
 ## Quality Control
 
-We'll iterate over features listed in the Seurat metadata columns and remove cells with counts below lower limits and/or above a high threshold. There are 2 ways to select lower and/or upper limits. The default behavior is to get summary statistics for each feature and then select cells with counts more than X standard deviations from the mean (default is +/-3 sd). The function also supports using Tukey's fence method based on quartiles. Alternatively, we can provide lower and or upper values (integer or double) and a hard cutoff will be applied.
+We'll iterate over features listed in the Seurat metadata columns and remove cells with counts below lower 
+limits and/or above a high threshold. There are 2 ways to select lower and/or upper limits. The default 
+behavior is to get summary statistics for each feature and then select cells with counts more than X 
+standard deviations from the mean (default is +/-3 sd). The function also supports using Tukey's fence 
+method based on quartiles. Alternatively, we can provide lower and or upper values (integer or double) 
+and a hard cutoff will be applied.
 
-For example, we can select cells with Gene.Expression n_Features outside of 3 sd from the mean, Peaks n_Counts greater than 1000, and cells with mitochondrial % less than 10% (progenitors tend to be mitoticlly active and have a higher % mito genes than many differentiated cells).
+For example, we can select cells with Gene.Expression n_Features outside of 3 sd from the mean, Peaks 
+n_Counts greater than 1000, and cells with mitochondrial % less than 10% (progenitors tend to be mitoticlly 
+active and have a higher % mito genes than many differentiated cells).
 
 
-```{r qc}
+```{r qc_metrics}
 
-remove_outliers = config[['qc']][['remove_outliers']]
-outlier_method = config[['qc']][['rm_outliers_method']]
-meta_labels = config[['qc']][['meta_labels']]
-lower = unlist(config[['qc']][['lower']])
-upper = unlist(config[['qc']][['upper']])
+# Retrieve QC configuration
+remove_outliers <- config[['qc']][['remove_outliers']]
+outlier_method <- config[['qc']][['rm_outliers_method']]
+meta_labels <- config[['qc']][['meta_labels']]
+lower <- unlist(config[['qc']][['lower']])
+upper <- unlist(config[['qc']][['upper']])
 
-print(remove_outliers)
-print(outlier_method)
-print(meta_labels)
+print(paste("Remove outliers?:", remove_outliers))
+print(paste("Removal method:", outlier_method))
+print(paste("Configured QC metrics:", paste(meta_labels, collapse=", ")))
+print("Lower limits:")
 print(lower)
+print("Upper limits:")
 print(upper)
 
 # are use selected metadata labels present for filtering?
 if (is.null(meta_labels)) {
-	meta_labels = c('nFeature_Gene.Expression', 'nCount_Gene.Expression', 'percent.mt')
+    meta_labels <- c('nFeature_Gene.Expression', 'nCount_Gene.Expression', 'percent.mt')
 }
 
 if (any(names(seurat@meta.data) %in% meta_labels)) {
-	print('Selected meta_labels from config file present in seurat object.')
-
-	features_present = TRUE
-	idx = names(seurat@meta.data) %in% meta_labels
-	meta_labels = names(seurat@meta.data)[idx]
-	print(meta_labels)
+    features_present <- TRUE
+    idx <- names(seurat@meta.data) %in% meta_labels
+    meta_labels <- names(seurat@meta.data)[idx]
+    print(paste("QC metrics present in the current obj:", paste(meta_labels, collapse=", ")))
 } else {
-	print('Selected meta_labels from config file not present in seurat object.')
-
-	features_present = FALSE
+    print('Configured QC metrics are not found in the current obj.')
+    features_present <- FALSE
 }
 
+```
 
-######
-# vis and filter
-######
-
+```{r plot_qc}
 Vln.list <- list()
 if (features_present) {
-	# visualize disributions before filter
-	Vln.list[['before_filtering']] <- VlnPlot(
-		object = seurat,
-		features = meta_labels,
-		ncol = length(meta_labels),
-		pt.size = 0,
-		group.by = 'orig.ident'
-	) & theme(axis.title.x=element_blank(),
-	          axis.text.x=element_blank(),
-	          axis.ticks.x=element_blank())
+    # Create exploratory violin plot before filtering
+    Vln.list[['before_filtering']] <- VlnPlot(
+        object = seurat,
+        features = meta_labels,
+        ncol = length(meta_labels),
+        pt.size = 0,
+        group.by = 'orig.ident'
+    ) & theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        plot.title = element_text(size=12))
 
 
-	if (remove_outliers) {
-		print("removing outliers")
+    if (remove_outliers) {
 
-		# get list of lower and/or upper values for each meta.data label
-		min_max_list = lapply(seq_along(unique(meta_labels)), function(x) {
-			meta_col = meta_labels[x]
-			
-			# print(meta_col)
-			counts = unlist(seurat[[meta_col]])
-			# print(head(counts))
-			# print(hist(counts, breaks = 100))
-			
-			if (any(names(lower) %in% meta_col)) {
-			  col_lower = lower[names(lower) %in% meta_col]
-			} else {
-			  col_lower = NULL
-			}
-			
-			if (any(names(upper) %in% meta_col)) {
-			  col_upper = upper[names(upper) %in% meta_col]
-			} else {
-			  col_upper = NULL
-			}
-			
-			ol = find_outliers(
-				counts = counts,
-				method = outlier_method,
-				k = 2.2,
-				sigma = 3,
-				lower = col_lower,
-				upper = col_upper,
-				na_rm = TRUE
-			)
-			return(ol)
-		})
-		idx = !is.na(min_max_list)
-		min_max_list = min_max_list[idx]
-		names(min_max_list) = meta_labels[idx]
-		
-		min_list = lapply(min_max_list, `[[`, 'min')
-		names(min_list) = names(min_max_list)
-		max_list = lapply(min_max_list, `[[`, 'max')
-		names(max_list) = names(min_max_list)
-		
-		for (i in 1:length(min_list)) {
-			var_name = names(min_list[i])
-			print(var_name)
-			var_val = min_list[[i]]
-			print(var_val)
-			
-			# Much like R's subset function, subset.Seurat is designed for interactive use only
-			# https://github.com/satijalab/seurat/issues/1053
-			expr <- FetchData(object = seurat, vars = var_name)
-			seurat = seurat[, which(x = expr > var_val)] # modified by Mira
-		}
-		rm(i)
-		
-		for (i in 1:length(max_list)) {
-			var_name = names(max_list[i])
-			print(var_name)
-			var_val = max_list[[i]]
-			print(var_val)
+        # get list of lower and/or upper values for each meta.data label
+        min_max_list <- lapply(seq_along(unique(meta_labels)), function(x) {
+            meta_col <- meta_labels[x]
 
-			expr <- FetchData(object = seurat, vars = var_name)   # modified by Mira
-			seurat = seurat[, which(x = expr < var_val)]  # modified by Mira
-		}
-	}
+            # Create a vector storing values for each metric
+            counts <- unlist(seurat[[meta_col]])
 
-	# visualize after subsetting
-	Vln.list[['after_filtering']] <- VlnPlot(
-		object = seurat,   # modified by Mira
-		features = meta_labels,
-		ncol = length(meta_labels),
-		pt.size = 0,
-		group.by = 'orig.ident'
-	) & theme(axis.title.x=element_blank(),
-	          axis.text.x=element_blank(),
-	          axis.ticks.x=element_blank())
+            # Retrieve upper and lower thresholds
+            if (any(names(lower) %in% meta_col)) {
+                col_lower <- lower[names(lower) %in% meta_col]
+            } else {
+                col_lower <- NULL
+            }
 
-	# ggsave(
-	# 	filename = snakemake@output[['vln_post_qc']],
-	# 	width = 4 * length(meta_labels),
-	# 	height = 6,
-	# 	units = "in"
-	# )
+            if (any(names(upper) %in% meta_col)) {
+                col_upper <- upper[names(upper) %in% meta_col]
+            } else {
+                col_upper <- NULL
+            }
 
-	
-	print('Done filtering seurat object for each cellranger output.')
-	print(seurat)
+            ol <- if (all(unique(counts) == 0)) {
+                print(paste('Counts vector all zeros. Returning NA in', meta_col))
+                print("--------------------------------------------------------------")
+                NA
+            } else {
+                find_outliers(
+                counts = counts,
+                method = outlier_method,
+                k = 2.2,
+                sigma = 3,
+                lower = col_lower,
+                upper = col_upper,
+                na_rm = TRUE
+                )
+            }
+
+            # Return a vector storing min and max values
+            return(ol)
+        }) %>%
+        set_names(unique(meta_labels))
+
+        # Remove elements returned NA
+        min_max_list <- min_max_list[!is.na(min_max_list)]
+
+        min_list <- lapply(min_max_list, `[[`, 'min') %>% set_names(names(min_max_list))
+        max_list <- lapply(min_max_list, `[[`, 'max') %>% set_names(names(min_max_list))
+
+        print("Cells are filtered based on the following lower limits:")
+        for (i in 1:length(min_list)) {
+            var_name <- names(min_list[i])
+            var_val <- min_list[[i]]
+            print(paste(var_val, "in", var_name))
+
+            # Much like R's subset function, subset.Seurat is designed for interactive use only
+            # https://github.com/satijalab/seurat/issues/1053
+            expr <- FetchData(object = seurat, vars = var_name)
+            seurat <- seurat[, which(x = expr > var_val)]
+        }
+        rm(i)
+        print("--------------------------------------------------------------")
+
+
+        print("Cells are filtered based on the following upper limits:")
+
+        for (i in 1:length(max_list)) {
+            var_name <- names(max_list[i])
+            var_val <- max_list[[i]]
+            print(paste(var_val, "in", var_name))
+
+            expr <- FetchData(object = seurat, vars = var_name)
+            seurat <- seurat[, which(x = expr < var_val)]
+        }
+
+        print("--------------------------------------------------------------")
+    }
+
+    # visualize after subsetting
+    Vln.list[['after_filtering']] <- VlnPlot(
+        object = seurat,
+        features = meta_labels,
+        ncol = length(meta_labels),
+        pt.size = 0,
+        group.by = 'orig.ident'
+    ) & theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        plot.title = element_text(size=12))
+    print('Seurat obj after QC filtering:')
+    print(seurat)
 
 } else {
-	print('Seurat object without filtering.')
-	print(seurat)
+    print('Seurat object without QC filtering:')
+    print(seurat)
 }
 
 
 ```
+
+
 
 ## QC plot - before filtering
 
@@ -252,10 +265,10 @@ print(Vln.list[['after_filtering']])
 ## Save Seurat object
 
 ```{r save}
-saveRDS(object=seurat, file=params[['seurat_out']])
-print('Done saving seurat object.')
-```
 
+print(paste("Seurat obj saved:", params[['seurat_out']]))
+saveRDS(object=seurat, file=params[['seurat_out']])
+```
 
 ## Session Info
 
