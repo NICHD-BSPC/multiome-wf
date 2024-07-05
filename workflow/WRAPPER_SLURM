@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="multiome-wf"
+#SBATCH --job-name="multiome-wf-test"
 #SBATCH --partition="norm"
 #SBATCH --time=24:00:00
 
@@ -43,6 +43,7 @@ fi
     -k \
     --restart-times 3 \
     --rerun-incomplete \
+    --rerun-trigger mtime \
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
     --use-conda \
