@@ -2,7 +2,6 @@
 title: "Cluster Seurat"
 output:
     html_document:
-            keep_md: yes
             toc: true
             toc_float: true
             code_folding: hide
@@ -11,8 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 
 ```
@@ -38,8 +36,17 @@ options(future.globals.maxSize=40000 * 1024^2,
 
 # Parallelize the run
 plan("multicore", workers=ncpus)
+```
 
-
+```{r}
+params = list(
+      seurat_in = "results/normalize_reduce_dims/unintegrated_2/unintegrated_2.rds",
+      config = "/vf/users/BSPC-Petros/multiome-wf/workflow/config/multiome-config/config.yaml",
+      res_choice = "results/chooser_plot/unintegrated_2/choice.rds",
+      seurat = "unintegrated_2",
+      res_use = "0.6",
+      seurat_out = "results/cluster/unintegrated_2/clustered_data.rds",
+      barcodes_out = "results/cluster/unintegrated_2/barcodes.rds")
 ```
 
 
@@ -61,14 +68,15 @@ If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse ma
 'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
 
 ```{r input}
-obj <- readRDS(obj_input)
 
+# Import Seurat obj
+obj <- readRDS(obj_input)
 
 # Set resolution to the previously computed (by chooser) or defined value
 if (params[['res_use']] == "None") {
-  res_use <- readRDS(choice_input)
+    res_use <- readRDS(choice_input)
 } else {
-  res_use <- params[['res_use']]
+    res_use <- params[['res_use']]
 }
 
 # Convert to numeric of the resolution is still a character obj
@@ -76,41 +84,46 @@ if (!is.numeric(res_use)) {
     res_use <- as.numeric(res_use)
 }
 
-cat('Input Seurat object:')
+print('Input Seurat object:')
 print(obj)
 
-cat('Resolution to use for community detection:')
-print(res_use)
+print(paste('Resolution to use for community detection:', res_use))
 ```
 
-
-## 
-
 ```{r vars_cluster}
+
+# Retrieve the configuration for the number of dimensions
 npcs <- snakemake.config[['chooser']][['groups']][[ params[['seurat']] ]]$npcs
 
+# Find the primary dimensionality reduction
 targets <- c("pca", "lsi")
 idx <- grep(paste(targets,collapse="|"), names(obj@reductions))
 reduction <- names(obj@reductions)[idx]
+
+# Find the current assay in use
 assay <- obj[[reduction]]@assay.used
 
+# Determine the number of minimum dimensions
 if (grepl("lsi", reduction)) {
-  npcs_min = 2
+    npcs_min <- 2
 } else {
-  npcs_min = 1
+    npcs_min <- 1
 }
 
 # uwot fails with less that 50 cells
 # https://github.com/satijalab/seurat/issues/4312
-if (nrow(obj@reductions[[reduction]]) >= 50 ) {
-  umap_method = "uwot"
-} else {
-  umap_method = "umap-learn"
-}
+# if ( nrow(obj@reductions[[reduction]]) >= 50 ) {
+#     umap_method <- "uwot"
+# } else {
+#     umap_method <- "umap-learn"
+# }
 
+umap_method <- "uwot"
 ```
 
-## 
+## Clustering
+
+Cells are clustered using the `FindNeighbors` followed by `FindClusters` functions in Seurat.
 
 ```{r cluster}
 
@@ -118,19 +131,18 @@ if (nrow(obj@reductions[[reduction]]) >= 50 ) {
 cluster_colname <- paste0(params[['seurat']],
                           paste0('_snn_res.', res_use))
 
-
-print("Calling FindNeighbors.")
+print("Calling FindNeighbors...")
 obj <- FindNeighbors(
-  object = obj,
-  reduction = reduction,
-  dims = npcs_min:npcs
+    object = obj,
+    reduction = reduction,
+    dims = npcs_min:npcs
 )
 
 # not really needed not that weighted nn is in new rule, delete later
 # graph_use = paste0(assay_use, '_snn')
 # print(graph_use)
 
-print("Calling FindClusters")
+print("Calling FindClusters...")
 obj <- FindClusters(
   object = obj,
   resolution = res_use
@@ -141,18 +153,43 @@ print('Finished finding neighbors for this assay.')
 # Ensure that the cluster is given correct name in the metadata
 obj@meta.data[[cluster_colname]] <- obj$seurat_clusters
 
+
+print(paste(cluster_colname, "column added to metadata for the current clustering"))
 ```
 
-## Visiualize
+## UMAP
 
 ```{r umap}
-obj <- RunUMAP(obj,
-               dims = npcs_min:npcs,
-               reduction = reduction,
-               assay = assay,
-               umap.method = umap_method
-)
 
+# Run UMAP
+obj <- tryCatch(
+    expr={
+        RunUMAP(obj,
+                dims = npcs_min:npcs,
+                reduction = reduction,
+                assay = assay,
+                umap.method = umap_method)
+    },
+    error=function(e) {
+        umap_method <- "umap-learn"
+        RunUMAP(obj,
+                dims = npcs_min:npcs,
+                reduction = reduction,
+                assay = assay,
+                umap.method = umap_method)
+    },
+    finally={
+        print(paste(umap_method, "used for UMAP"))
+    }
+)
+```
+
+
+## Visiualize {.tabset}
+
+```{r visualization, results='asis'}
+
+cat('### By orig.ident')
 plot <- DimPlot(
   obj,
   reduction = "umap",
@@ -160,34 +197,36 @@ plot <- DimPlot(
   group.by = "orig.ident"
 )
 
-plot
+print(plot)
+cat('\n\n')
 
+cat('### By', cluster_colname)
 plot <- DimPlot(
   obj,
   reduction = "umap",
   pt.size = 0.5,
-  group.by = "seurat_clusters"
+  group.by = cluster_colname
 )
 
-plot
+print(plot)
 ```
 
 
 ## Save Seurat object
 
-```{r save, results='asis'}
+```{r save, eval=FALSE}
 
 cat('Updated Seurat object:')
 print(obj)
 
 # save main seurat object
 saveRDS(object=obj, file=params[['seurat_out']])
-cat('Done saving seurat object.')
+print(paste('Updated Seurat object saved in', params[['seurat_out']]))
 
 # save barcodes for later use (combining multiple processed objects)
-barcodes = colnames(obj)
+barcodes <- colnames(obj)
 saveRDS(object=barcodes, file=params[['barcodes_out']])
-cat('Done saving cell barcodes.')
+print(paste('Barcodes saved in', params[['barcodes_out']]))
 ```
 
 
