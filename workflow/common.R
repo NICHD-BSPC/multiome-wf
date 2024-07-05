@@ -247,31 +247,27 @@ find_outliers <- function(
 	return(min_max)
 }
 
-preprocess_seurat = function(seurat_obj, assay, norm_method) {
-	DefaultAssay(seurat_obj) = assay
+preprocess_seurat <- function(seurat_obj, assay, norm_method) {
+	DefaultAssay(seurat_obj) <- assay
 	
 	if (norm_method == 'log') {
 		print("Performing log normalization.")
 		
-		seurat_obj = NormalizeData(
+		seurat_obj <- NormalizeData(
 			object = seurat_obj,
 			normalization.method = 'LogNormalize'
 		)
 		
-		seurat_obj = FindVariableFeatures(
+		seurat_obj <- FindVariableFeatures(
 			object = seurat_obj,
 			selection.method = "vst",
 			nfeatures = 2000
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(
-			object = seurat_obj
-		)
+		seurat_obj <- ScaleData(seurat_obj)
 		
-		seurat_obj <- RunPCA(
-			object = seurat_obj
-		)
+		seurat_obj <- RunPCA(seurat_obj)
 
 		# reduction_name = paste0(tolower(assay), '_pca')
 		# seurat_obj <- RunPCA(
@@ -295,20 +291,16 @@ preprocess_seurat = function(seurat_obj, assay, norm_method) {
 		VariableFeatures(seurat_obj) <- rownames(seurat_obj)
 		print(head(VariableFeatures(seurat_obj)))
 		
-		seurat_obj = NormalizeData(
+		seurat_obj <- NormalizeData(
 			object = seurat_obj,
 			normalization.method = 'CLR',
 			margin = 2
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(
-			object = seurat_obj
-		)
+		seurat_obj <- ScaleData(seurat_obj)
 		
-		seurat_obj <- RunPCA(
-			object = seurat_obj
-		)
+		seurat_obj <- RunPCA(object = seurat_obj)
 
 		# reduction_name = paste0(tolower(assay), '_pca')
 		# seurat_obj <- RunPCA(
@@ -341,16 +333,14 @@ preprocess_seurat = function(seurat_obj, assay, norm_method) {
 		# 	# verbose = FALSE
 		# )
 		
-		seurat_obj = SCTransform(
+		seurat_obj <- SCTransform(
 			object = seurat_obj,
 			assay = assay
 		)
 		
 		# !!!!!!!!!! When using SCT method DO NOT scale data with ScaleData() !!!!!!!!!!
 		
-		seurat_obj <- RunPCA(
-			object = seurat_obj
-		)
+		seurat_obj <- RunPCA(seurat_obj)
 
 		# reduction_name = paste0(tolower(assay), '_pca')
 		# seurat_obj <- RunPCA(
@@ -371,18 +361,14 @@ preprocess_seurat = function(seurat_obj, assay, norm_method) {
 	} else if (norm_method == "lsi") {
 		print("Performing LSA normalization.")
 		
-		seurat_obj <- RunTFIDF(
-			object = seurat_obj
-		)
+		seurat_obj <- RunTFIDF(seurat_obj)
 		
 		seurat_obj <- FindTopFeatures(
 			object = seurat_obj,
 			min.cutoff = 10
 		)
 		
-		seurat_obj <- RunSVD(
-			object = seurat_obj
-		)
+		seurat_obj <- RunSVD(seurat_obj)
 
 		# # use 'lsi' reduction.name for now
 		# reduction_name = paste0(tolower(assay), '_lsi')
