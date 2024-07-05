@@ -248,7 +248,6 @@ find_outliers <- function(
 }
 
 preprocess_seurat <- function(seurat_obj, assay, norm_method) {
-	DefaultAssay(seurat_obj) <- assay
 	
 	if (norm_method == 'log') {
 		print("Performing log normalization.")
@@ -269,21 +268,6 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		
 		seurat_obj <- RunPCA(seurat_obj)
 
-		# reduction_name = paste0(tolower(assay), '_pca')
-		# seurat_obj <- RunPCA(
-		# 	object = seurat_obj,
-		# 	reduction.name = reduction_name
-		# )
-		
-		# max_pcs = ncol(seurat_obj[[reduction_name]]@cell.embeddings)
-		
-		# umap_red_name =paste0(tolower(assay), '_umap')
-		# seurat_obj = RunUMAP(
-		# 	seurat_obj,
-		# 	dims = 1:max_pcs, 
-		# 	reduction = reduction_name,
-		# 	reduction.name = umap_red_name
-		# )
 		
 	} else if (norm_method == 'clr') {
 		print("Performing log normalization.")
@@ -302,36 +286,8 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		
 		seurat_obj <- RunPCA(object = seurat_obj)
 
-		# reduction_name = paste0(tolower(assay), '_pca')
-		# seurat_obj <- RunPCA(
-		# 	object = seurat_obj,
-		# 	reduction.name = reduction_name
-		# )
-		
-		# max_pcs = ncol(seurat_obj[[reduction_name]]@cell.embeddings)
-		
-		# umap_red_name =paste0(tolower(assay), '_umap')
-		# seurat_obj = RunUMAP(
-		# 	seurat_obj,
-		# 	dims = 1:max_pcs, 
-		# 	reduction = reduction_name,
-		# 	reduction.name = umap_red_name
-		# )
-		
 	} else if (norm_method == 'sct') {
 		print("Performing SCTransform normalization.")
-		
-		# # Default assay name returned by SCTransform is 'SCT'
-		# # Need to rename in case using SCT on multiple assays (GEX + feature barcoding, etc)
-		# new_assay_name = paste(assay, 'SCT', sep = '.')
-		# print('Adding SCTransform to the following slot')
-		# print(new_assay_name)
-		# seurat_obj = SCTransform(
-		# 	object = seurat_obj,
-		# 	assay = assay,
-		# 	new.assay.name = new_assay_name
-		# 	# verbose = FALSE
-		# )
 		
 		seurat_obj <- SCTransform(
 			object = seurat_obj,
@@ -342,21 +298,6 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		
 		seurat_obj <- RunPCA(seurat_obj)
 
-		# reduction_name = paste0(tolower(assay), '_pca')
-		# seurat_obj <- RunPCA(
-		# 	object = seurat_obj,
-		# 	reduction.name = reduction_name
-		# )
-		
-		# max_pcs = ncol(seurat_obj[[reduction_name]]@cell.embeddings)
-		
-		# umap_red_name =paste0(tolower(assay), '_umap')
-		# seurat_obj = RunUMAP(
-		# 	seurat_obj,
-		# 	dims = 1:max_pcs, 
-		# 	reduction = reduction_name,
-		# 	reduction.name = umap_red_name
-		# )
 		
 	} else if (norm_method == "lsi") {
 		print("Performing LSA normalization.")
@@ -370,23 +311,6 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		
 		seurat_obj <- RunSVD(seurat_obj)
 
-		# # use 'lsi' reduction.name for now
-		# reduction_name = paste0(tolower(assay), '_lsi')
-		# seurat_obj <- RunSVD(
-		# 	object = seurat_obj,
-		# 	reduction.name = reduction_name
-		# )
-		
-		# max_pcs = ncol(seurat_obj[[reduction_name]]@cell.embeddings)
-		
-		# umap_red_name =paste0(tolower(assay), '_umap')
-		# seurat_obj = RunUMAP(
-		# 	seurat_obj,
-		# 	dims = 1:max_pcs, 
-		# 	reduction = reduction_name,
-		# 	reduction.name = umap_red_name
-		# )
-		
 	} else {
 		print('Invalid choice for normalization.')
 		print('please select log, sct or tfidf methods and re-run this step')
