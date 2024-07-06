@@ -38,18 +38,6 @@ options(future.globals.maxSize=40000 * 1024^2,
 plan("multicore", workers=ncpus)
 ```
 
-```{r}
-params = list(
-      seurat_in = "results/normalize_reduce_dims/unintegrated_2/unintegrated_2.rds",
-      config = "/vf/users/BSPC-Petros/multiome-wf/workflow/config/multiome-config/config.yaml",
-      res_choice = "results/chooser_plot/unintegrated_2/choice.rds",
-      seurat = "unintegrated_2",
-      res_use = "0.6",
-      seurat_out = "results/cluster/unintegrated_2/clustered_data.rds",
-      barcodes_out = "results/cluster/unintegrated_2/barcodes.rds")
-```
-
-
 ## Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
@@ -214,7 +202,7 @@ print(plot)
 
 ## Save Seurat object
 
-```{r save, eval=FALSE}
+```{r save}
 
 cat('Updated Seurat object:')
 print(obj)
