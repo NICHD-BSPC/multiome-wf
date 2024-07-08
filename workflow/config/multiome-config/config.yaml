@@ -129,18 +129,17 @@ normalize:
 # umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
 integrate:
   activate: true
-  memory_MB: null
   atac_integrate_embeddings: true
   groups:
     integrated_0:
       # split_by: meta_batch
       split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integration
-      n_dataset: 4
+      n_dataset: 2
       reference:
-        label: batch1
+        label: wt
         assay_name: Gene.Expression
       query:
-        label: batch2
+        label: ko
         assay_name: Gene.Expression
       norm_method: sct
       integrate_dims:
@@ -149,13 +148,41 @@ integrate:
     integrated_1:
       # split_by: meta_batch
       split_by: meta_geno
-      n_dataset: 4
+      n_dataset: 2
       reference:
-        label: batch1
+        label: wt
         assay_name: Peaks
       query:
-        label: batch2
+        label: ko
         assay_name: Peaks
+      norm_method: lsi
+      integrate_dims:
+        - 1
+        - 30
+    integrated_2:
+      # split_by: meta_batch
+      split_by: meta_geno
+      n_dataset: 2
+      reference:
+        label: wt
+        assay_name: MACS
+      query:
+        label: ko
+        assay_name: MACS
+      norm_method: lsi
+      integrate_dims:
+        - 1
+        - 30
+    integrated_3:
+      # split_by: meta_batch
+      split_by: meta_geno
+      n_dataset: 2
+      reference:
+        label: wt
+        assay_name: Gene.Activity
+      query:
+        label: ko
+        assay_name: Gene.Activity
       norm_method: lsi
       integrate_dims:
         - 1
