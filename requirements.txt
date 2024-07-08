@@ -21,6 +21,7 @@ bioconductor-ensdb.hsapiens.v86
 bioconductor-limma
 bioconductor-ensdb.mmusculus.v79
 bioconductor-genomicranges
+bioconductor-glmgampoi
 samtools
 r-data.table
 bioconductor-rhdf5
