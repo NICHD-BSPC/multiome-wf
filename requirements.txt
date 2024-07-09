@@ -26,6 +26,7 @@ samtools
 r-data.table
 bioconductor-rhdf5
 python
+ipython
 pandas
 rst2html5
 alabaster
