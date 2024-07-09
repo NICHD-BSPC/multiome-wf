@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import os
+from itertools import compress
 
 ##### for interactive debugging
 # import yaml
 # with open("config/multiome-config/config.yaml", 'r') as stream:
-     # config = yaml.safe_load(stream)
+#     config = yaml.safe_load(stream)
 
 
 ##### load config and sample sheets #####
@@ -32,18 +33,11 @@ singularity: "docker://continuumio/miniconda3"
 
 
 samples = pd.read_table(config["samples"]).set_index(["sample", "replicate"], drop=False)
-# samples.index.names = ["sample"]
-samples.index.names = ["sample_id", "replicate_id"]
+samples.index.names = ["sample", "replicate"]
 samples.index = samples.index.set_levels(
     [i.astype(str) for i in samples.index.levels]
 )  # enforce str in index
 # print(samples)
-
-# assays = pd.read_table(config["assays"]).set_index("sample", drop=False)
-# assays.index.names = ["sample"]
-# # print(assays)
-
-
 
 # Set chooser variables
 resolutions = config['chooser']['resolutions']
@@ -69,13 +63,6 @@ def is_activated(xpath):
     for entry in xpath.split("/"):
         c = c.get(entry, {})
     return bool(c.get("activate", False))
-
-def get_anno_rmd(wildcards):
-    if config["ANNOTATION"] == "EnsDb":
-        annofile='annotation_ensdb.Rmd'
-    else:
-        annofile='annotation_gtf.Rmd'
-    return annofile
 
 def get_tenx_type(wildcards):
     """Get matrix type (column name) from sample sheet."""
@@ -120,41 +107,18 @@ def get_groups(xpath):
     group_names = list(groups.keys())
     return group_names
 
-def get_assays(xpath, assay_type=None):
+
+def get_assays(xpath):
     """Get assay names from selected config section.
     If using group integrate, need to specify assay_type"""
     c = config
     groups = c.get(xpath, {}).get("groups", {})
     # group_vals is a list of dict_values
-    group_vals = list(groups.values())
-    assay_names = []
-    if assay_type is None:
-        for x in group_vals:
-            # get dict for given group values
-            assay_name = x.get("assay_name", {})
-            assay_names.append(assay_name)
-    else:
-        for x in group_vals:
-            # get dict for given group values
-            assay_name = x.get(assay_type, {}).get("assay_name", {})
-            assay_names.append(assay_name)
+    assay_names = [v['assay_name'] for v in groups.values()]
     return assay_names
 
 
 ####### rule inputs ###########
-
-def get_coembed_input(wildcards):
-    """If present, select seurat object to for rule input."""
-    if is_activated("integrate"):
-        seurat_obj = [
-        "results/process/unintegrated.rds",
-        "results/process/integrated.rds"
-        ]
-    else:
-        seurat_obj = [
-        "results/process/unintegrated.rds"
-        ]
-    return seurat_obj
 
 def get_cluster_inputs(wildcards):
     seurat = wildcards.seurat
@@ -188,100 +152,28 @@ def determine_input():
 
 
 ####### valid inputs ##########
+# Create a list storing all targets configured for normalization and integration
+snn_targets = get_groups("normalize")
+if is_activated("integrate"):
+    snn_targets.extend(get_groups("integrate"))
 
-def get_snn_targets():
-    # Gather files for clustering. 
-    # Either shared nearest neighbor or 
-    # weighted nearest neighbor methods.
-    unintegrated_list = get_groups("normalize")
-    snn_targets = unintegrated_list[:] # copy values not reference
-    # # for filtering out "MACS" assays, if needed
-    # unintegrated_assays = get_groups("normalize")
-    # snn_assays = unintegrated_assays[:]
-    if config["macs2"]["run"] == "N":
-        from itertools import compress
-        # snn_targets.remove("unintegrated_2")
-        # find any unitegrated assays containing "MACS"
-        assays_list = get_assays("normalize")
-        # subset snn_targets based on logicals checking "MACS"
-        idx = [item != "MACS" for item in assays_list]
-        snn_targets = list(compress(snn_targets, idx))
-    if is_activated("integrate"):
-        integrated_list = get_groups("integrate")
-        if config["macs2"]["run"] == "N":
-            # find any reference/query assays containing "MACS"
-            assays_ref = get_assays("integrate", assay_type = "reference")
-            idx_ref = np.array([item != "MACS" for item in assays_ref])
-            assays_query = get_assays("integrate", assay_type = "query")
-            idx_query = np.array([item != "MACS" for item in assays_query])
-            # numpy compare, retain 'false' if idx_ref or idx_query has a false
-            idx = list(idx_ref & idx_query)
-            integrated_list = list(compress(integrated_list, idx))
-        snn_targets.extend(integrated_list)
-    if is_activated("coembed"):
-        coembed_list = get_groups("coembed")
-        snn_targets.extend(coembed_list)
-        # fix later as with 'if config["macs2"] == "N"'
-        # coembed_assays = get_assays("coembed")
-        # snn_assays.extend(coembed_assays)
-    return snn_targets
+# Filter the targets based on MACS2 configuration
+if config["macs2"]["run"] == "N":
+    # find any unitegrated assays containing "MACS"
+    assays_list = get_assays("normalize")
+    assays_list.extend(get_assays("integrate"))
+    # subset snn_targets based on logicals checking "MACS"
+    idx = [item != "MACS" for item in assays_list]
+    snn_targets = list(compress(snn_targets, idx))
 
-snn_targets = get_snn_targets()
+# Create a dictionary for rule-target pairs
+d = {}
+for key, value in config.items():
+    if isinstance(value, dict):
+        if "activate" in value.keys() or key == "normalize":
+            d[key] = value["groups"]
 
-
-def get_valid_groups():
-    # it's easy to accidentally add analysis groups for optional rules
-    # this filters out out groups that don't match across groups
-    # get activations and groups for each config section:
-    a = {}
-    d = {}
-    for i in config.keys():
-        # print(i)
-        if isinstance (config[i], dict) or isinstance (config[i], OrderedDict):
-            # print("is")
-            c = config[i]
-            if "activate" in c.keys():
-                a[i] = c['activate']
-                # print(c.keys())
-                d[i] = c['groups']
-        else:
-            # print("not")
-            d[i] = None
-    dd = {key:val for key, val in d.items() if val != None}
-    for key, value in a.items():
-        if not value:
-            del dd[key]
-    if is_activated("weighted_nn"):
-        # print("weighted_nn activated")
-        dw = dd['weighted_nn']
-        del dd['weighted_nn']
-    dd['normalize'] = config['normalize']['groups']
-    df = pd.DataFrame.from_dict(dd)
-    g = {}
-    for i in df.columns:
-        # print(i)
-        targets = snn_targets[:]
-        if is_activated("weighted_nn"):
-            targets.extend(list(dw.keys()))
-        df_filter = df.loc[[item in targets for item in df.index], :]
-        df_filter = df_filter.dropna(subset=[i]).index
-        df_filter =df_filter.unique().to_list()
-        g[i] = df_filter
-    if is_activated("weighted_nn"):
-        h = {}
-        for key, value in dw.items():
-            h[key] = dw[key]['input_groups']
-        for key, value in h.items():
-            if not all([item in targets for item in h['wnn_0']]):
-                del h[key]
-        if bool(h):
-            g['weighted_nn'] = list(h.keys())
-    valid_groups = g
-    return valid_groups
-
-valid_groups = get_valid_groups()
-
-print(valid_groups)    # uncomment for testing
+valid_groups = {key:list(config[key]['groups'].keys()) for key in d.keys()}
 
 ####### cluster inputs ########
 
@@ -302,49 +194,39 @@ if is_activated("weighted_nn"):
         )
     )
 
-# print("cluster_input")
-# print(cluster_input)
-
 ####### all inputs ############
+wanted_input = []
 
-def all_input(wildcards):
-    wanted_input = []
-
-    if is_activated("diff_analysis"):
-        wanted_input.extend(
-            expand(
-                "results/diff_analysis/{seurat}/markers.tsv",
-                seurat=valid_groups['diff_analysis']
-            )
+if is_activated("diff_analysis"):
+    wanted_input.extend(
+        expand(
+            "results/diff_analysis/{seurat}/markers.tsv",
+            seurat=valid_groups['diff_analysis']
         )
-
-    # gather path to combine as many seurat objects as possible
-    wanted_input.append(
-        "results/combine/seurat_combined.rds"
     )
 
-    # Downstream analyses following chooseR, append to 'wanted_input' here.
-    # other cool stuff here...
+# gather path to combine as many seurat objects as possible
+wanted_input.append(
+    "results/combine/seurat_combined.rds"
+)
 
-    if config["guide"] == "build":
-        wanted_input.append(
-            "../report/guide.rst"
-        )
-    elif config["guide"] == "render":
-        wanted_input.append(
-            "../report/guide.html"
-        )
-
-    return wanted_input
-
+# Downstream analyses following chooseR, append to 'wanted_input' here.
+# other cool stuff here...
+if config["guide"] == "build":
+    wanted_input.append(
+        "../report/guide.rst"
+    )
+elif config["guide"] == "render":
+    wanted_input.append(
+        "../report/guide.html"
+    )
 
 ####### rules ###########
 
 rule all:
     input:
-        all_input
-
-
+        wanted_input
+        # expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['diff_analysis'])
 
 rule build_annotation:
     """
@@ -356,7 +238,7 @@ rule build_annotation:
     Does not impact sample['genome'] where multi-species is supported.
     """
     input:
-        markdown = get_anno_rmd,
+        markdown = lambda x: "annotation_ensdb.Rmd" if config["ANNOTATION"] == "EnsDb" else "annotation_gtf.Rmd"
     output:
         html = "results/build_annotation/report.html",
         anno_atac = "results/build_annotation/annotation.rds",

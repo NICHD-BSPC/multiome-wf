@@ -61,6 +61,9 @@ macs2:
 
 
 # Normalization and linear reduction
+#
+# split_by: metadata column to split, match the split_by in the `integrate`
+#
 # groups: Each group to perform normalization. Group name (key) must be unique.
 #
 # assay_name: Which Seurat assay to use. Seurat assay names are '.' delimited.
@@ -69,6 +72,7 @@ macs2:
 # norm_method: Method to normalize the group's assay.
 #   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
 normalize:
+  split_by: meta_geno
   groups:
     unintegrated_0:
       assay_name: Gene.Expression
@@ -130,59 +134,29 @@ normalize:
 integrate:
   activate: true
   atac_integrate_embeddings: true
+  split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integrati
   groups:
     integrated_0:
-      # split_by: meta_batch
-      split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integration
-      n_dataset: 2
-      reference:
-        label: wt
-        assay_name: Gene.Expression
-      query:
-        label: ko
-        assay_name: Gene.Expression
+      assay_name: Gene.Expression
       norm_method: sct
+      integrate_method: CCAIntegration  # RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration
       integrate_dims:
         - 1
         - 30
     integrated_1:
-      # split_by: meta_batch
-      split_by: meta_geno
-      n_dataset: 2
-      reference:
-        label: wt
-        assay_name: Peaks
-      query:
-        label: ko
-        assay_name: Peaks
+      assay_name: Peaks
       norm_method: lsi
       integrate_dims:
         - 1
         - 30
     integrated_2:
-      # split_by: meta_batch
-      split_by: meta_geno
-      n_dataset: 2
-      reference:
-        label: wt
-        assay_name: MACS
-      query:
-        label: ko
-        assay_name: MACS
+      assay_name: MACS
       norm_method: lsi
       integrate_dims:
         - 1
         - 30
     integrated_3:
-      # split_by: meta_batch
-      split_by: meta_geno
-      n_dataset: 2
-      reference:
-        label: wt
-        assay_name: Gene.Activity
-      query:
-        label: ko
-        assay_name: Gene.Activity
+      assay_name: Gene.Activity
       norm_method: lsi
       integrate_dims:
         - 1
@@ -194,40 +168,6 @@ dataset_size:
   toydataset: true  # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # check `https://satijalab.org/seurat/reference/integrateembeddings`
-
-
-# Coembed rna and atac data
-# activate: Coembed rna and atac data instead of integrating/transforming data?
-#   Similar in concept to integration workflow, but doesn't transform ATAC data or create "integrated" slot.
-#   Coembedding rule will create a new Seurat object for the comembeding rule.
-#   If True, 
-#     1. Use RNA Gene Expression counts
-#     2. Impute ATAC Gene Activity Scores from Gene Expression counts
-#     3. Coembed UMAPs
-#     Ref: https://satijalab.org/seurat/articles/atacseq_integration_vignette.html
-#   If False,
-#     Skips coembedding rule
-#
-# reference: group to use as reference data for coembedding
-#
-# type: Which object to look for data in? Can select an assay in unitegrated or integrated Seurat objects.
-#
-# slot_name: assay name to use, '.' delimited. Any valid assay from unintegrated or integrated objects.
-#
-# norm_method: normalization method for assay selected in 'slot_name'
-#
-# reduction: reduction performed on assay selected in 'slot_name'
-coembed:
-  activate: false
-  groups:
-    integrated_0:
-      split_by: meta_batch
-      reference:
-        label: batch1
-        assay_name: Gene.Expression
-      query:
-        label: batch2
-        assay_name: Gene.Expression
 
 chooser:
   groups:
