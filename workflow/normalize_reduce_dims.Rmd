@@ -58,6 +58,7 @@ config_path <- params[['config']]
 Read in all Seurat objects and combine in a list.
 
 ```{r input}
+
 seurat <- readRDS(params[['seurat_in']])
 print('Input Seurat object:')
 print(seurat)
@@ -82,6 +83,8 @@ We'll iterate over a single group listed in the 'normalize' section of the yaml 
 target <- basename(params[['seurat_out']])
 target <- gsub("^(.*).rds", "\\1", target)
 print(paste("Normalizing for group:", target))
+
+split_by <- config[['normalize']][['split_by']]
 
 groups <- config[['normalize']][['groups']]
 
@@ -117,11 +120,8 @@ column. This breaks most downstream processes.
 # remove cells with 0 counts for the selected assay
 var_name <- paste0('nCount_', assay)
 print(paste("Cells with zero or missing values are removed based on", var_name))
-var_val <- 0
 
-# https://github.com/satijalab/seurat/issues/1053
-# old code:
-# expr <- FetchData(object = seurat, vars = var_name)
+# Create a logical vector for each cell having non-zero counts
 new_idx <- tryCatch(expr={
              fetch <- FetchData(object = seurat, vars = var_name)
              !is.na(fetch) & (fetch > 0) },
@@ -140,11 +140,14 @@ multiple reductions (umap for GEX and umap for ATAC, etc)
 ```{r normalize}
 
 if (length(new_idx) > 0 & !identical(idx, new_idx)) {
-    # https://github.com/satijalab/seurat/issues/1053
+    # Subset cells with non-zero counts if present
     seurat_sub <- seurat[,which(x = new_idx)]
 
     # Ensure to set default assay properly
-	DefaultAssay(seurat_sub) <- assay
+    DefaultAssay(seurat_sub) <- assay
+
+    # Split the layers by the choice of your metadata variable
+    seurat_sub <- split(seurat_sub, seurat_sub@meta.data[[split_by]])
 
     # Run dimensionality reduction based on configuration
     seurat_sub <- preprocess_seurat(
@@ -156,7 +159,7 @@ if (length(new_idx) > 0 & !identical(idx, new_idx)) {
     print('Assay not present in dataset. Skipping.')
 }
 
-print('Dim Reduction slots in Seurat object:')
+print('Reduced dimensions added:')
 print(seurat_sub@reductions)
 ```
 
