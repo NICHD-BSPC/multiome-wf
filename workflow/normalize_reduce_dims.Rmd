@@ -146,9 +146,6 @@ if (length(new_idx) > 0 & !identical(idx, new_idx)) {
     # Ensure to set default assay properly
     DefaultAssay(seurat_sub) <- assay
 
-    # Split the layers by the choice of your metadata variable
-    seurat_sub <- split(seurat_sub, seurat_sub@meta.data[[split_by]])
-
     # Run dimensionality reduction based on configuration
     seurat_sub <- preprocess_seurat(
         seurat_obj = seurat_sub,
