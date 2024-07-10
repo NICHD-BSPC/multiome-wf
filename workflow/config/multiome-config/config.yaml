@@ -146,18 +146,20 @@ integrate:
     integrated_1:
       assay_name: Peaks
       norm_method: lsi
+      integrate_method: rlsi
       integrate_dims:
         - 1
         - 30
-    integrated_2:
-      assay_name: MACS
-      norm_method: lsi
-      integrate_dims:
-        - 1
-        - 30
+    # integrated_2:
+      # assay_name: MACS
+      # norm_method: lsi
+      # integrate_dims:
+        # - 1
+        # - 30
     integrated_3:
       assay_name: Gene.Activity
-      norm_method: lsi
+      norm_method: log
+      integrate_method: CCAIntegration
       integrate_dims:
         - 1
         - 30
