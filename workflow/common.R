@@ -266,8 +266,9 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(seurat_obj) %>%
-			RunPCA()
+		seurat_obj <- ScaleData(seurat_obj)
+
+		seurat_obj <- RunPCA(seurat_obj)
 		
 	} else if (norm_method == 'clr') {
 		print("Performing log normalization.")
@@ -285,8 +286,9 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(seurat_obj) %>%
-			RunPCA()
+		seurat_obj <- ScaleData(seurat_obj)
+
+		seurat_obj <- RunPCA(seurat_obj)
 		
 
 	} else if (norm_method == 'sct') {
