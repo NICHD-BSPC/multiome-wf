@@ -154,6 +154,7 @@ def determine_input():
 ####### valid inputs ##########
 # Create a list storing all targets configured for normalization and integration
 snn_targets = get_groups("normalize")
+
 if is_activated("integrate"):
     snn_targets.extend(get_groups("integrate"))
 
@@ -175,43 +176,63 @@ for key, value in config.items():
 
 valid_groups = {key:list(config[key]['groups'].keys()) for key in d.keys()}
 
-####### cluster inputs ########
+######### Input files ###########
 
-# gather files for shared nearest neighbor analysis
-cluster_input = []
-cluster_input.extend(
-    expand(
-        "results/cluster/{seurat}/clustered_data.rds",
-        seurat=snn_targets
-    )
+# Prep input from normalization
+normalize_input = expand(
+    "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.rds",
+    seurat_un=valid_groups["normalize"])
+
+# Prep input from integration
+integrate_input = expand(
+    "results/integrate/{seurat_in}.rds",
+    seurat_in=valid_groups["integrate"]
+)
+
+# Prep input from chooser
+chooser_input = expand(
+    "results/chooser_run/{seurat_all}/seurat_obj_{res}.rds",
+    seurat_all=snn_targets, res=resolutions
+)
+
+# Prep input from cluster
+cluster_input = expand(
+    "results/cluster/{seurat_all}/clustered_data.rds",
+    seurat_all=snn_targets
 )
 
 if is_activated("weighted_nn"):
     cluster_input.extend(
         expand(
-            "results/wnn/{seurat}/clustered_data.rds",
-            seurat=valid_groups['weighted_nn']
+            "results/wnn/{seurat_all}/clustered_data.rds",
+            seurat_all=valid_groups['weighted_nn']
         )
     )
+
+
+# Prep input from marker gene analysis
+diff_input = expand(
+    "results/diff_analysis/{seurat_all}/markers.tsv",
+    seurat_all=valid_groups['diff_analysis'])
+
 
 ####### all inputs ############
-wanted_input = []
 
+# Initialize a list with the input for combine rule
+wanted_input = ["results/combine/seurat_combined.rds"] 
+
+# Add default input to the list
+wanted_input = wanted_input + normalize_input + chooser_input + cluster_input
+
+# Add integrate_input if configured
+if is_activated("integrate"):
+    wanted_input.extend(integrate_input)
+
+# Add diff_input if configured
 if is_activated("diff_analysis"):
-    wanted_input.extend(
-        expand(
-            "results/diff_analysis/{seurat}/markers.tsv",
-            seurat=valid_groups['diff_analysis']
-        )
-    )
+    wanted_input.extend(diff_input)
 
-# gather path to combine as many seurat objects as possible
-wanted_input.append(
-    "results/combine/seurat_combined.rds"
-)
-
-# Downstream analyses following chooseR, append to 'wanted_input' here.
-# other cool stuff here...
+# Add guide input if configured
 if config["guide"] == "build":
     wanted_input.append(
         "../report/guide.rst"
@@ -225,7 +246,8 @@ elif config["guide"] == "render":
 
 rule all:
     input:
-        wanted_input
+        integrate_input
+        # wanted_input
         # expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['diff_analysis'])
 
 rule build_annotation:
@@ -536,12 +558,12 @@ rule normalize_reduce_dims:
         seurat_in = determine_input(),
         config = ancient(configuration),
     output:
-        html = "results/normalize_reduce_dims/{seurat}/{seurat}.report.html",
-        seurat_out = "results/normalize_reduce_dims/{seurat}/{seurat}.rds",
-        output_dir = directory("results/normalize_reduce_dims/{seurat}")
+        html = "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.report.html",
+        seurat_out = "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.rds",
+        output_dir = directory("results/normalize_reduce_dims/{seurat_un}")
     params:
         scriptdir = "scripts",
-        intermediates_dir="results/normalize_reduce_dims/intermediates_dir/{seurat}",
+        intermediates_dir = "results/normalize_reduce_dims/intermediates_dir/{seurat_un}",
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -551,7 +573,8 @@ rule normalize_reduce_dims:
         # disk_mb=1024 * 100,
         # runtime=60 * 24
     shell:
-        """Rscript -e 'params = list(
+        """
+        Rscript -e 'params = list(
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 seurat_out = "{output.seurat_out}",
@@ -561,6 +584,7 @@ rule normalize_reduce_dims:
                 output_dir="{output.output_dir}",
                 intermediates_dir = "{params.intermediates_dir}",
                 output_file = "{output.html}" )'
+        rm -rf {params.intermediates_dir}
         """
 
 rule integrate:
@@ -574,11 +598,11 @@ rule integrate:
     """
     input:
         markdown = "integrate.Rmd",
-        seurat_in = determine_input(),
+        seurat_in = "results/normalize_reduce_dims/un{seurat_in}/un{seurat_in}.rds",
         config = ancient(configuration),
     output:
-        html = "results/integrate/{seurat}.report.html",
-        seurat_out = "results/integrate/{seurat}.rds",
+        html = "results/integrate/{seurat_in}.report.html",
+        seurat_out = "results/integrate/{seurat_in}.rds",
     threads: 32
     resources:
           mem_mb=1024 * 100,
@@ -912,4 +936,5 @@ rule render_guide:
         "../report/guide.html"
     shell:
         "rst2html5 --stylesheet {input.css} -q {input.rst} {output}"  # returns guide.html
+
 
