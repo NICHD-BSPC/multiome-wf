@@ -195,56 +195,6 @@ cluster:
   resolution: 0.6  # Set to null if you're taking advantage of chooser
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
-# Community detection and graphing
-# groups: Each group to perform clustering.
-#   If provided, group names must match 'groups' section of 'normalization' or 'integration' sections.
-#   If not provided, clustering will be performed on all assays using default values from Seurat methods.
-#
-# neighbor_method: use Seurat's graph-based shared nearest neighbor detection ['shared']
-#   or weighted nearest neighbor ['weighted']
-#   - Shared nearest neighbor graph is suitable for most applications using single modality.
-#   - Weighted neratest neighbor graph is useful for multimodal analyses
-#       (GEX+ATAC multiome, CITE-Seq, etc)
-#   - Note: weighted nearest neighbor method requires umap (tsne not supported by Seurat)
-# assay_name: Which Seurat assay(s) to use. Seurat assay names are '.' delimited.
-#   Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
-#
-# reduction: Which reduction(s) to use to build graphs for 'snn' or 'wsnn'
-#   Order must match order in 'assay_name'
-#   Currently supported reductions:
-#   - 'pca' for all assays except ATAC Peaks
-#   - 'lsi' for ATAC peaks
-#
-# umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
-#   Order must match order in 'assay_name'
-#
-# resolution: Single numeric value to use as resolution parameter for group.
-# Example 1: defaults
-# cluster:
-#   activate: true
-#   groups: null
-#
-# Example 2: manual param selection
-# cluster:
-#   activate: true
-#   groups:
-#     unintegrated_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
-#     coembeded_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
-
 # Fix later
 # Weighted snn
 weighted_nn:
