@@ -252,6 +252,8 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 	if (norm_method == 'log') {
 		print("Performing log normalization.")
 		
+		# Split the layers by the choice of your metadata variable
+		seurat_obj <- split(seurat_obj, seurat_obj@meta.data[[split_by]])
 		seurat_obj <- NormalizeData(
 			object = seurat_obj,
 			normalization.method = 'LogNormalize'
@@ -264,14 +266,15 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(seurat_obj)
-		
-		seurat_obj <- RunPCA(seurat_obj)
-
+		seurat_obj <- ScaleData(seurat_obj) %>%
+			RunPCA()
 		
 	} else if (norm_method == 'clr') {
 		print("Performing log normalization.")
 		
+		# Split the layers by the choice of your metadata variable
+		seurat_obj <- split(seurat_obj, seurat_obj@meta.data[[split_by]])
+
 		VariableFeatures(seurat_obj) <- rownames(seurat_obj)
 		print(head(VariableFeatures(seurat_obj)))
 		
@@ -282,13 +285,15 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		)
 		
 		# Log norm method needs fruther scaling
-		seurat_obj <- ScaleData(seurat_obj)
+		seurat_obj <- ScaleData(seurat_obj) %>%
+			RunPCA()
 		
-		seurat_obj <- RunPCA(object = seurat_obj)
 
 	} else if (norm_method == 'sct') {
 		print("Performing SCTransform normalization.")
 		
+		# Split the layers by the choice of your metadata variable
+		seurat_obj <- split(seurat_obj, seurat_obj@meta.data[[split_by]])
 		seurat_obj <- SCTransform(
 			object = seurat_obj,
 			assay = assay
@@ -297,7 +302,6 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 		# !!!!!!!!!! When using SCT method DO NOT scale data with ScaleData() !!!!!!!!!!
 		
 		seurat_obj <- RunPCA(seurat_obj)
-
 		
 	} else if (norm_method == "lsi") {
 		print("Performing LSA normalization.")
