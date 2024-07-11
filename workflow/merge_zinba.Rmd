@@ -79,7 +79,7 @@ annotation <- readRDS(params[["annotation"]])
 
 ## Update ZINBA peak coordinates (if necessary)
 
-- Peaks are called by ZINBA during the cellranger-arc run (saved in `atac_peaks.bed`). See more info 
+Peaks are called by ZINBA during the cellranger-arc run (saved in `atac_peaks.bed`). See more info 
 about [cellranger-arc-mediated peak calling](https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/output/peaks).
 
 We will check if there are more than one sample with a Peaks assay, and if so, take the union of all loci 
