@@ -121,14 +121,14 @@ def get_assays(xpath):
 ####### rule inputs ###########
 
 def get_cluster_inputs(wildcards):
-    seurat = wildcards.seurat
+    seurat = wildcards.seurat_all
     r = re.compile(seurat)
     unintegrated_list = get_groups("normalize")
     matches = list(filter(r.match, unintegrated_list))
     if (len(matches) > 0):
-        seurat_obj = "results/normalize_reduce_dims/{seurat}/{seurat}.rds"
+        seurat_obj = f"results/normalize_reduce_dims/{seurat}/{seurat}.rds"
     else:
-        seurat_obj = "results/integrate/{seurat}/{seurat}.rds"
+        seurat_obj = f"results/integrate/{seurat}/{seurat}.rds"
     return seurat_obj
 
 def get_diff_test_input(wildcards):
@@ -246,7 +246,9 @@ elif config["guide"] == "render":
 
 rule all:
     input:
-        integrate_input
+        chooser_input,
+        integrate_input,
+        normalize_input
         # wanted_input
         # expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['diff_analysis'])
 
@@ -630,18 +632,23 @@ rule chooser_paral:
     """
     input:
         markdown = "chooser_paral.Rmd",   # chooser - parallelized
-        seurat_in = get_cluster_inputs,
+#         seurat_in = get_cluster_inputs,
+        seurat_in = lambda wildcards: (
+            f"results/normalize_reduce_dims/{wildcards.seurat_un}/{wildcards.seurat_un}.rds"
+            if wildcards.seurat_all in get_groups['normalize']
+            else f"results/integrate/{wildcards.seurat_in}/{wildcards.seurat_in}.rds"
+        ),
         config = ancient(configuration),
     output:
-        html = "results/chooser_run/{seurat}/res_{res}/report.html",
-        output_dir = directory("results/chooser_run/{seurat}/res_{res}"),
-        calculation_rds = expand("results/chooser_run/{{seurat}}/{sil}_{{res}}.rds", sil=chooser_sil),
-        seurat_rds = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
+        html = "results/chooser_run/{seurat_all}/res_{res}/report.html",
+        output_dir = directory("results/chooser_run/{seurat_all}/res_{res}"),
+        calculation_rds = expand("results/chooser_run/{{seurat_all}}/{sil}_{{res}}.rds", sil=chooser_sil),
+        seurat_rds = "results/chooser_run/{seurat_all}/seurat_obj_{res}.rds",
     params:
-        results_path = "results/chooser_run/{seurat}",
-        seurat_out = "{seurat}",
+        results_path = "results/chooser_run/{seurat_all}",
+        seurat_out = "{seurat_all}",
         scriptdir="scripts",
-        intermediates_dir = "results/chooser_run/intermediates_dir/{seurat}/res_{res}",
+        intermediates_dir = "results/chooser_run/intermediates_dir/{seurat_all}/res_{res}",
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -667,6 +674,7 @@ rule chooser_paral:
                 intermediates_dir = "{params.intermediates_dir}",
                 output_dir = "{output.output_dir}",
                 output_file = "{output.html}")'
+            rm -rf {params.intermediates_dir}
         """
 
 rule chooser_aggr:
