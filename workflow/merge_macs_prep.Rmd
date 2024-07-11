@@ -92,27 +92,18 @@ fails. A better way to do handle this is to use cellranger-arc aggr, which merge
 and re-counts fragments which those loci.
 
 ```{r update_zinba_peaks}
-# any peaks present?
-peaks_idx <- sapply(seurat_list, function(x) { 
-    any(names(x) %in% 'Peaks') 
+
+# Create a logical vector indicating the presence of `Peaks`
+peaks_idx <- sapply(seq_along(seurat_list), function(x) {
+    any(names(seurat_list[[x]]) %in% 'Peaks')
 })
 
 # peaks present in more >1 sample? If so, update peaks coords across samples
 if (sum(peaks_idx, na.rm = TRUE) > 1) {
 
-    # make a list of all peaks coords
-    peaks <- lapply(seq_along(peaks_idx), function(x) {
-        if (peaks_idx[x]) {
-            regions <- seurat_list[[x]][['Peaks']]@ranges
-        } else {
-            regions <- NA
-        }
-        return(regions)
-    })
+    peaks <- seurat_list[peaks_idx] %>%
+        lapply(function(o) o[['Peaks']]@ranges)
 
-    # merge all peak coords
-    idx <- which(!is.na(peaks))
-    peaks <- peaks[idx]
     # align the ranges and merge overlapping ranges to produce a simplified set
     merged_peaks <- GenomicRanges::reduce(Reduce("c", peaks))
     print('Updated peaks for use with all Peaks X Cells matrices:')
