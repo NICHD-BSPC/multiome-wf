@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r packages_and_functions, include=FALSE}
+libray(tidyverse)
 library(GenomeInfoDb)
 library(Signac)
 library(Seurat)
