@@ -119,17 +119,16 @@ def get_assays(xpath):
 
 
 ####### rule inputs ###########
-
 def get_cluster_inputs(wildcards):
-    seurat = wildcards.seurat_all
-    r = re.compile(seurat)
-    unintegrated_list = get_groups("normalize")
-    matches = list(filter(r.match, unintegrated_list))
-    if (len(matches) > 0):
-        seurat_obj = f"results/normalize_reduce_dims/{seurat}/{seurat}.rds"
+    if wildcards.seurat in valid_groups['integrate']:
+        seurat = wildcards.seurat
+        return "results/integrate/{{seurat}}/{{seurat}}.rds"
     else:
-        seurat_obj = f"results/integrate/{seurat}/{seurat}.rds"
-    return seurat_obj
+        seurat = wildcards.seurat
+        return "results/normalize_reduce_dims/{{seurat}}/{{seurat}}.rds"
+
+def get_integrate_inputs(wildcards):
+    return f"results/normalize_reduce_dims/un{wildcards.seurat_i}/un{wildcards.seurat_i}.rds"
 
 def get_diff_test_input(wildcards):
     seurat = wildcards.seurat
@@ -180,25 +179,27 @@ valid_groups = {key:list(config[key]['groups'].keys()) for key in d.keys()}
 
 # Prep input from normalization
 normalize_input = expand(
-    "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.rds",
-    seurat_un=valid_groups["normalize"])
+    "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.rds",
+    seurat_u=valid_groups["normalize"])
 
 # Prep input from integration
 integrate_input = expand(
-    "results/integrate/{seurat_in}.rds",
-    seurat_in=valid_groups["integrate"]
+    "results/integrate/{seurat_i}.rds",
+    seurat_i=valid_groups["integrate"]
 )
 
 # Prep input from chooser
 chooser_input = expand(
-    "results/chooser_run/{seurat_all}/seurat_obj_{res}.rds",
-    seurat_all=snn_targets, res=resolutions
+    "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
+    seurat=snn_targets, res=resolutions
 )
+if not is_activated("integrate"):
+    chooser_input = [x for x in chooser_input if x not in valid_groups['integrate']]
 
 # Prep input from cluster
 cluster_input = expand(
-    "results/cluster/{seurat_all}/clustered_data.rds",
-    seurat_all=snn_targets
+    "results/cluster/{seurat}/clustered_data.rds",
+    seurat=snn_targets
 )
 
 if is_activated("weighted_nn"):
@@ -222,7 +223,7 @@ diff_input = expand(
 wanted_input = ["results/combine/seurat_combined.rds"] 
 
 # Add default input to the list
-wanted_input = wanted_input + normalize_input + chooser_input + cluster_input
+# wanted_input = wanted_input + normalize_input + chooser_input + cluster_input
 
 # Add integrate_input if configured
 if is_activated("integrate"):
@@ -246,11 +247,10 @@ elif config["guide"] == "render":
 
 rule all:
     input:
-        chooser_input,
-        integrate_input,
-        normalize_input
-        # wanted_input
-        # expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['diff_analysis'])
+        # chooser_input,
+        normalize_input,
+        integrate_input
+
 
 rule build_annotation:
     """
@@ -262,7 +262,11 @@ rule build_annotation:
     Does not impact sample['genome'] where multi-species is supported.
     """
     input:
-        markdown = lambda x: "annotation_ensdb.Rmd" if config["ANNOTATION"] == "EnsDb" else "annotation_gtf.Rmd"
+        markdown = lambda x: (
+            "annotation_ensdb.Rmd" 
+            if config["ANNOTATION"] == "EnsDb" 
+            else "annotation_gtf.Rmd"
+        )
     output:
         html = "results/build_annotation/report.html",
         anno_atac = "results/build_annotation/annotation.rds",
@@ -560,12 +564,12 @@ rule normalize_reduce_dims:
         seurat_in = determine_input(),
         config = ancient(configuration),
     output:
-        html = "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.report.html",
-        seurat_out = "results/normalize_reduce_dims/{seurat_un}/{seurat_un}.rds",
-        output_dir = directory("results/normalize_reduce_dims/{seurat_un}")
+        html = "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.report.html",
+        seurat_out = "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.rds",
+        interm_dir = temp("results/normalize_reduce_dims/intermediates_dir/{seurat_u}")
     params:
         scriptdir = "scripts",
-        intermediates_dir = "results/normalize_reduce_dims/intermediates_dir/{seurat_un}",
+        output_dir = "results/normalize_reduce_dims/{seurat_u}",
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -580,14 +584,15 @@ rule normalize_reduce_dims:
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 seurat_out = "{output.seurat_out}",
-                scriptdir = "{params.scriptdir}" );
+                scriptdir = "{params.scriptdir}");
             rmarkdown::render("{input.markdown}",
                 params = params,
-                output_dir="{output.output_dir}",
-                intermediates_dir = "{params.intermediates_dir}",
-                output_file = "{output.html}" )'
-        rm -rf {params.intermediates_dir}
+                output_dir="{params.output_dir}",
+                intermediates_dir = "{output.interm_dir}",
+                output_file = "{output.html}")'
         """
+
+
 
 rule integrate:
     """
@@ -600,11 +605,11 @@ rule integrate:
     """
     input:
         markdown = "integrate.Rmd",
-        seurat_in = "results/normalize_reduce_dims/un{seurat_in}/un{seurat_in}.rds",
+        seurat_in = get_integrate_inputs,
         config = ancient(configuration),
     output:
-        html = "results/integrate/{seurat_in}.report.html",
-        seurat_out = "results/integrate/{seurat_in}.rds",
+        html = "results/integrate/{seurat_i}.report.html",
+        seurat_out = "results/integrate/{seurat_i}.rds",
     threads: 32
     resources:
           mem_mb=1024 * 100,
@@ -625,30 +630,23 @@ rule integrate:
                 output_file = "{output.html}" )'
         """
 
-
 rule chooser_paral:
     """
     Runs chooseR
     """
     input:
         markdown = "chooser_paral.Rmd",   # chooser - parallelized
-#         seurat_in = get_cluster_inputs,
-        seurat_in = lambda wildcards: (
-            f"results/normalize_reduce_dims/{wildcards.seurat_un}/{wildcards.seurat_un}.rds"
-            if wildcards.seurat_all in get_groups['normalize']
-            else f"results/integrate/{wildcards.seurat_in}/{wildcards.seurat_in}.rds"
-        ),
+        seurat_in = get_cluster_inputs,
         config = ancient(configuration),
     output:
-        html = "results/chooser_run/{seurat_all}/res_{res}/report.html",
-        output_dir = directory("results/chooser_run/{seurat_all}/res_{res}"),
-        calculation_rds = expand("results/chooser_run/{{seurat_all}}/{sil}_{{res}}.rds", sil=chooser_sil),
-        seurat_rds = "results/chooser_run/{seurat_all}/seurat_obj_{res}.rds",
+        html = "results/chooser_run/{seurat}/res_{res}/report.html",
+        output_dir = directory("results/chooser_run/{seurat}/res_{res}"),
+        calculation_rds = expand("results/chooser_run/{{seurat}}/{sil}_{{res}}.rds", sil=chooser_sil),
+        seurat_rds = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
+        intermediates_dir = temp("results/chooser_run/intermediates_dir/{seurat}/res_{res}")
     params:
-        results_path = "results/chooser_run/{seurat_all}",
-        seurat_out = "{seurat_all}",
+        results_path = "results/chooser_run/{seurat}",
         scriptdir="scripts",
-        intermediates_dir = "results/chooser_run/intermediates_dir/{seurat_all}/res_{res}",
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -665,284 +663,14 @@ rule chooser_paral:
                 config = "{input.config}",
                 calculation_outs = "{output.calculation_rds}",
                 seurat_rds = "{output.seurat_rds}",
-                seurat_out = "{params.seurat_out}",
+                seurat_out = "{wildcards.seurat}",
                 results_path = "{params.results_path}",
                 res = "{wildcards.res}",
-                scriptdir = "{params.scriptdir}" );
+                scriptdir = "{params.scriptdir}");
             rmarkdown::render("{input.markdown}",
                 params = params,
-                intermediates_dir = "{params.intermediates_dir}",
-                output_dir = "{output.output_dir}",
-                output_file = "{output.html}")'
-            rm -rf {params.intermediates_dir}
-        """
-
-rule chooser_aggr:
-    """
-    Plots chooseR results
-    """
-    input:
-        markdown = 'chooser_aggr.Rmd',      # chooser - results
-        sil_obj = expand('results/chooser_run/{{seurat}}/{sil}_{res}.rds',
-                        sil=chooser_sil,
-                        res=resolutions),
-        config = ancient(configuration)
-    output:
-        html = "results/chooser_plot/{seurat}/report.html",
-        output_dir = directory("results/chooser_plot/{seurat}"),
-        seurat_rds = "results/chooser_plot/{seurat}/clustered_data.rds",
-        choice_rds = "results/chooser_plot/{seurat}/choice.rds",
-    params:
-        resolutions = resolutions,
-        res_path = "results/chooser_run/{seurat}",
-        new_path = "results/chooser_plot/{seurat}",
-        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
-    conda:
-        "chooser/env.yaml"
-    threads: 12
-    resources:
-        mem_mb=1024 * 150,
-        disk_mb=1024 * 100,
-        runtime=60 * 1
-    shell:
-        """
-        Rscript -e 'params = list(
-            sil_obj="{input.sil_obj}",
-            results_path="{params.res_path}",
-            new_path = "{params.new_path}",
-            config = "{input.config}",
-            seurat = "{wildcards.seurat}",
-            seurat_out = "{output.seurat_rds}",
-            choice_out = "{output.choice_rds}" );
-        rmarkdown::render("{input.markdown}",
-            params = params,
-            intermediates_dir = "{params.intermediates_dir}",
-            output_dir = "{output.output_dir}",
-            output_file = "{output.html}")'
-        """
-
-rule cluster:
-    """
-    Cluster each unintegrated or integrated assay based on Chooser results
-    """
-    input:
-        markdown = "cluster.Rmd",      # chooser - results
-        seurat_in = get_cluster_inputs,
-        res_choice = "results/chooser_plot/{seurat}/choice.rds",
-        config = ancient(configuration),
-    output:
-        html = "results/cluster/{seurat}/report.html",
-        output_dir = directory("results/cluster/{seurat}"),
-        seurat_out = "results/cluster/{seurat}/clustered_data.rds",
-        barcodes_out = "results/cluster/{seurat}/barcodes.rds",
-    params:
-        intermediates_dir = "results/cluster/intermediates_dir/{seurat}",
-        res_use = config["cluster"]["resolution"]
-    threads: 12
-    resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 24
-        # mem_mb=1024 * 200,
-        # disk_mb=1024 * 100,
-        # runtime=60 * 24
-    shell:
-        """
-        Rscript -e 'params = list(
-            seurat_in = "{input.seurat_in}",
-            config = "{input.config}",
-            res_choice = "{input.res_choice}",
-            seurat = "{wildcards.seurat}",
-            res_use = "{params.res_use}",
-            seurat_out = "{output.seurat_out}",
-            barcodes_out = "{output.barcodes_out}" );
-        rmarkdown::render("{input.markdown}",
-            params = params,
-            intermediates_dir = "{params.intermediates_dir}",
-            output_dir = "{output.output_dir}",
-            output_file = "{output.html}")'
-        """
-
-rule weighted_nn:
-    """
-    Runs weighted nearest neighbor analysis,
-    assumues cell names for each assay are identical.
-    Currently only one WNN analysis supported.
-    """
-    input:
-        markdown = "weighted_nn.Rmd",
-        seurats = expand(
-            "results/cluster/{seurat}/clustered_data.rds",
-            seurat=snn_targets
-        ),
-        config = ancient(configuration),
-    output:
-        html = "results/wnn/{seurat}/report.html",
-        seurat_out = "results/wnn/{seurat}/clustered_data.rds",
-        barcodes_out = "results/wnn/{seurat}/barcodes.rds",
-    params:
-        scriptdir = "scripts",
-    threads: 12
-    resources:
-        mem_mb=1024 * 200,
-        disk_mb=1024 * 50,
-        runtime=60 * 12
-        # mem_mb=1024 * 600,
-        # disk_mb=1024 * 300,
-        # runtime=60 * 12
-    shell:
-        """
-        ulimit -u 8192;
-        Rscript -e 'params = list(
-                seurats = "{input.seurats}",
-                config = "{input.config}",
-                seurat_out = "{output.seurat_out}",
-                barcodes_out = "{output.barcodes_out}",
-                seurat = "{wildcards.seurat}",
-                scriptdir = "{params.scriptdir}" );
-            rmarkdown::render("{input.markdown}",
-                params = parameters,
-                output_file = "{output.html}")'
-        """
-
-rule diff_analysis:
-    """
-    Runs differential testing for specified assays.
-    """
-    input:
-        markdown = "diff_analysis.Rmd",
-        seurat_in = get_diff_test_input,
-        config = ancient(configuration),
-    output:
-        html = "results/diff_analysis/{seurat}/report.html",
-        output_dir = directory("results/diff_analysis/{seurat}"),
-        markers_out = "results/diff_analysis/{seurat}/markers.tsv",
-    params:
-        scriptdir = "scripts",
-        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
-    threads: 32
-    resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 24
-        # mem_mb=1024 * 500,
-        # disk_mb=1024 * 250,
-        # runtime=60 * 24
-    shell:
-        """
-        ulimit -u 8192;
-        Rscript -e 'params = list(
-                seurat_in = "{input.seurat_in}",
-                config = "{input.config}",
-                markers_out = "{output.markers_out}",
-                seurat = "{wildcards.seurat}",
-                scriptdir = "{params.scriptdir}" );
-            rmarkdown::render("{input.markdown}",
-                params = parameters,
-                intermediates_dir = "{params.intermediates_dir}",
+                intermediates_dir = "{output.intermediates_dir}",
                 output_dir = "{output.output_dir}",
                 output_file = "{output.html}")'
         """
-
-rule combine:
-    """
-    Merge all Seurat objects created during rules cluster and weighted_nn.
-    Input  objects have 1 normalized, scaled assay, dim. reduction,
-    cluster identities from SNN and/or WNN community detection.
-    Merges non-greedily: if all cell barcodes in 2 objects identical merge objects.
-    If unique cell barcodes exist in either object, objects not merged.
-    """
-    input:
-        markdown = "combine.Rmd",
-        seurats = cluster_input,
-        config = ancient(configuration),
-    output:
-        html = "results/combine/report.html",
-        seurat_out = "results/combine/seurat_combined.rds",
-    threads: 12
-    resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 24
-        # mem_mb=1024 * 1000,
-        # disk_mb=1024 * 500,
-        # runtime=60 * 24
-    shell:
-        """Rscript -e 'params = list(
-                seurats = "{input.seurats}",
-                config = "{input.config}",
-                seurat_out = "{output.seurat_out}" );
-            rmarkdown::render("{input.markdown}",
-                params = parameters,
-                output_file = "{output.html}")'
-        """
-
-
-
-# Add downstream analyses here with combined object.
-# Be sure to append output file to "wanted_input" list.
-######################################################
-
-rule build_guide:
-    """
-    Builds initial version of guide.rst
-    """
-    input:
-        "config/other-setup/guide_template.rst"
-    output:
-        "../report/guide.rst"
-    params:
-        sampletable = config["samples"]
-    resources:
-        mem_mb=1024 * 20,
-        disk_mb=1024 * 10,
-        runtime=10
-    shell:
-        # returns guide.rst with report.html file paths in the results directory
-        """
-        find results -print | grep report.html > reportlist.txt
-        cat {params.sampletable} | tr '[:space:]' '[\n*]' | grep / > cellrangerlist.txt
-        while read p
-        do
-            if [[ "$p" == "Downstream output reports" ]]
-            then
-                echo "$p\n" >> {output}
-                while read l
-                do
-                    # update result name
-                    result_name=$(dirname "$l" | sed 's/results\///')
-                    line="$l"
-                    # escape bash variables by doubling them
-                    echo "- \`${{result_name}} <${{line}}>\`_\n" >> {output}
-                done < reportlist.txt
-            elif [[ "$p" == "Cellranger output directory" ]]
-            then
-                echo "$p\n" >> {output}
-                while read f
-                do
-                    file='- `cellranger_output <'"$f"'>`_\n'
-                    echo "$file" >> {output}
-                done < cellrangerlist.txt
-            elif [[ "$p" == ":local:" ]]
-            then
-                echo "\t:local:" >> {output}
-            else
-                echo "$p" >> {output}
-            fi
-        done < {input}
-        rm reportlist.txt cellrangerlist.txt
-        """
-
-rule render_guide:
-    """
-    Renders guide.rst
-    """
-    input:
-        css = "config/other-setup/style.css",
-        rst = "../report/guide.rst"
-    output:
-        "../report/guide.html"
-    shell:
-        "rst2html5 --stylesheet {input.css} -q {input.rst} {output}"  # returns guide.html
-
 
