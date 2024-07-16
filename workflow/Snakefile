@@ -42,77 +42,51 @@ samples.index = samples.index.set_levels(
 # Set chooser variables
 resolutions = config['chooser']['resolutions']
 chooser_sil = config['chooser']['silhouette']
-
-# Fix later:
-# Add some check to ensure within config.yaml sections,
-# "groups" dict keys are consistent with previous rules/sections
-
-
-##### wildcard constraints #####
-
-# fix later
-# wildcard_constraints:
-#     sample="|".join(samples.index),
+user_resolution = config['cluster']['resolution']
 
 
 ####### helpers ###########
 
 def is_activated(xpath):
-    """Rule selected rule?"""
+    """Check if the rule specified by xpath is activated."""
     c = config
     for entry in xpath.split("/"):
         c = c.get(entry, {})
     return bool(c.get("activate", False))
 
+
+def get_anno_rmd(wildcards):
+    return 'annotation_ensdb.Rmd' if config["ANNOTATION"] == "EnsDb" else 'annotation_gtf.Rmd'
+
 def get_tenx_type(wildcards):
     """Get matrix type (column name) from sample sheet."""
     cols = ['HDF5_Multiple_Assays', 'RDS_Multiple_Assays', 'Gene.Expression', 'Peaks', 'TF']
-    # df = samples.loc[wildcards.sample, cols] # does not account for replicates
-    if wildcards.replicate == 'nan':
-        samp_mask = samples["sample"]==wildcards.sample
-        df = samples[samp_mask]
-    else:
-        samp_mask = samples["sample"]==wildcards.sample
-        rep_mask = samples["replicate"]==wildcards.replicate
-        df = samples[samp_mask & rep_mask]
-    df = df.loc[:,cols].dropna(axis=1)
-    tenx_type = df.columns.to_list()
-    return tenx_type
+    df = samples[samples["sample"] == wildcards.sample]
+    if wildcards.replicate != 'nan':
+        df = df[df["replicate"] == wildcards.replicate]
+    return df[cols].dropna(axis=1).columns.to_list()
 
 def get_tenx(wildcards):
     """Get filtered matrix (hdf5/rds file or mex directory) path from sample sheet."""
     cols = ['HDF5_Multiple_Assays', 'RDS_Multiple_Assays', 'Gene.Expression', 'Peaks', 'TF']
-    # df = samples.loc[wildcards.sample, cols] # does not account for replicates
-    if wildcards.replicate == 'nan':
-        samp_mask = samples["sample"]==wildcards.sample
-        df = samples[samp_mask]
-    else:
-        samp_mask = samples["sample"]==wildcards.sample
-        rep_mask = samples["replicate"]==wildcards.replicate
-        df = samples[samp_mask & rep_mask]
-    df = df.loc[:,cols].dropna(axis=1)
-    tenx_path = df.values.flatten().tolist()
-    return tenx_path
+    df = samples[samples["sample"] == wildcards.sample]
+    if wildcards.replicate != 'nan':
+        df = df[df["replicate"] == wildcards.replicate]
+    return df[cols].dropna(axis=1).values.flatten().tolist()
 
 def get_tsv_path(xpath):
-    if os.path.exists(xpath):
-        return xpath
-    else:
-        return ""
+    return xpath if os.path.exists(xpath) else ""
 
 def get_groups(xpath):
     """Get group names from selected config section"""
-    c = config
-    groups = c.get(xpath, {}).get("groups", {})
-    group_names = list(groups.keys())
-    return group_names
-
+    return list(config.get(xpath, {}).get("groups", {}).keys())
 
 def get_assays(xpath):
-    """Get assay names from selected config section.
-    If using group integrate, need to specify assay_type"""
-    c = config
-    groups = c.get(xpath, {}).get("groups", {})
+    """
+    Get assay names from selected config section.
+    If using group integrate, need to specify assay_type
+    """
+    groups = config.get(xpath, {}).get("groups", {})
     # group_vals is a list of dict_values
     assay_names = [v['assay_name'] for v in groups.values()]
     return assay_names
@@ -120,26 +94,23 @@ def get_assays(xpath):
 
 ####### rule inputs ###########
 def get_cluster_inputs(wildcards):
-    if wildcards.seurat in valid_groups['integrate']:
-        seurat = wildcards.seurat
-        return "results/integrate/{{seurat}}/{{seurat}}.rds"
+    """
+    Decide input file path for rules `chooser_paral` and `cluster`
+    with or without integration
+    """
+    seurat = wildcards.seurat
+    if seurat in get_groups("normalize"):
+        return f"results/normalize_reduce_dims/{seurat}/{seurat}.rds"
     else:
-        seurat = wildcards.seurat
-        return "results/normalize_reduce_dims/{{seurat}}/{{seurat}}.rds"
-
-def get_integrate_inputs(wildcards):
-    return f"results/normalize_reduce_dims/un{wildcards.seurat_i}/un{wildcards.seurat_i}.rds"
+        return f"results/integrate/{seurat}.rds"
 
 def get_diff_test_input(wildcards):
     seurat = wildcards.seurat
-    r = re.compile(seurat)
     weighted_nn_list = get_groups("weighted_nn")
-    matches = list(filter(r.match, weighted_nn_list))
-    if (len(matches) > 0):
-        seurat_obj = "results/wnn/{seurat}/clustered_data.rds"
+    if seurat in weighted_nn_list:
+        return "results/wnn/{seurat}/clustered_data.rds"  
     else:
-        seurat_obj = "results/cluster/{seurat}/clustered_data.rds"
-    return seurat_obj
+        return "results/cluster/{seurat}/clustered_data.rds"
 
 def determine_input():
     if config["macs2"]["run"] == "Y":
@@ -175,82 +146,60 @@ for key, value in config.items():
 
 valid_groups = {key:list(config[key]['groups'].keys()) for key in d.keys()}
 
-######### Input files ###########
+####### cluster inputs ########
 
-# Prep input from normalization
-normalize_input = expand(
-    "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.rds",
-    seurat_u=valid_groups["normalize"])
-
-# Prep input from integration
-integrate_input = expand(
-    "results/integrate/{seurat_i}.rds",
-    seurat_i=valid_groups["integrate"]
-)
-
-# Prep input from chooser
-chooser_input = expand(
-    "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
-    seurat=snn_targets, res=resolutions
-)
-if not is_activated("integrate"):
-    chooser_input = [x for x in chooser_input if x not in valid_groups['integrate']]
-
-# Prep input from cluster
-cluster_input = expand(
-    "results/cluster/{seurat}/clustered_data.rds",
-    seurat=snn_targets
+cluster_input = []
+cluster_input.extend(
+    expand(
+        "results/cluster/{seurat}/clustered_data.rds",
+        seurat=snn_targets
+    )
 )
 
 if is_activated("weighted_nn"):
     cluster_input.extend(
         expand(
-            "results/wnn/{seurat_all}/clustered_data.rds",
-            seurat_all=valid_groups['weighted_nn']
+            "results/wnn/{seurat}/clustered_data.rds",
+            seurat=valid_groups['weighted_nn']
         )
     )
 
-
-# Prep input from marker gene analysis
-diff_input = expand(
-    "results/diff_analysis/{seurat_all}/markers.tsv",
-    seurat_all=valid_groups['diff_analysis'])
-
-
 ####### all inputs ############
 
-# Initialize a list with the input for combine rule
-wanted_input = ["results/combine/seurat_combined.rds"] 
+def all_input(wildcards):
+    wanted_input = []
 
-# Add default input to the list
-# wanted_input = wanted_input + normalize_input + chooser_input + cluster_input
+    if is_activated("diff_analysis"):
+        wanted_input.extend(
+            expand(
+                "results/diff_analysis/{seurat}/markers.tsv",
+                seurat=valid_groups['diff_analysis']
+            )
+        )
 
-# Add integrate_input if configured
-if is_activated("integrate"):
-    wanted_input.extend(integrate_input)
-
-# Add diff_input if configured
-if is_activated("diff_analysis"):
-    wanted_input.extend(diff_input)
-
-# Add guide input if configured
-if config["guide"] == "build":
     wanted_input.append(
-        "../report/guide.rst"
+        "results/combine/seurat_combined.rds"
     )
-elif config["guide"] == "render":
-    wanted_input.append(
-        "../report/guide.html"
-    )
+
+    if config["guide"] == "build":
+        wanted_input.append(
+            "../report/guide.rst"
+        )
+    elif config["guide"] == "render":
+        wanted_input.append(
+            "../report/guide.html"
+        )
+
+    return wanted_input
+
 
 ####### rules ###########
 
 rule all:
     input:
-        # chooser_input,
-        normalize_input,
-        integrate_input
-
+#         expand("results/integrate/{seurat}.rds", seurat=valid_groups['integrate']),
+#         expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['normalize']),
+        expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions)
 
 rule build_annotation:
     """
@@ -262,11 +211,7 @@ rule build_annotation:
     Does not impact sample['genome'] where multi-species is supported.
     """
     input:
-        markdown = lambda x: (
-            "annotation_ensdb.Rmd" 
-            if config["ANNOTATION"] == "EnsDb" 
-            else "annotation_gtf.Rmd"
-        )
+        markdown = get_anno_rmd,
     output:
         html = "results/build_annotation/report.html",
         anno_atac = "results/build_annotation/annotation.rds",
@@ -291,7 +236,6 @@ rule build_annotation:
 rule create_seurat:
     """
     Creates a seurat object with associated assays.
-    Include a 'wildcards.units' in unlikely case of multiple technical reps.
     """
     input:
         markdown = "create_seurat.Rmd",
@@ -346,9 +290,9 @@ rule qc:
     output:
         html = "results/qc/{sample}-{replicate}.report.html",
         seurat_out = "results/qc/{sample}-{replicate}.seurat_qc.rds",
+        intermediates_dir=temp("results/qc/{sample}-{replicate}")
     params:
         scriptdir = "scripts",
-        intermediates_dir="results/qc/{sample}-{replicate}",
         outdir = "results/qc"
     threads: 12
     resources:
@@ -366,7 +310,7 @@ rule qc:
                 scriptdir = "{params.scriptdir}" );
             rmarkdown::render("{input.markdown}",
                 params = params,
-                intermediates_dir = "{params.intermediates_dir}",
+                intermediates_dir = "{output.intermediates_dir}",
                 output_dir = "{params.outdir}",
                 output_file = "{output.html}" )'
         """
@@ -564,12 +508,12 @@ rule normalize_reduce_dims:
         seurat_in = determine_input(),
         config = ancient(configuration),
     output:
-        html = "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.report.html",
-        seurat_out = "results/normalize_reduce_dims/{seurat_u}/{seurat_u}.rds",
-        interm_dir = temp("results/normalize_reduce_dims/intermediates_dir/{seurat_u}")
+        html = "results/normalize_reduce_dims/{seurat}/{seurat}.report.html",
+        seurat_out = "results/normalize_reduce_dims/{seurat}/{seurat}.rds",
+        interm_dir = temp("results/normalize_reduce_dims/intermediates_dir/{seurat}")
     params:
         scriptdir = "scripts",
-        output_dir = "results/normalize_reduce_dims/{seurat_u}",
+        output_dir = "results/normalize_reduce_dims/{seurat}",
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -592,6 +536,9 @@ rule normalize_reduce_dims:
                 output_file = "{output.html}")'
         """
 
+def get_integrate_inputs(wildcards):
+    seurat = "un" + wildcards.seurat
+    return f"results/normalize_reduce_dims/{seurat}/{seurat}.rds",
 
 
 rule integrate:
@@ -605,11 +552,12 @@ rule integrate:
     """
     input:
         markdown = "integrate.Rmd",
+        # seurat_in = "results/normalize_reduce_dims/un{seurat}/un{seurat}.rds",
         seurat_in = get_integrate_inputs,
         config = ancient(configuration),
     output:
-        html = "results/integrate/{seurat_i}.report.html",
-        seurat_out = "results/integrate/{seurat_i}.rds",
+        html = "results/integrate/{seurat}.report.html",
+        seurat_out = "results/integrate/{seurat}.rds",
     threads: 32
     resources:
           mem_mb=1024 * 100,
@@ -630,12 +578,13 @@ rule integrate:
                 output_file = "{output.html}" )'
         """
 
+
 rule chooser_paral:
     """
-    Runs chooseR
+    Runs chooseR for clustering resolution selection.
     """
     input:
-        markdown = "chooser_paral.Rmd",   # chooser - parallelized
+        markdown = "chooser_paral.Rmd",
         seurat_in = get_cluster_inputs,
         config = ancient(configuration),
     output:
@@ -643,18 +592,16 @@ rule chooser_paral:
         output_dir = directory("results/chooser_run/{seurat}/res_{res}"),
         calculation_rds = expand("results/chooser_run/{{seurat}}/{sil}_{{res}}.rds", sil=chooser_sil),
         seurat_rds = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
-        intermediates_dir = temp("results/chooser_run/intermediates_dir/{seurat}/res_{res}")
+        intermediates_dir = temp("resul/chooser_run/intermediates_dir/{seurat}/res_{res}")
     params:
         results_path = "results/chooser_run/{seurat}",
-        scriptdir="scripts",
+        seurat_out = "{seurat}",
+        scriptdir = "scripts",
     threads: 12
     resources:
-        mem_mb=1024 * 100,
-        disk_mb=1024 * 50,
-        runtime=60 * 12
-        # mem_mb=1024 * 200,
-        # disk_mb=1024 * 100,
-        # runtime=60 * 12
+        mem_mb = 1024 * 100,
+        disk_mb = 1024 * 50,
+        runtime = 720
     conda:
         "chooser/env.yaml"
     shell:
@@ -663,14 +610,16 @@ rule chooser_paral:
                 config = "{input.config}",
                 calculation_outs = "{output.calculation_rds}",
                 seurat_rds = "{output.seurat_rds}",
-                seurat_out = "{wildcards.seurat}",
+                seurat_out = "{params.seurat_out}",
                 results_path = "{params.results_path}",
                 res = "{wildcards.res}",
-                scriptdir = "{params.scriptdir}");
+                scriptdir = "{params.scriptdir}" );
             rmarkdown::render("{input.markdown}",
                 params = params,
                 intermediates_dir = "{output.intermediates_dir}",
                 output_dir = "{output.output_dir}",
                 output_file = "{output.html}")'
         """
+
+
 
