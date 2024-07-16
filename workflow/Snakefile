@@ -104,6 +104,11 @@ def get_cluster_inputs(wildcards):
     else:
         return f"results/integrate/{seurat}.rds"
 
+def get_integrate_inputs(wildcards):
+    seurat = "un" + wildcards.seurat
+    return f"results/normalize_reduce_dims/{seurat}/{seurat}.rds",
+
+
 def get_diff_test_input(wildcards):
     seurat = wildcards.seurat
     weighted_nn_list = get_groups("weighted_nn")
@@ -286,14 +291,14 @@ rule qc:
     input:
         markdown = "qc.Rmd",
         seurat_in = "results/create_seurat/{sample}-{replicate}.seurat_raw.rds",
-        config = ancient(configuration),
+        config = ancient(configuration)
     output:
         html = "results/qc/{sample}-{replicate}.report.html",
         seurat_out = "results/qc/{sample}-{replicate}.seurat_qc.rds",
-        intermediates_dir=temp("results/qc/{sample}-{replicate}")
     params:
         scriptdir = "scripts",
-        outdir = "results/qc"
+        outdir = "results/qc",
+        intermediates_dir="results/qc/{sample}-{replicate}"
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -303,16 +308,18 @@ rule qc:
         # disk_mb=1024 * 100
         # runtime=60 * 24
     shell:
-        """Rscript -e 'params = list(
+        """
+        Rscript -e 'params = list(
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 seurat_out = "{output.seurat_out}",
                 scriptdir = "{params.scriptdir}" );
             rmarkdown::render("{input.markdown}",
                 params = params,
-                intermediates_dir = "{output.intermediates_dir}",
+                intermediates_dir = "{params.intermediates_dir}",
                 output_dir = "{params.outdir}",
                 output_file = "{output.html}" )'
+        rm -rf {params.intermediates_dir}
         """
 
 rule merge_zinba:
@@ -509,11 +516,11 @@ rule normalize_reduce_dims:
         config = ancient(configuration),
     output:
         html = "results/normalize_reduce_dims/{seurat}/{seurat}.report.html",
-        seurat_out = "results/normalize_reduce_dims/{seurat}/{seurat}.rds",
-        interm_dir = temp("results/normalize_reduce_dims/intermediates_dir/{seurat}")
+        seurat_out = "results/normalize_reduce_dims/{seurat}/{seurat}.rds"
     params:
         scriptdir = "scripts",
         output_dir = "results/normalize_reduce_dims/{seurat}",
+        interm_dir = "results/normalize_reduce_dims/intermediates_dir/{seurat}"
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -532,13 +539,10 @@ rule normalize_reduce_dims:
             rmarkdown::render("{input.markdown}",
                 params = params,
                 output_dir="{params.output_dir}",
-                intermediates_dir = "{output.interm_dir}",
+                intermediates_dir = "{params.interm_dir}",
                 output_file = "{output.html}")'
+        rm -rf {params.interm_dir}
         """
-
-def get_integrate_inputs(wildcards):
-    seurat = "un" + wildcards.seurat
-    return f"results/normalize_reduce_dims/{seurat}/{seurat}.rds",
 
 
 rule integrate:
@@ -578,7 +582,6 @@ rule integrate:
                 output_file = "{output.html}" )'
         """
 
-
 rule chooser_paral:
     """
     Runs chooseR for clustering resolution selection.
@@ -592,11 +595,11 @@ rule chooser_paral:
         output_dir = directory("results/chooser_run/{seurat}/res_{res}"),
         calculation_rds = expand("results/chooser_run/{{seurat}}/{sil}_{{res}}.rds", sil=chooser_sil),
         seurat_rds = "results/chooser_run/{seurat}/seurat_obj_{res}.rds",
-        intermediates_dir = temp("resul/chooser_run/intermediates_dir/{seurat}/res_{res}")
     params:
         results_path = "results/chooser_run/{seurat}",
         seurat_out = "{seurat}",
         scriptdir = "scripts",
+        intermediates_dir = "resul/chooser_run/intermediates_dir/{seurat}/res_{res}"
     threads: 12
     resources:
         mem_mb = 1024 * 100,
@@ -605,7 +608,8 @@ rule chooser_paral:
     conda:
         "chooser/env.yaml"
     shell:
-        """Rscript -e 'params = list(
+        """
+        Rscript -e 'params = list(
                 seurat_in = "{input.seurat_in}",
                 config = "{input.config}",
                 calculation_outs = "{output.calculation_rds}",
@@ -616,9 +620,10 @@ rule chooser_paral:
                 scriptdir = "{params.scriptdir}" );
             rmarkdown::render("{input.markdown}",
                 params = params,
-                intermediates_dir = "{output.intermediates_dir}",
+                intermediates_dir = "{params.intermediates_dir}",
                 output_dir = "{output.output_dir}",
                 output_file = "{output.html}")'
+        rm -rf {params.intermediates_dir}
         """
 
 
