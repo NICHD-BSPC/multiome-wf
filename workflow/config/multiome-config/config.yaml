@@ -198,7 +198,7 @@ chooser:
     - silhouette_grouped
 
 cluster:
-  resolution: 0.6  # Set to null if you're taking advantage of chooser
+  resolution: null  # set to null if you wish to determine optimal resolution using chooseR
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
 # Fix later
