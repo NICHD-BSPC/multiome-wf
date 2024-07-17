@@ -204,7 +204,9 @@ rule all:
     input:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
 #         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-        expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets)
+        expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets),
+#         expand("results/prep_cluster/{seurat}/choice.rds", seurat=snn_targets)
+
 
 
 rule build_annotation:
@@ -673,6 +675,23 @@ rule chooser_aggr:
         rm -rf {params.intermediates_dir}
         """
 
+rule prep_cluster:
+    """
+    Prepare an RDS file storing the resolution of clustering
+    if it's configured by user
+    """
+    input:
+        seurat_in = get_cluster_inputs
+    output:
+        "results/prep_cluster/{seurat}/choice.rds"
+    params:
+        res_use = user_resolution
+    threads: 1
+    shell:
+        """
+        Rscript -e 'res <- {params.res_use}; saveRDS(res, "{output}")'
+        """
+
 rule cluster:
     """
     Cluster each unintegrated or integrated assay based on Chooser results
@@ -680,7 +699,11 @@ rule cluster:
     input:
         markdown = "cluster.Rmd",      # chooser - results
         seurat_in = get_cluster_inputs,
-        res_choice = "results/chooser_plot/{seurat}/choice.rds",
+        res_choice = lambda wildcards:( 
+            f"results/chooser_plot/{wildcards.seurat}/choice.rds"
+            if pd.isnull(user_resolution)
+            else f"results/prep_cluster/{wildcards.seurat}/choice.rds"
+        ),
         config = ancient(configuration),
     output:
         html = "results/cluster/{seurat}/report.html",
@@ -688,8 +711,7 @@ rule cluster:
         seurat_out = "results/cluster/{seurat}/clustered_data.rds",
         barcodes_out = "results/cluster/{seurat}/barcodes.rds",
     params:
-        intermediates_dir = "results/cluster/intermediates_dir/{seurat}",
-        res_use = config["cluster"]["resolution"]
+        intermediates_dir = "results/cluster/intermediates_dir/{seurat}"
     threads: 12
     resources:
         mem_mb=1024 * 100,
@@ -705,7 +727,6 @@ rule cluster:
             config = "{input.config}",
             res_choice = "{input.res_choice}",
             seurat = "{wildcards.seurat}",
-            res_use = "{params.res_use}",
             seurat_out = "{output.seurat_out}",
             barcodes_out = "{output.barcodes_out}");
         rmarkdown::render("{input.markdown}",
@@ -715,3 +736,4 @@ rule cluster:
             output_file = "{output.html}")'
         rm -rf {params.intermediates_dir}
         """
+
