@@ -62,11 +62,7 @@ If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse ma
 obj <- readRDS(obj_input)
 
 # Set resolution to the previously computed (by chooser) or defined value
-if (params[['res_use']] == "None") {
-    res_use <- readRDS(choice_input)
-} else {
-    res_use <- params[['res_use']]
-}
+res_use <- readRDS(choice_input)
 
 # Convert to numeric of the resolution is still a character obj
 if (!is.numeric(res_use)) {
