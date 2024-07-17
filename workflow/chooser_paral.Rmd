@@ -95,12 +95,19 @@ print(paste('Number of dimensions:', npcs))
 
 # Identify dimensionality reduction performed in the previous step for the input obj
 dim_reductions <- c("pca", "lsi")
-reduction <- intersect(names(obj@reductions), dim_reductions)
+reduction <- names(obj@reductions)
+reduction_idx <- sapply(dim_reductions, function(r) str_detect(reduction, r))
 
-# Break if the number of dimensionality reduction is not 1
-if (length(reduction) > 1) {
-    stop("More than one dimensionality reduction found!")
-} else if (length(reduction) == 0) {
+# Break if the number of dimensionality reduction is 0 or more than 1 unintegrated dimensionality reductions
+# found
+if (sum(reduction_idx) > 1) {
+    if (any(str_detect(reduction, "integrated"))) {
+        reduction <- reduction[str_detect(reduction, "integrated")]
+    }
+    else {
+        stop("More than one dimensionality reduction found!")
+    }
+} else if (sum(reduction_idx) == 0) {
     stop("Dimensionality reduction missing!")
 }
 
