@@ -237,13 +237,13 @@ if ( !(0 %in% dim(meds)) ) {
             axis.ticks = element_line(colour = "black"),
         )
 
-    ggsave(
-        filename = paste0(new_path, "/silhouette_distribution_plot.png"),
-        dpi = 300,
-        height = 3.5,
-        width = 3.5,
-        units = "in"
-    )
+#     ggsave(
+#         filename = paste0(new_path, "/silhouette_distribution_plot.png"),
+#         dpi = 300,
+#         height = 3.5,
+#         width = 3.5,
+#         units = "in"
+#     )
 
 } else {
     # Skip plotting if the dimension of `meds` is zero
@@ -282,13 +282,13 @@ if (!is.null(scores_merged)) {
                 axis.ticks = element_line(colour = "black"),
             )
 
-    ggsave(
-        filename = paste0(new_path, "/silhouette_point_plot_", choice, ".png"),
-        dpi = 300,
-        height = 3.5,
-        width = 3.5,
-        units = "in"
-    )
+#     ggsave(
+#         filename = paste0(new_path, "/silhouette_point_plot_", choice, ".png"),
+#         dpi = 300,
+#         height = 3.5,
+#         width = 3.5,
+#         units = "in"
+#     )
 } else {
     cat("No plot generated!")
 }
@@ -364,14 +364,14 @@ if ( !is.null(grp) ) {
         ) +
         guides(fill = guide_colorbar(barheight = 3, barwidth = 1))
 
-    ggsave(
-        plot = plot,
-        filename = paste0(new_path, "/coclustering_heatmap_", choice, ".png"),
-        dpi = 300,
-        height = 3.5,
-        width = 3.5,
-        units = "in"
-    )
+#     ggsave(
+#         plot = plot,
+#         filename = paste0(new_path, "/coclustering_heatmap_", choice, ".png"),
+#         dpi = 300,
+#         height = 3.5,
+#         width = 3.5,
+#         units = "in"
+#     )
 
     print(plot)
 } else {
@@ -386,10 +386,17 @@ if ( !is.null(grp) ) {
 # Import seurat
 obj <- readRDS(paste0(results_path, "/seurat_obj_", choice, ".rds"))
 
-
 # Let's add the silhouette scores to the Seurat object!
 sil_scores <- readRDS(paste0(results_path, "/silhouette_", choice, ".rds"))
 
+# Update the silhouette scores to NULL if it's NA
+sil_scores <- if (is.null(sil_scores)) {
+    NULL
+} else if (is.na(sil_scores)) {
+    NULL
+} else {
+    sil_scores
+}
 
 if (!is.null(sil_scores)) {
     sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
@@ -450,31 +457,36 @@ if (grepl("lsi", reduction)) {
     npcs_min <- 1
 }
 
+tryCatch(expr={
+    obj <- RunUMAP(obj,
+                   dims = npcs_min:npcs,
+                   reduction = reduction,
+                   assay = assay
+    )
 
-obj <- RunUMAP(obj,
-               dims = npcs_min:npcs,
-               reduction = reduction,
-               assay = assay
+    plot <- DimPlot(
+        obj,
+        reduction = "umap",
+        group.by = glue::glue("{reduction}.{assay}_res.{choice}"),
+        pt.size = 0.5,
+        # cols = gg_color(6) # Only necessary if you have ordered your clusters
+    )
+
+#     ggsave(
+#         plot = plot,
+#         filename = paste0(results_path, "/", choice, "_cluster_umap.png"),
+#         dpi = 300,
+#         height = 5,
+#         width = 5,
+#         units = "in"
+#     )
+
+    print(plot)
+    },
+    error=function(e) {
+        print("No plot generated!")
+    }
 )
-
-plot <- DimPlot(
-    obj,
-    reduction = "umap",
-    group.by = glue::glue("{reduction}.{assay}_res.{choice}"),
-    pt.size = 0.5,
-    # cols = gg_color(6) # Only necessary if you have ordered your clusters
-)
-
-ggsave(
-    plot = plot,
-    filename = paste0(results_path, "/", choice, "_cluster_umap.png"),
-    dpi = 300,
-    height = 5,
-    width = 5,
-    units = "in"
-)
-
-plot
 
 ```
 
@@ -483,7 +495,7 @@ plot
 ```{r umap_silscores, results='asis'}
 
 # We also find it useful to visualise the silhouette scores on the UMAP!
-if (!is.null(sil_scores)) {
+if (!is.null(sil_scores) & "umap" %in% names(obj@reductions)) {
     plot <- FeaturePlot(
         obj,
         "sil_score",
@@ -501,14 +513,14 @@ if (!is.null(sil_scores)) {
 
     print(plot)
 
-    ggsave(
-        plot = plot,
-        filename = paste0(new_path, "/", choice, "_silhouette_umap.png"),
-        dpi = 300,
-        height = 5,
-        width = 5,
-        units = "in"
-    )
+#     ggsave(
+#         plot = plot,
+#         filename = paste0(new_path, "/", choice, "_silhouette_umap.png"),
+#         dpi = 300,
+#         height = 5,
+#         width = 5,
+#         units = "in"
+#     )
 
 } else {
     cat("No plot generated!")
