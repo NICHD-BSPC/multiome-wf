@@ -203,8 +203,8 @@ def all_input(wildcards):
 rule all:
     input:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
-        expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-#         expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets)
+#         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
+        expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets)
 
 
 rule build_annotation:
@@ -707,7 +707,7 @@ rule cluster:
             seurat = "{wildcards.seurat}",
             res_use = "{params.res_use}",
             seurat_out = "{output.seurat_out}",
-            barcodes_out = "{output.barcodes_out}" );
+            barcodes_out = "{output.barcodes_out}");
         rmarkdown::render("{input.markdown}",
             params = params,
             intermediates_dir = "{params.intermediates_dir}",
