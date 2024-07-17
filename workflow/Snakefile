@@ -202,9 +202,8 @@ def all_input(wildcards):
 
 rule all:
     input:
-#         expand("results/integrate/{seurat}.rds", seurat=valid_groups['integrate']),
-#         expand("results/normalize_reduce_dims/{seurat}/{seurat}.rds", seurat=valid_groups['normalize']),
-        expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions)
+        expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
+        expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets)
 
 rule build_annotation:
     """
@@ -599,7 +598,7 @@ rule chooser_paral:
         results_path = "results/chooser_run/{seurat}",
         seurat_out = "{seurat}",
         scriptdir = "scripts",
-        intermediates_dir = "resul/chooser_run/intermediates_dir/{seurat}/res_{res}"
+        intermediates_dir = "results/chooser_run/intermediates_dir/{seurat}/res_{res}"
     threads: 12
     resources:
         mem_mb = 1024 * 100,
@@ -626,5 +625,47 @@ rule chooser_paral:
         rm -rf {params.intermediates_dir}
         """
 
-
-
+rule chooser_aggr:
+    """
+    Plots chooseR results
+    """
+    input:
+        markdown = 'chooser_aggr.Rmd',      # chooser - results
+        sil_obj = expand('results/chooser_run/{{seurat}}/{sil}_{res}.rds',
+                        sil=chooser_sil,
+                        res=resolutions),
+        config = ancient(configuration)
+    output:
+        html = "results/chooser_plot/{seurat}/report.html",
+        output_dir = directory("results/chooser_plot/{seurat}"),
+        seurat_rds = "results/chooser_plot/{seurat}/clustered_data.rds",
+        choice_rds = "results/chooser_plot/{seurat}/choice.rds",
+    params:
+        resolutions = resolutions,
+        res_path = "results/chooser_run/{seurat}",
+        new_path = "results/chooser_plot/{seurat}",
+        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
+    conda:
+        "chooser/env.yaml"
+    threads: 12
+    resources:
+        mem_mb=1024 * 150,
+        disk_mb=1024 * 100,
+        runtime=60 * 1
+    shell:
+        """
+        Rscript -e 'params = list(
+            sil_obj="{input.sil_obj}",
+            results_path="{params.res_path}",
+            new_path = "{params.new_path}",
+            config = "{input.config}",
+            seurat = "{wildcards.seurat}",
+            seurat_out = "{output.seurat_rds}",
+            choice_out = "{output.choice_rds}");
+        rmarkdown::render("{input.markdown}",
+            params = params,
+            intermediates_dir = "{params.intermediates_dir}",
+            output_dir = "{output.output_dir}",
+            output_file = "{output.html}")'
+        rm -rf {params.intermediates_dir}
+        """
