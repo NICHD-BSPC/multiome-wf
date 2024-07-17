@@ -617,7 +617,7 @@ rule chooser_paral:
                 seurat_out = "{params.seurat_out}",
                 results_path = "{params.results_path}",
                 res = "{wildcards.res}",
-                scriptdir = "{params.scriptdir}" );
+                scriptdir = "{params.scriptdir}");
             rmarkdown::render("{input.markdown}",
                 params = params,
                 intermediates_dir = "{params.intermediates_dir}",
