@@ -202,8 +202,10 @@ def all_input(wildcards):
 
 rule all:
     input:
-        expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
-        expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets)
+#         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
+        expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
+#         expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets)
+
 
 rule build_annotation:
     """
@@ -631,9 +633,10 @@ rule chooser_aggr:
     """
     input:
         markdown = 'chooser_aggr.Rmd',      # chooser - results
-        sil_obj = expand('results/chooser_run/{{seurat}}/{sil}_{res}.rds',
-                        sil=chooser_sil,
-                        res=resolutions),
+        sil_obj = expand(
+            'results/chooser_run/{{seurat}}/{sil}_{res}.rds',
+            sil=chooser_sil,
+            res=resolutions),
         config = ancient(configuration)
     output:
         html = "results/chooser_plot/{seurat}/report.html",
@@ -662,6 +665,49 @@ rule chooser_aggr:
             seurat = "{wildcards.seurat}",
             seurat_out = "{output.seurat_rds}",
             choice_out = "{output.choice_rds}");
+        rmarkdown::render("{input.markdown}",
+            params = params,
+            intermediates_dir = "{params.intermediates_dir}",
+            output_dir = "{output.output_dir}",
+            output_file = "{output.html}")'
+        rm -rf {params.intermediates_dir}
+        """
+
+rule cluster:
+    """
+    Cluster each unintegrated or integrated assay based on Chooser results
+    """
+    input:
+        markdown = "cluster.Rmd",      # chooser - results
+        seurat_in = get_cluster_inputs,
+        res_choice = "results/chooser_plot/{seurat}/choice.rds",
+        config = ancient(configuration),
+    output:
+        html = "results/cluster/{seurat}/report.html",
+        output_dir = directory("results/cluster/{seurat}"),
+        seurat_out = "results/cluster/{seurat}/clustered_data.rds",
+        barcodes_out = "results/cluster/{seurat}/barcodes.rds",
+    params:
+        intermediates_dir = "results/cluster/intermediates_dir/{seurat}",
+        res_use = config["cluster"]["resolution"]
+    threads: 12
+    resources:
+        mem_mb=1024 * 100,
+        disk_mb=1024 * 50,
+        runtime=60 * 24
+        # mem_mb=1024 * 200,
+        # disk_mb=1024 * 100,
+        # runtime=60 * 24
+    shell:
+        """
+        Rscript -e 'params = list(
+            seurat_in = "{input.seurat_in}",
+            config = "{input.config}",
+            res_choice = "{input.res_choice}",
+            seurat = "{wildcards.seurat}",
+            res_use = "{params.res_use}",
+            seurat_out = "{output.seurat_out}",
+            barcodes_out = "{output.barcodes_out}" );
         rmarkdown::render("{input.markdown}",
             params = params,
             intermediates_dir = "{params.intermediates_dir}",
