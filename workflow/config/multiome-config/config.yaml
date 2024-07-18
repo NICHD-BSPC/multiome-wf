@@ -247,6 +247,7 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+      alpha: 0.05
     unintegrated_1:
       cluster_idents: seurat_clusters
       assay: null
@@ -254,6 +255,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: 'LR'
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
     unintegrated_2:
       cluster_idents: seurat_clusters
       assay: null
@@ -261,6 +263,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: 'LR'
       latent_vars: 'nCount_MACS'
+      alpha: 0.05
     integrated_0:
       cluster_idents: seurat_clusters
       assay: null
@@ -268,6 +271,7 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+      alpha: 0.05
     integrated_1:
       cluster_idents: seurat_clusters
       assay: null
@@ -275,6 +279,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: 'LR'
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
     wnn_0:
       cluster_idents: seurat_clusters
       assay: SCT
@@ -282,6 +287,7 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+      alpha: 0.05
     wnn_1:
       cluster_idents: seurat_clusters
       assay: SCT
@@ -289,6 +295,7 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
+      alpha: 0.05
 
 # Choose guide options:
 # build - build initial version of guide.rst from config/template_guide.rst
