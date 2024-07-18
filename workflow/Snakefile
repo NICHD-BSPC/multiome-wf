@@ -204,9 +204,7 @@ rule all:
     input:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
 #         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-        expand("results/cluster/{seurat}/clustered_data.rds", seurat=snn_targets),
-#         expand("results/prep_cluster/{seurat}/choice.rds", seurat=snn_targets)
-
+        expand("results/wnn/{seurat}/clustered_data.rds", seurat=snn_targets)
 
 
 rule build_annotation:
@@ -737,3 +735,44 @@ rule cluster:
         rm -rf {params.intermediates_dir}
         """
 
+rule weighted_nn:
+    """
+    Runs weighted nearest neighbor analysis,
+    assumues cell names for each assay are identical.
+    Currently only one WNN analysis supported.
+    """
+    input:
+        markdown = "weighted_nn.Rmd",
+        seurats = expand(
+            "results/cluster/{seurat}/clustered_data.rds",
+            seurat=snn_targets
+        ),
+        config = ancient(configuration),
+    output:
+        html = "results/wnn/{seurat}/report.html",
+        seurat_out = "results/wnn/{seurat}/clustered_data.rds",
+        barcodes_out = "results/wnn/{seurat}/barcodes.rds",
+    params:
+        scriptdir = "scripts",
+    threads: 12
+    resources:
+        mem_mb=1024 * 100,
+        disk_mb=1024 * 50,
+        runtime=60 * 12
+        # mem_mb=1024 * 600,
+        # disk_mb=1024 * 300,
+        # runtime=60 * 12
+    shell:
+        """
+        ulimit -u 8192;
+        Rscript -e 'params = list(
+                seurats = "{input.seurats}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}",
+                barcodes_out = "{output.barcodes_out}",
+                seurat = "{wildcards.seurat}",
+                scriptdir = "{params.scriptdir}");
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                output_file = "{output.html}")'
+        """
