@@ -52,9 +52,11 @@ snakemake.config <- yaml::read_yaml(params[['config']])
 
 # Read in data
 
-For input file paths listed in samples.tsv, we'll read in data from files in one of the following formats: 'HDF5', 'MEX', or 'RDS'.
-If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse matrices ('dgCMatrix') will be created.
-'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
+For input file paths listed in samples.tsv, we'll read in data from files in one of the following formats: 
+'HDF5', 'MEX', or 'RDS'.
+
+If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse matrices ('dgCMatrix') 
+will be created. 'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
 
 ```{r input}
 
