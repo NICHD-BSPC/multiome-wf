@@ -202,7 +202,8 @@ rule all:
     input:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
 #         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-        expand("results/wnn/{seurat}/clustered_data.rds", seurat=valid_groups['weighted_nn'])
+#         expand("results/wnn/{seurat}/clustered_data.rds", seurat=valid_groups['weighted_nn']),
+        expand("results/diff_analysis/{seurat}/markers.tsv", seurat=valid_groups['diff_analysis'])
 
 
 rule build_annotation:
@@ -773,3 +774,44 @@ rule weighted_nn:
                 params = parameters,
                 output_file = "{output.html}")'
         """
+
+rule diff_analysis:
+    """
+    Runs differential testing for specified assays.
+    """
+    input:
+        markdown = "diff_analysis.Rmd",
+        seurat_in = get_diff_test_inputs,
+        config = ancient(configuration),
+    output:
+        html = "results/diff_analysis/{seurat}/report.html",
+        output_dir = directory("results/diff_analysis/{seurat}"),
+        markers_out = "results/diff_analysis/{seurat}/markers.tsv",
+    params:
+        scriptdir = "scripts",
+        intermediates_dir = "results/chooser_plot/intermediates_dir/{seurat}",
+    threads: 32
+    resources:
+        mem_mb=1024 * 100,
+         disk_mb=1024 * 50,
+         runtime=60 * 12
+        # mem_mb=1024 * 500,
+        # disk_mb=1024 * 250,
+        # runtime=60 * 24
+    shell:
+        """
+        ulimit -u 8192;
+        Rscript -e 'params = list(
+                seurat_in = "{input.seurat_in}",
+                config = "{input.config}",
+                markers_out = "{output.markers_out}",
+                seurat = "{wildcards.seurat}",
+                scriptdir = "{params.scriptdir}");
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                intermediates_dir = "{params.intermediates_dir}",
+                output_dir = "{output.output_dir}",
+                output_file = "{output.html}")'
+        rm -rf {params.intermediates_dir}
+        """
+
