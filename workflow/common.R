@@ -324,26 +324,6 @@ preprocess_seurat <- function(seurat_obj, assay, norm_method) {
 	return(seurat_obj)
 }
 
-# input is vector of min/max pairs, output is ranged sequence for each pair
-dim_vals_to_list = function(dim_vals) {
-	split_list = split(dim_vals, 1:length(dim_vals) %% 2 == 0)
-
-	dims_list = lapply(seq_along(split_list), function(x) {
-		mins = split_list[['FALSE']]
-		maxs = split_list[['TRUE']]
-		min_max = c(mins[x], maxs[x])
-		return(min_max)
-	})
-
-	dims_list = lapply(seq_along(dims_list), function(x) {
-		dims = dims_list[[x]]
-		dims = seq(from = dims[1], to = dims[2])
-		return(dims)
-	})
-
-	return(dims_list)
-}
-
 
 # Detect core on slurm cluster
 #############################
