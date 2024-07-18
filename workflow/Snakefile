@@ -108,14 +108,12 @@ def get_integrate_inputs(wildcards):
     seurat = "un" + wildcards.seurat
     return f"results/normalize_reduce_dims/{seurat}/{seurat}.rds",
 
-
-def get_diff_test_input(wildcards):
+def get_diff_test_inputs(wildcards):
     seurat = wildcards.seurat
-    weighted_nn_list = get_groups("weighted_nn")
-    if seurat in weighted_nn_list:
-        return "results/wnn/{seurat}/clustered_data.rds"  
+    if seurat in get_groups("weighted_nn"):
+        return f"results/wnn/{seurat}/clustered_data.rds"  
     else:
-        return "results/cluster/{seurat}/clustered_data.rds"
+        return f"results/cluster/{seurat}/clustered_data.rds"
 
 def determine_input():
     if config["macs2"]["run"] == "Y":
@@ -204,7 +202,7 @@ rule all:
     input:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
 #         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-        expand("results/wnn/{seurat}/clustered_data.rds", seurat=snn_targets)
+        expand("results/wnn/{seurat}/clustered_data.rds", seurat=valid_groups['weighted_nn'])
 
 
 rule build_annotation:
@@ -743,10 +741,9 @@ rule weighted_nn:
     """
     input:
         markdown = "weighted_nn.Rmd",
-        seurats = expand(
+        seurats =expand(
             "results/cluster/{seurat}/clustered_data.rds",
-            seurat=snn_targets
-        ),
+            seurat=snn_targets),
         config = ancient(configuration),
     output:
         html = "results/wnn/{seurat}/report.html",
