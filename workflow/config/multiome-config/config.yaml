@@ -207,7 +207,6 @@ weighted_nn:
   activate: true
   groups:
     wnn_0:
-      neighbor_method: weighted
       input_groups:
         - unintegrated_0 # corresponds to SCT
         - unintegrated_1 # corresponds to Peaks
@@ -220,8 +219,8 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
     wnn_1:
-      neighbor_method: weighted
       input_groups:
         - integrated_0 # corresponds to SCT
         - integrated_1 # corresponds to Peaks
@@ -234,6 +233,7 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc

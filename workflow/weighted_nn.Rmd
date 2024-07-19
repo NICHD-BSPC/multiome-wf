@@ -72,8 +72,12 @@ targets <- group[['input_groups']]
 idx <- grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
 seurat_inputs <- seurat_inputs[idx]
 
+comm_detection <- group[['detection_method']]
+
 print('Seurat objects in use:')
 print(seurat_inputs)
+
+
 ```
 
 # Read in data
@@ -231,10 +235,28 @@ if (length(common_names) > 0) {
     )
 
     # Run clustering
+    comm_detection <- ifelse(is.null(comm_detection), 3, comm_detection)
+    comm_label <- ifelse(comm_detection == 1, "Louvain", ifelse(
+        comm_detection == 2, "Louvain with multilevel refinement", ifelse(
+        comm_detection == 3, "Smart local moving (SLM)", ifelse(
+        comm_detection == 4, "Leiden", "Undetermined"
+    ))))
+
+    print('--------------------------------------------------------------------------')
+
+    if (comm_label == "Undetermined") {
+        stop("Wrong method for algorithm parameter in FindCluster function! Check yoru configuration.")
+    } else {
+        print(paste("WNN clustering performed using modularity optimization method no.", comm_detection))
+        print(paste("This will run", comm_label))
+        print("See the following reference for more info:")
+        print("Ludo Waltmana and Nees Jan van Eck, Eur. Phys. J. B (2013)")
+        print("https://link.springer.com/article/10.1140/epjb/e2013-40829-0")
+    }
     seurat <- FindClusters(
         object = seurat,
         graph.name = "wsnn",
-        algorithm = 3,
+        algorithm = comm_detection,
         resolution = res,
         verbose=FALSE
     )
