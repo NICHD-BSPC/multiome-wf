@@ -42,6 +42,7 @@ plan("multicore", workers=ncpus)
 
 ```
 
+
 # Read in data
 
 Read in Seurat object.
@@ -126,7 +127,9 @@ if (length(ident_name) > 0) {
         red_use <- names(seurat@reductions)[idx]
         red_use <- if (any(sapply(red_use, function(r) str_detect(r, "integrated")))) {
             red_use[str_detect(red_use, "integrated")]
-        } 
+        } else {
+            red_use
+        }
         assay_use <- seurat@reductions[[red_use]]@assay.used
 
     } else {
@@ -153,6 +156,8 @@ if (length(ident_name) > 0) {
 
     # fix later:
     # Warning: 'latent.vars' is only used for the following tests: negbinom, poisson, MAST, LR
+    print(paste("Null hypothesis testing in use:", test_use))
+    print(paste("See more info about testing options in https://satijalab.org/seurat/reference/findallmarkers"))
     markers_df <- FindAllMarkers(
         object = seurat,
         assay = assay_use,
@@ -171,10 +176,15 @@ if (length(ident_name) > 0) {
 
 # Filter out non DEGs from the data frame
 print(paste("FDR threshold:", alpha))
-markers_df <- markers_df[markers_df$p_val_adj <= alpha,] %>%
-    # Reorder columns
-    rownames_to_column("Gene") %>%
-    dplyr::select(-gene)
+if (nrow(markers_df) > 0) {
+    markers_df <- markers_df[markers_df$p_val_adj <= alpha,] %>%
+        # Reorder columns
+        rownames_to_column("Gene") %>%
+        dplyr::select(-gene)
+} else {
+    print("No DEGs found!")
+    markers_df <- data.frame()
+}
 
 ```
 
@@ -184,7 +194,11 @@ markers_df <- markers_df[markers_df$p_val_adj <= alpha,] %>%
 ```{r save, results='asis'}
 
 path_out <- params[['markers_out']]
-cat("- DE table: [", path_out, "](", path_out, ")")
+if (nrow(markers_df) > 0) {
+    cat("- DE table: [", path_out, "](", path_out, ")")
+} else {
+    cat("Table for DEG not provided.")
+}
 
 write.table(
     x = markers_df,
