@@ -41,18 +41,8 @@ options(future.globals.maxSize=40000 * 1024^2,
 plan("multicore", workers=ncpus)
 ```
 
-```{r}
-params = list(
-                seurats = "results/cluster/unintegrated_0/clustered_data.rds results/cluster/unintegrated_1/clustered_data.rds results/cluster/unintegrated_2/clustered_data.rds results/cluster/unintegrated_3/clustered_data.rds results/cluster/integrated_0/clustered_data.rds results/cluster/integrated_1/clustered_data.rds results/cluster/integrated_3/clustered_data.rds results/wnn/wnn_0/clustered_data.rds results/wnn/wnn_1/clustered_data.rds",
-                config = "/vf/users/BSPC-Petros/multiome-wf/workflow/config/multiome-config/config.yaml",
-                seurat_out = "results/combine/seurat_combined.rds" )
-```
 
-
-# Set variables
-
-We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, 
-respectively. We'll also set paths to input files.
+Here, we combine all Seurat objects created so far depending on the number of barcodes.
 
 ```{r variables}
 # Retrieve input/output file paths
@@ -64,11 +54,7 @@ seurat_out <- params[["seurat_out"]]
 
 # Read in data
 
-For input file paths listed in samples.tsv, we'll read in data from files in one of the following formats: 
-'HDF5', 'MEX', or 'RDS'.
-
-If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse matrices ('dgCMatrix') 
-will be created. 'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
+Seurat objects containing identical number of barcodes are combined into one object (e.g. `nBarcodes_<number>`).
 
 ```{r config_input}
 
@@ -357,16 +343,19 @@ seurat_list <- lapply(names(bc_summary_list), function(name) {
                 }
 
                 # Transfer clustering metadata
-                ident_pattern <- "snn_res\\.[0-9]+.*"
-                idc <- grep(ident_pattern, names(seurat_add@meta.data))
-                if (length(idc) > 0) {
+                ident_pattern <- ".snn_res\\.[0-9]+.*"
+                # Create a logical vector for clustering columns
+                idc <- str_detect(colnames(seurat_add@meta.data), ident_pattern)
+                # If any clustering column present,
+                if (any(idc)) {
+                    # Choose one column name matching the current group name
                     clust_column <- names(seurat_add@meta.data)[idc]
                     col_name_new <- if (any(grepl("wsnn", clust_column))) {
                         idw <- which(grepl("wsnn", clust_column))
                         clust_column <- clust_column[idw]
                         sub("wsnn", groups_c, clust_column)
                     } else {
-                        clust_column
+                        clust_column <- clust_column[str_detect(clust_column, groups_c)]
                     }
                 }
 
@@ -398,12 +387,12 @@ seurat_list <- seurat_list[sapply(seurat_list, function(o) !is.null(o))]
 
 # Save Seurat object
 
-```{r save, results='asis'}
 
+```{r save}
 print('Updated Seurat obj:')
 print(seurat_list)
 
-# saveRDS(object=seurat_list, file=seurat_out)
+saveRDS(object=seurat_list, file=seurat_out)
 print(paste("Seurat obj saved to", seurat_out))
 ```
 
