@@ -203,8 +203,7 @@ rule all:
 #         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
 #         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
 #         expand("results/wnn/{seurat}/clustered_data.rds", seurat=valid_groups['weighted_nn']),
-        expand("results/diff_analysis/{seurat}/markers.tsv", seurat=valid_groups['diff_analysis'])
-
+        all_input
 
 rule build_annotation:
     """
@@ -815,3 +814,101 @@ rule diff_analysis:
         rm -rf {params.intermediates_dir}
         """
 
+rule combine:
+    """
+    Merge all Seurat objects created during rules cluster and weighted_nn.
+    Input  objects have 1 normalized, scaled assay, dim. reduction,
+    cluster identities from SNN and/or WNN community detection.
+    Merges non-greedily: if all cell barcodes in 2 objects identical merge objects.
+    If unique cell barcodes exist in either object, objects not merged.
+    """
+    input:
+        markdown = "combine.Rmd",
+        seurats = cluster_input,
+        config = ancient(configuration),
+    output:
+        html = "results/combine/report.html",
+        seurat_out = "results/combine/seurat_combined.rds",
+    threads: 12
+    resources:
+        mem_mb=1024 * 100,
+        disk_mb=1024 * 50,
+        runtime=60 * 24
+        # mem_mb=1024 * 1000,
+        # disk_mb=1024 * 500,
+        # runtime=60 * 24
+    shell:
+        """Rscript -e 'params = list(
+                seurats = "{input.seurats}",
+                config = "{input.config}",
+                seurat_out = "{output.seurat_out}");
+            rmarkdown::render("{input.markdown}",
+                params = parameters,
+                output_file = "{output.html}")'
+        """
+
+# Add downstream analyses here with combined object.
+# Be sure to append output file to "wanted_input" list.
+######################################################
+
+rule build_guide:
+    """
+    Builds initial version of guide.rst
+    """
+    input:
+        "config/other-setup/guide_template.rst"
+    output:
+        "../report/guide.rst"
+    params:
+        sampletable = config["samples"]
+    resources:
+        mem_mb=1024 * 20,
+        disk_mb=1024 * 10,
+        runtime=10
+    shell:
+        # returns guide.rst with report.html file paths in the results directory
+        """
+        find results -print | grep report.html > reportlist.txt
+        cat {params.sampletable} | tr '[:space:]' '[\n*]' | grep / > cellrangerlist.txt
+        while read p
+        do
+            if [[ "$p" == "Downstream output reports" ]]
+            then
+                echo "$p\n" >> {output}
+                while read l
+                do
+                    # update result name
+                    result_name=$(dirname "$l" | sed 's/results\///')
+                    line="$l"
+                    # escape bash variables by doubling them
+                    echo "- \`${{result_name}} <${{line}}>\`_\n" >> {output}
+                done < reportlist.txt
+            elif [[ "$p" == "Cellranger output directory" ]]
+            then
+                echo "$p\n" >> {output}
+                while read f
+                do
+                    file='- `cellranger_output <'"$f"'>`_\n'
+                    echo "$file" >> {output}
+                done < cellrangerlist.txt
+            elif [[ "$p" == ":local:" ]]
+            then
+                echo "\t:local:" >> {output}
+            else
+                echo "$p" >> {output}
+            fi
+        done < {input}
+        rm reportlist.txt cellrangerlist.txt
+        """
+
+rule render_guide:
+    """
+    Renders guide.rst
+    """
+    input:
+        css = "config/other-setup/style.css",
+        rst = "../report/guide.rst"
+    output:
+        "../report/guide.html"
+    shell:
+        "rst2html5 --stylesheet {input.css} -q {input.rst} {output}"  # returns guide.html
