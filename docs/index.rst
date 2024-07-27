@@ -55,29 +55,33 @@
 About
 =====
 
-`multiome-wf` is a Snakemake workflow for common single cell sequencing analyses.
+`multiome-wf` is a `Snakemake <https://snakemake.readthedocs.io/en/stable/>`_ 
+workflow for common single cell sequencing analyses.
 
 With the advent of new sequencing methods and associated data sets, combining different
 single cell sequencing modalities is cumbersome and error-prone. A core feature of the
 `multiome-wf` is standardizing how disparate data types are combined and preprocessed
 prior to downstream analyses.
 
-The workflow was build around 10X Genomics products, but should work with any single 
-cell data set as long as the input matrices have been properly formatted.
+The workflow was built around `10X Genomics <https://www.10xgenomics.com/>`_ products, 
+but should work with any single cell data set as long as the input matrices have been 
+properly formatted.
 
 Some of the modalities this workflow supports include:
 
-- Gene Expression: quantified by cellranger count and cellranger aggr
+- Gene Expression: mapped and quantified by ``cellranger count`` and ``cellranger aggr``
 
-- ATAC: quantified by cellranger-atac count and cellranger aggr
+- ATAC: mapped and quantified by ``cellranger-atac count`` and ``cellranger-atac aggr``
 
-- Multiome (Gene Exression + ATAC from same cell), CITE-Seq: quantified by cellranger-arc count and cellranger-arc aggr
+- Multiome (Gene Exression + ATAC from same cell), CITE-Seq: mapped and quantified by 
+  ``cellranger-arc count`` and ``cellranger-arc aggr``
 
 - Cell Multiplexing (Cell Multiplexing Oligos): demultiplexed using cellranger pipelines.
 
 - Multiple Batches, Multiple experimental conditions
 
-.. _note:
+.. note::
+
     While this workflow does some basic tertiary analyses, such as differential testing, the
     core purpose of this workflow is preparing a unified dataset to be used as input for standalone
     downstream analyses, such as Trajectory Inference, Gene-Peak Interactions, etc which are
@@ -87,7 +91,7 @@ Some of the modalities this workflow supports include:
 Getting Started
 ---------------
 
-See :ref:`getting-started` to get started.
+See :ref:`setup` to get started.
 
-See :ref:`workflows` to learn more about the supported workflows.
+See :ref:`overview-wf` to learn more about the supported workflows.
 
