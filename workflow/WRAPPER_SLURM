@@ -43,7 +43,7 @@ fi
     -k \
     --restart-times 3 \
     --rerun-incomplete \
-    --rerun-trigger mtime \
+    --rerun-triggers mtime \
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
     --use-conda \
