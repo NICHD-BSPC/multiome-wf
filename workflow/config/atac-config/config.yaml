@@ -127,15 +127,7 @@ integrate:
   atac_integrate_embeddings: true
   groups:
     integrated_1:
-      # split_by: meta_batch
-      split_by: meta_modality
-      n_dataset: 2
-      reference:
-        label: batch1
-        assay_name: Peaks
-      query:
-        label: batch2
-        assay_name: Peaks
+      assay_name: Peaks
       norm_method: lsi
       integrate_dims:
         - 1
@@ -144,43 +136,9 @@ integrate:
 # Is your input a toy dataset?
 # This question is required to adjust the number of neighbors when integrating datasets
 dataset_size:
-  toydataset: false # true or false
+  toydataset: true # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # check `https://satijalab.org/seurat/reference/integrateembeddings`
-
-
-# Coembed rna and atac data
-# activate: Coembed rna and atac data instead of integrating/transforming data?
-#   Similar in concept to integration workflow, but doesn't transform ATAC data or create "integrated" slot.
-#   Coembedding rule will create a new Seurat object for the comembeding rule.
-#   If True, 
-#     1. Use RNA Gene Expression counts
-#     2. Impute ATAC Gene Activity Scores from Gene Expression counts
-#     3. Coembed UMAPs
-#     Ref: https://satijalab.org/seurat/articles/atacseq_integration_vignette.html
-#   If False,
-#     Skips coembedding rule
-#
-# reference: group to use as reference data for coembedding
-#
-# type: Which object to look for data in? Can select an assay in unitegrated or integrated Seurat objects.
-#
-# slot_name: assay name to use, '.' delimited. Any valid assay from unintegrated or integrated objects.
-#
-# norm_method: normalization method for assay selected in 'slot_name'
-#
-# reduction: reduction performed on assay selected in 'slot_name'
-coembed:
-  activate: false
-  groups:
-    integrated_0:
-      split_by: meta_batch
-      reference:
-        label: batch1
-        assay_name: Gene.Expression
-      query:
-        label: batch2
-        assay_name: Gene.Expression
 
 chooser:
   groups:
@@ -205,58 +163,10 @@ chooser:
     - silhouette_grouped
 
 cluster:
-  resolution: 0.6  # Set to null if you're taking advantage of chooser
+  resolution: null  # Set to null if you're taking advantage of chooser
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
-# Community detection and graphing
-# groups: Each group to perform clustering.
-#   If provided, group names must match 'groups' section of 'normalization' or 'integration' sections.
-#   If not provided, clustering will be performed on all assays using default values from Seurat methods.
-#
-# neighbor_method: use Seurat's graph-based shared nearest neighbor detection ['shared']
-#   or weighted nearest neighbor ['weighted']
-#   - Shared nearest neighbor graph is suitable for most applications using single modality.
-#   - Weighted neratest neighbor graph is useful for multimodal analyses
-#       (GEX+ATAC multiome, CITE-Seq, etc)
-#   - Note: weighted nearest neighbor method requires umap (tsne not supported by Seurat)
-# assay_name: Which Seurat assay(s) to use. Seurat assay names are '.' delimited.
-#   Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
-#
-# reduction: Which reduction(s) to use to build graphs for 'snn' or 'wsnn'
-#   Order must match order in 'assay_name'
-#   Currently supported reductions:
-#   - 'pca' for all assays except ATAC Peaks
-#   - 'lsi' for ATAC peaks
-#
-# umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
-#   Order must match order in 'assay_name'
-#
-# resolution: Single numeric value to use as resolution parameter for group.
-# Example 1: defaults
-# cluster:
-#   activate: true
-#   groups: null
-#
-# Example 2: manual param selection
-# cluster:
-#   activate: true
-#   groups:
-#     unintegrated_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
-#     coembeded_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
+
 
 # Fix later
 # Weighted snn
@@ -302,21 +212,21 @@ diff_analysis:
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_Peaks'
     unintegrated_2:
       cluster_idents: seurat_clusters
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_MACS'
     integrated_1:
       cluster_idents: seurat_clusters
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_Peaks'
 
 
