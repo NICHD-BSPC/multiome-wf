@@ -253,7 +253,7 @@ diff_analysis:
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_Peaks'
       alpha: 0.05
     unintegrated_2:
@@ -261,7 +261,7 @@ diff_analysis:
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_MACS'
       alpha: 0.05
     integrated_0:
@@ -277,7 +277,7 @@ diff_analysis:
       assay: null
       slot: data
       min_pct: 0.2
-      test_use: 'LR'
+      test_use: null
       latent_vars: 'nCount_Peaks'
       alpha: 0.05
     wnn_0:
