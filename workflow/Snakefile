@@ -31,13 +31,12 @@ configuration = workflow.configfiles[0]
 # Allow users to fix the underlying OS via singularity.
 singularity: "docker://continuumio/miniconda3"
 
-
+# Import sampletable
 samples = pd.read_table(config["samples"]).set_index(["sample", "replicate"], drop=False)
 samples.index.names = ["sample", "replicate"]
 samples.index = samples.index.set_levels(
     [i.astype(str) for i in samples.index.levels]
 )  # enforce str in index
-# print(samples)
 
 # Set chooser variables
 resolutions = config['chooser']['resolutions']
@@ -200,9 +199,6 @@ def all_input(wildcards):
 
 rule all:
     input:
-#         expand("results/chooser_run/{seurat}/seurat_obj_{res}.rds", seurat=snn_targets, res=resolutions),
-#         expand("results/chooser_plot/{seurat}/clustered_data.rds", seurat=snn_targets),
-#         expand("results/wnn/{seurat}/clustered_data.rds", seurat=valid_groups['weighted_nn']),
         all_input
 
 rule build_annotation:
@@ -239,7 +235,14 @@ rule build_annotation:
 
 rule create_seurat:
     """
-    Creates a seurat object with associated assays.
+    - creates a single cell obj for RNA and/or ATAC using count matrices
+    - filters intersecting cells across the modalities
+    - adds samplenames to barcodes
+    - adds gene activity to seurat obj
+        - TSS enrichment score
+        - nucleosome signal
+    - calculates mito percentage
+    - adds metadata variables assigned in the sample.tsv and aggregates.tsv files
     """
     input:
         markdown = "create_seurat.Rmd",
@@ -281,11 +284,9 @@ rule create_seurat:
 
 rule qc:
     """
-    Filters cell counts based on user-supplied column names present in Seurat metadata.
-    Saves pre- and post-filtered violin plots if user wants to generate report later.
-
-    Do this step individually, in case need to re-run QC/filtering with diff params.
-    Little bit of I/O overhead worth it.
+    - imputes missing values to zero in metadata
+    - removes outlier cells based on upper/lower limits in QC metrics
+    - creates exploratory violin plots before and after filtering
     """
     input:
         markdown = "qc.Rmd",
@@ -323,7 +324,9 @@ rule qc:
 
 rule merge_zinba:
     """
-    Merge seurat objects from QC in case of skipping macs2 peakcalling
+    - merge seurat objects from QC in case of skipping macs2 peakcalling
+    - update the peak x cell matrices to have identical genomic coordinates 
+      in a merged seurat obj across the ATAC datasets if it has multiple ATAC samples
     """
     input:
         markdown = "merge_zinba.Rmd",
@@ -358,12 +361,12 @@ rule merge_zinba:
 
 rule merge_macs_prep:
     """
-    Merge section:
-    Combines all samples in samples.tsv into a single Seurat object.
-    This improves consistency across all assays/samples.
-    If multiple peaks files from select_peaks rule are found, performs granges reduction.
-    Note that NA are imputed for cells lacking counts data.
-    Example: Cells containing only GEX data will have NA for all ATAC peaks and vice versa.
+    - combines all samples in samples.tsv into a single Seurat object.
+    - update the peak x cell matrices to have identical genomic coordinates 
+      in a merged seurat obj across the ATAC datasets if it has multiple ATAC samples
+    - saves fragments as a single bed file for macs2 peak calling
+    - NA are imputed for cells lacking counts data.
+      Example: Cells containing only GEX data will have NA for all ATAC peaks and vice versa.
 
     Peakcalling section:
     ZINBA: Combine peaks if needed
@@ -456,7 +459,8 @@ rule macs2:
 
 rule add_macs_peaks:
     """
-    This rule merges macs2-called peaks to seurat
+    - updates Seurat obj with MACS-called peaks if present, which adds a new assay labeled MACS
+    - adds a pseudo peak matrix with zeros for cells with no peaks called
     """
     input:
         peak = "results/macs2/NA_peaks.narrowPeak",
@@ -490,24 +494,16 @@ rule add_macs_peaks:
 
 rule normalize_reduce_dims:
     """
-    Pre-process unitegrated data.
-    Splits Seurat object from combine_seurat into a list of Seurat objects,
-    each object containing 1 assay. Checks for and removes imputed zero values
-    generated during combine_seruat step to retain only 'true' counts,
-    (the imputed zeros are very problematic).
-    For each assay, perform log, sct or lsi normalization. One norm per assay.
+    - filters cell barcodes where the counts are non-zero and non-missing in each modality
+    - split the Seurat obj into layers
+    - performs normalization on the filtered cells for each assay
+    - performs dimensionality reduction on the filtered cells in each modality
+    - creates an elbow plot per sample per modality
+
+    NOTE: 
     Linear and non-linear dimensional reductions are stored in unique dim red key:
     using format: paste0(assay_name, "_", reduction_type)
     Example("gene.expression_pca").
-    Rule returns a list of Seurat objects, each element containing one assay.
-    Exception is when 2 assays have identical cells (Multiome, CITE-Seq),
-    in which case, will the list element will be a seruat object containing
-    all assays with equal cell count (Seurat object with 2 assays.)
-    Fix later: This behavior should probably be changed to ensure
-    each output list element contains Seurat object with one and only one assay.
-    Fix later: If each list element contains only one assay,
-    possibly change dim reduction keys to 'pca/lsi' or 'umap' for easy access
-    in downstream rules easier to fix. Check if this is viable.
     """
     input:
         markdown = "normalize_reduce_dims.Rmd",
@@ -546,16 +542,15 @@ rule normalize_reduce_dims:
 
 rule integrate:
     """
-    Perform one or more integration based on sample.tsv or units.tsv columns.
-    Note that imputed zeros from combine_seruat rule are note used for integration.
-    Fix later: check if imputed zeros still exist and possibly remove from the
-    pre- and/or post-integrated objects.
+    - runs normalization and dim reduction if it's missing
+    - integrates datasets in the same modalities based on sample.tsv or units.tsv
+    - create an exploratory elbow plot
+
+    NOTE:
     Add more columns to sample.tsv or units.tsv for new integration combinations.
-    Returns list of Seurat objects, each object contains one integration.
     """
     input:
         markdown = "integrate.Rmd",
-        # seurat_in = "results/normalize_reduce_dims/un{seurat}/un{seurat}.rds",
         seurat_in = get_integrate_inputs,
         config = ancient(configuration),
     output:
@@ -583,7 +578,11 @@ rule integrate:
 
 rule chooser_paral:
     """
-    Runs chooseR for clustering resolution selection.
+    (Optional)
+    Runs chooseR for clustering resolution selection to calculate silhouette scores per cluster 
+    on iteratively sampled cells
+
+    Reference: https://pubmed.ncbi.nlm.nih.gov/33522897
     """
     input:
         markdown = "chooser_paral.Rmd",
@@ -627,7 +626,9 @@ rule chooser_paral:
 
 rule chooser_aggr:
     """
-    Plots chooseR results
+    (Optional)
+    - creates exploratory plots for individual resolutions and silhouette scores
+    - calculates optimal resolution
     """
     input:
         markdown = 'chooser_aggr.Rmd',      # chooser - results
@@ -674,7 +675,8 @@ rule chooser_aggr:
 rule prep_cluster:
     """
     Prepare an RDS file storing the resolution of clustering
-    if it's configured by user
+
+    NOTE: Configure `cluster` in your config.yaml
     """
     input:
         seurat_in = get_cluster_inputs
@@ -690,7 +692,8 @@ rule prep_cluster:
 
 rule cluster:
     """
-    Cluster each unintegrated or integrated assay based on Chooser results
+    - runs clustering and UMAP
+    - creates exploratory UMAP plots
     """
     input:
         markdown = "cluster.Rmd",      # chooser - results
@@ -735,9 +738,11 @@ rule cluster:
 
 rule weighted_nn:
     """
-    Runs weighted nearest neighbor analysis,
-    assumues cell names for each assay are identical.
-    Currently only one WNN analysis supported.
+    - filters cells existing in both modalities
+    - builds a Seurat object consisting of assays and dimensionality reductions for both modalities
+    - finds multimodal neighbors
+    - runs UMAP and clustering
+    - creates exploratory plots
     """
     input:
         markdown = "weighted_nn.Rmd",
@@ -776,7 +781,8 @@ rule weighted_nn:
 
 rule diff_analysis:
     """
-    Runs differential testing for specified assays.
+    - computes per-cluster marker genes
+    - saves DEGs in a tsv file
     """
     input:
         markdown = "diff_analysis.Rmd",
@@ -816,11 +822,10 @@ rule diff_analysis:
 
 rule combine:
     """
-    Merge all Seurat objects created during rules cluster and weighted_nn.
-    Input  objects have 1 normalized, scaled assay, dim. reduction,
-    cluster identities from SNN and/or WNN community detection.
-    Merges non-greedily: if all cell barcodes in 2 objects identical merge objects.
-    If unique cell barcodes exist in either object, objects not merged.
+    - merges all dimensionality reductions and metadata info created during rules cluster
+      and weighted_nn (if present) into one Seurat objects
+    - returns a list of Seurat objects
+    - Seurat objects are combined only if they contain identical barcodes
     """
     input:
         markdown = "combine.Rmd",
