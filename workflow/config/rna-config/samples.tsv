@@ -1,3 +1,3 @@
 sample	replicate	genome	HDF5_Multiple_Assays	RDS_Multiple_Assays	Gene.Expression	Peaks	TF	fragments	singlecell	meta_modality	meta_batch	meta_geno
-tissue1	nan	hg38			../test_data/tenx_rna/filtered_feature_bc_matrix.h5					RNA	batch1	wt
-tissue2	nan	hg38			../test_data/tenx_rna/filtered_feature_bc_matrix.h5					RNA	batch2	wt
+toydataset	nan	hg38		../test_data/tenx_rna/filtered_feature_bc_matrix.h5						RNA	batch1	wt
+toydataset1	nan	hg38		../test_data/tenx_rna/filtered_feature_bc_matrix.h5						RNA	batch2	ko
