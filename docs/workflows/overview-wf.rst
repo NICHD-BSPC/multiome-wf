@@ -45,12 +45,8 @@ how to configure each rule, and make adjustments as necessary.
 
     .. code-block:: bash
 
-        rsync -rvt workflow/ workflow/genome1-atac/
-        rsync -rvt workflow/ workflow/genome2-atac/
-
-        # OR 
-        # rsync -rvt workflow/ workflow-genome1-atac/
-        # rsync -rvt workflow/ workflow-genome2-atac/
+        $ rsync -rvt workflow/ workflow-genome1-atac/
+        $ rsync -rvt workflow/ workflow-genome2-atac/
 
     Now, downstream analyses can link to and utilize results from these individual
     folders, while the whole project remains self-contained.
