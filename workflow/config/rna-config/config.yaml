@@ -43,9 +43,7 @@ qc:
   rm_outliers_method: sd
   meta_labels:
     - nCount_Gene.Expression
-    - nCount_Peaks
     - percent.mt
-    - TSS.enrichment
   lower: 
     nCount_Gene.Expression: 100
   upper: null
@@ -59,6 +57,9 @@ macs2:
 
 
 # Normalization and linear reduction
+#
+# split_by: metadata column to split, match the split_by in the `integrate`
+#
 # groups: Each group to perform normalization. Group name (key) must be unique.
 #
 # assay_name: Which Seurat assay to use. Seurat assay names are '.' delimited.
@@ -67,11 +68,11 @@ macs2:
 # norm_method: Method to normalize the group's assay.
 #   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
 normalize:
+  split_by: meta_geno
   groups:
     unintegrated_0:
       assay_name: Gene.Expression
       norm_method: sct
-
 
 # Integrate data sets
 # activate: Integrate (transform) count data and/or dimensional reductions/embeddings?
@@ -118,79 +119,31 @@ normalize:
 # umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
 integrate:
   activate: true
-  memory_MB: null
   atac_integrate_embeddings: true
+  split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integrati
   groups:
     integrated_0:
-      # split_by: meta_batch
-      split_by: meta_modality # this has to match the column name of your metadata indicating datasets for integration
-      n_dataset: 4
-      reference:
-        label: batch1
-        assay_name: Gene.Expression
-      query:
-        label: batch2
-        assay_name: Gene.Expression
+      assay_name: Gene.Expression
       norm_method: sct
+      integrate_method: CCAIntegration  # RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration
       integrate_dims:
         - 1
         - 30
 
+
 # Is your input a toy dataset?
 # This question is required to adjust the number of neighbors when integrating datasets
 dataset_size:
-  toydataset: false  # true or false
+  toydataset: true  # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # check `https://satijalab.org/seurat/reference/integrateembeddings`
-
-
-# Coembed rna and atac data
-# activate: Coembed rna and atac data instead of integrating/transforming data?
-#   Similar in concept to integration workflow, but doesn't transform ATAC data or create "integrated" slot.
-#   Coembedding rule will create a new Seurat object for the comembeding rule.
-#   If True, 
-#     1. Use RNA Gene Expression counts
-#     2. Impute ATAC Gene Activity Scores from Gene Expression counts
-#     3. Coembed UMAPs
-#     Ref: https://satijalab.org/seurat/articles/atacseq_integration_vignette.html
-#   If False,
-#     Skips coembedding rule
-#
-# reference: group to use as reference data for coembedding
-#
-# type: Which object to look for data in? Can select an assay in unitegrated or integrated Seurat objects.
-#
-# slot_name: assay name to use, '.' delimited. Any valid assay from unintegrated or integrated objects.
-#
-# norm_method: normalization method for assay selected in 'slot_name'
-#
-# reduction: reduction performed on assay selected in 'slot_name'
-coembed:
-  activate: false
-  groups:
-    integrated_0:
-      split_by: meta_batch
-      reference:
-        label: batch1
-        assay_name: Gene.Expression
-      query:
-        label: batch2
-        assay_name: Gene.Expression
 
 chooser:
   groups:
     unintegrated_0:
       npcs: 25
-    unintegrated_1:
-      npcs: 20
-    unintegrated_2:
-      npcs: 20
-    unintegrated_3:
-      npcs: 20
     integrated_0:
       npcs: 25
-    integrated_1:
-      npcs: 20
   resolutions:
     - 0.6
     - 0.8
@@ -200,66 +153,15 @@ chooser:
     - silhouette_grouped
 
 cluster:
-  resolution: 0.6  # Set to null if you're taking advantage of chooser
+  resolution: 0.8  # set to null if you wish to determine optimal resolution using chooseR
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
-# Community detection and graphing
-# groups: Each group to perform clustering.
-#   If provided, group names must match 'groups' section of 'normalization' or 'integration' sections.
-#   If not provided, clustering will be performed on all assays using default values from Seurat methods.
-#
-# neighbor_method: use Seurat's graph-based shared nearest neighbor detection ['shared']
-#   or weighted nearest neighbor ['weighted']
-#   - Shared nearest neighbor graph is suitable for most applications using single modality.
-#   - Weighted neratest neighbor graph is useful for multimodal analyses
-#       (GEX+ATAC multiome, CITE-Seq, etc)
-#   - Note: weighted nearest neighbor method requires umap (tsne not supported by Seurat)
-# assay_name: Which Seurat assay(s) to use. Seurat assay names are '.' delimited.
-#   Currently supported assays names 'Gene.Expression', 'Multiplexing.Capture', 'Peaks', 'Gene.Activity'
-#
-# reduction: Which reduction(s) to use to build graphs for 'snn' or 'wsnn'
-#   Order must match order in 'assay_name'
-#   Currently supported reductions:
-#   - 'pca' for all assays except ATAC Peaks
-#   - 'lsi' for ATAC peaks
-#
-# umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
-#   Order must match order in 'assay_name'
-#
-# resolution: Single numeric value to use as resolution parameter for group.
-# Example 1: defaults
-# cluster:
-#   activate: true
-#   groups: null
-#
-# Example 2: manual param selection
-# cluster:
-#   activate: true
-#   groups:
-#     unintegrated_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
-#     coembeded_0:
-#       neighbor_method: shared
-#       assay_name: Gene.Expression
-#       reduction: pca
-#       umap_dims:
-#       - null
-#       - null
-#       resolution: null
-
-# Fix later
 # Weighted snn
+# NOTE: Set `activate` to false for unimodal analyses
 weighted_nn:
   activate: false
   groups:
     wnn_0:
-      neighbor_method: weighted
       input_groups:
         - unintegrated_0 # corresponds to SCT
         - unintegrated_1 # corresponds to Peaks
@@ -272,8 +174,8 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
     wnn_1:
-      neighbor_method: weighted
       input_groups:
         - integrated_0 # corresponds to SCT
         - integrated_1 # corresponds to Peaks
@@ -286,6 +188,7 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
@@ -299,13 +202,8 @@ diff_analysis:
       min_pct: null
       test_use: null
       latent_vars: null
-    integrated_0:
-      cluster_idents: seurat_clusters
-      assay: null
-      slot: data
-      min_pct: null
-      test_use: null
-      latent_vars: null
+      alpha: 0.05
+
 
 # Choose guide options:
 # build - build initial version of guide.rst from config/template_guide.rst
