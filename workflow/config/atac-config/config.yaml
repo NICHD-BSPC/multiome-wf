@@ -66,6 +66,7 @@ macs2:
 # norm_method: Method to normalize the group's assay.
 #   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
 normalize:
+  split_by: meta_geno
   groups:
     unintegrated_1:
       assay_name: Peaks
@@ -123,12 +124,13 @@ normalize:
 # umap_dims: Range of dimensions to use for UMAP non-linear reduction after integration.
 integrate:
   activate: true
-  memory_MB: null
   atac_integrate_embeddings: true
+  split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integrati
   groups:
     integrated_1:
       assay_name: Peaks
       norm_method: lsi
+      integrate_method: rlsi
       integrate_dims:
         - 1
         - 30
@@ -162,19 +164,17 @@ chooser:
     - frequency_grouped
     - silhouette_grouped
 
+
 cluster:
-  resolution: null  # Set to null if you're taking advantage of chooser
+  resolution: 0.8  # set to null if you wish to determine optimal resolution using chooseR
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
-
-
-# Fix later
 # Weighted snn
+# NOTE: Set to false for unimodal analyses
 weighted_nn:
   activate: false
   groups:
     wnn_0:
-      neighbor_method: weighted
       input_groups:
         - unintegrated_0 # corresponds to SCT
         - unintegrated_1 # corresponds to Peaks
@@ -187,8 +187,8 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
     wnn_1:
-      neighbor_method: weighted
       input_groups:
         - integrated_0 # corresponds to SCT
         - integrated_1 # corresponds to Peaks
@@ -201,6 +201,7 @@ weighted_nn:
         - - 1
           - 20
       resolution: 0.6
+      detection_method: 3
 
 # differential testing (i.e. diff gene expression, chromatin accessibility, TF motifs)
 # can change "cluster_idents" to any metadata column, i.e. "orig.ident", "library_id", "batch_effect", etc
@@ -214,6 +215,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
     unintegrated_2:
       cluster_idents: seurat_clusters
       assay: null
@@ -221,6 +223,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_MACS'
+      alpha: 0.05
     integrated_1:
       cluster_idents: seurat_clusters
       assay: null
@@ -228,6 +231,7 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
 
 
 # Choose guide options:
