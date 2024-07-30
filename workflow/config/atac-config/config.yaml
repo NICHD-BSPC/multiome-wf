@@ -144,16 +144,12 @@ dataset_size:
 
 chooser:
   groups:
-    unintegrated_0:
-      npcs: 25
     unintegrated_1:
       npcs: 20
     unintegrated_2:
       npcs: 20
     unintegrated_3:
       npcs: 20
-    integrated_0:
-      npcs: 25
     integrated_1:
       npcs: 20
   resolutions:
