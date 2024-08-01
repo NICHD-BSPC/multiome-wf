@@ -40,8 +40,6 @@ options(future.globals.maxSize=40000 * 1024^2,
 
 # Parallelize the run
 plan("multicore", workers=ncpus)
-
-
 ```
 
 ## Set variables
@@ -214,7 +212,6 @@ if (any(duplicated(names(tenx_data)))) {
     stop(save = "no")
 }
 
-# print(str(tenx_data))
 
 # # Convert 10X Genomics 'Gene Expression' feature type to 'RNA'
 # # Many Seurat functions look specifically for 'RNA' string in assays
@@ -232,8 +229,6 @@ tenx_data <-  lapply(seq_along(tenx_data), function(x) {
 }) %>%
 set_names(names(tenx_data))
 
-# cat('list names and cell names were updated!')
-# print(str(tenx_data))
 ```
 
 
