@@ -18,8 +18,6 @@ aggregates: config/rna-config/aggregates.tsv
 assays: config/rna-config/assays.tsv
 
 
-
-
 # Choose how to build your annotation (e.g. EnsDb or GTF)
 # if "GTF", provide path to annotation file, otherwise null.
 ANNOTATION: "EnsDb"
@@ -157,7 +155,7 @@ cluster:
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
 # Weighted snn
-# NOTE: Set `activate` to false for unimodal analyses
+# NOTE: Set to false for unimodal analyses
 weighted_nn:
   activate: false
   groups:
@@ -196,6 +194,14 @@ diff_analysis:
   activate: true
   groups:
     unintegrated_0:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: null
+      test_use: null
+      latent_vars: null
+      alpha: 0.05
+    integrated_0:
       cluster_idents: seurat_clusters
       assay: null
       slot: data
