@@ -88,6 +88,6 @@ Now you are ready to build your documentation. Run the following commands:
     $ conda activate ./env
     $ make html
 
-
+Here's your root document: ``_build/html/index.html``
 
 
