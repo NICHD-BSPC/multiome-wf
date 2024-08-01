@@ -22,15 +22,14 @@ library(Signac)
 library(Seurat)
 library(knitr)
 library(Matrix)
-# library(future)
 library(data.table)
-# library(parallel)
 
-set.seed(1327)  # added to remove unwanted randomness
+set.seed(1327)
 
 # Set correct paths
 source("chooser/R/pipeline.R")
 ```
+
 
 ```{r variables}
 results_path <- params[['results_path']]
@@ -193,6 +192,10 @@ if (length(idx_loc) == length(boot_list1) || nrow(boot_mat) == 0) {
     } else if (nrow(possible_choices) > 1) {
         # if multiple, take res with highest median CI. Might be best criteria
         choice <- possible_choices[med == max(med),][abs(low_med) == max(abs(low_med)),]$res
+        # If multiple, choose the first one
+        if (length(choice) > 1) {
+            choice <- choice[1]
+        }
     }
 }
 
@@ -390,13 +393,19 @@ obj <- readRDS(paste0(results_path, "/seurat_obj_", choice, ".rds"))
 sil_scores <- readRDS(paste0(results_path, "/silhouette_", choice, ".rds"))
 
 # Update the silhouette scores to NULL if it's NA
-sil_scores <- if (is.null(sil_scores)) {
-    NULL
-} else if (is.na(sil_scores)) {
+sil_scores <- if (length(sil_scores) <= 1) {
     NULL
 } else {
     sil_scores
 }
+
+# sil_scores <- if (is.null(sil_scores)) {
+#     NULL
+# } else if (is.na(sil_scores)) {
+#     NULL
+# } else {
+#     sil_scores
+# }
 
 if (!is.null(sil_scores)) {
     sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
