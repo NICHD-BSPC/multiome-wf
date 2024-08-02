@@ -20,7 +20,7 @@ run the following:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:lcdb/lcdb-wf.git <project_name>
+    $ git clone git@github.com:NICHD-BSPC/multiome-wf.git <project_name>
 
 Otherwise, clone using the web URL below:
 
