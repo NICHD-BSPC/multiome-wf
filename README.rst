@@ -34,14 +34,14 @@ the *lcdb-wf* into *mouse_brain* folder:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:lcdb/lcdb-wf.git mouse_brain
+    $ git clone git@github.com:NICHD-BSPC/multiome-wf.git mouse_brain
 
 Not assigning any directory name will use ``lcdb-wf``. Let's assume it is cloned 
 to ``lcdb-wf`` by running the following command:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:lcdb/lcdb-wf.git
+    $ git clone git@github.com:NICHD-BSPC/multiome-wf.git
 
 
 Conda
@@ -65,6 +65,7 @@ If you are ready to set up your main conda environment, follow the command below
 
 .. code-block::
 
+    # Assume you are in the multiome-wf directory
     $ mamba env create --prefix ./env --file env.yaml
 
 This will create a new conda environment named ``env`` in the current directory.
