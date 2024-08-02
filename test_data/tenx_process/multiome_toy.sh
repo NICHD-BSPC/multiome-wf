@@ -91,4 +91,4 @@ bgzip < $TOY_ATAC > $TOY_ATAC.gz
 tabix -p bed --zero-based --force --begin 2 --end 3 $TOY_ATAC.gz
 
 
-
+Rscript GEX.R

@@ -1,7 +1,7 @@
 TOY_IN="tenx_input"
 TOY_OUT="../tenx_multiome_toy"
 PER_BARCODE_METRICS="$TOY_IN/per_barcode_metrics.csv"
-TOY_BARCODE_CSV="$TOY_IN/toy_barcode.csv"
+TOY_BARCODE_CSV="$TOY_OUT/toy_barcode.csv"
 ATAC_FRAG="$TOY_IN/atac_fragments.tsv"
 TOY_ATAC="$TOY_OUT/toy_atac.tsv"
 TOY_ATAC_ATAC="$TOY_OUT/toy_atac_atac.tsv"
