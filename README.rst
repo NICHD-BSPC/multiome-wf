@@ -60,6 +60,15 @@ instructions:
 - `Conda on Biowulf <https://hpc.nih.gov/docs/diy_installation/conda.html>`_
 - `Dotfiles of Dr. Ryan Dale (NIH/NICHD) <https://daler.github.io/dotfiles>`_
 
+
+If you are ready to set up your main conda environment, follow the command below:
+
+.. code-block::
+
+    $ mamba env create --prefix ./env --file env.yaml
+
+This will create a new conda environment named ``env`` in the current directory.
+
 Documentation
 ~~~~~~~~~~~~~
 
