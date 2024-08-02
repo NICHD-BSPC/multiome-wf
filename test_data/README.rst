@@ -13,39 +13,60 @@ The *multiome-wf* provides a toy dataset for multiome and download scripts for s
 All files for creating or downloading toy datasets are listed below:
 
 .. code-block:: bash
-    .
-    ├── README.rst
-    ├── tenx_atac
-    │   └── download_raw.sh
-    ├── tenx_multiome_toy
-    │   ├── toy_atac.tsv.gz
-    │   ├── toy_atac.tsv.gz.tbi
-    │   ├── toy_barcode.csv
-    │   ├── toy_matrix.rds
-    │   ├── toy_peaks.bed
-    │   └── toy_peaks_peaks.tsv
-    ├── tenx_process
-    │   ├── download_raw.sh
-    │   ├── GEX_config.R
-    │   ├── GEX.R
-    │   ├── multiome_toy_config.sh
-    │   ├── multiome_toy.sh
-    │   ├── path.R
-    │   └── toy_seurat.Rmd
-    └── tenx_rna
-        └── download_raw.sh
+
+   $ tree
+   .
+   ├── README.rst
+   ├── tenx_atac
+   │   └── download_raw.sh
+   ├── tenx_multiome_toy
+   │   ├── toy_atac.tsv.gz
+   │   ├── toy_atac.tsv.gz.tbi
+   │   ├── toy_barcode.csv
+   │   ├── toy_matrix.rds
+   │   ├── toy_peaks.bed
+   │   └── toy_peaks_peaks.tsv
+   ├── tenx_process
+   │   ├── download_raw.sh
+   │   ├── GEX_config.R
+   │   ├── GEX.R
+   │   ├── multiome_toy_config.sh
+   │   └── multiome_toy.sh
+   └── tenx_rna
+       └── download_raw.sh
+
+Directories:
+
+- ``tenx_atac``
+    - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
+      from 10X Genomics
+    - The scATAC-seq test dataset will be downloaded here
+- ``tenx_rna``
+    - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
+      from 10X Genomics
+    - The scRNA-seq test dataset will be downloaded here
+- ``tenx_multiome_toy``
+    - Contains pipeline-provided toy dataset for multiome
+- ``tenx_process``
+    - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
+      from 10X Genomics
+    - The main bash script (``multiome_toy.sh``) is run to generate the toy dataset 
+      in ``tenx_multiome_toy``
+    - Contains auxiliary scripts (``multiome_toy_config.sh``, ``GEX.R``, ``GEX_config.R``) implemented 
+      in the main bash script
+
 
 Conda environment
 ~~~~~~~~~~~~~~~~~
 
-This demo requires conda environment set up for the main workflow. Ensure to have 
-your main conda environment activated.
+This demo requires a conda environment set up for the main workflow. Ensure that your 
+main conda environment is activated.
 
 Generating 10X multiome toy dataset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following demo will walk you through how to generate the multiome toy dataset. 
-However, you do not need to re-run them if you have cloned the repository.
+However, you do not need to re-run it if you have cloned the repository.
 
 Dataset preparation is performed in the ``tenx_process`` folder. 
 
@@ -54,7 +75,7 @@ Dataset preparation is performed in the ``tenx_process`` folder.
     $ cd tenx_process
 
 The toy dataset is prepared from a full dataset provided by 10X Genomics. Run
-the following command for download:
+the following command to download it:
 
 .. code-block:: bash
 
@@ -77,7 +98,7 @@ as shown below:
     0 directories, 5 files
 
 Once the full dataset is prepared, run the following command to create a toy dataset 
-having subsets of the full dataset:
+containing a subset of the full dataset:
 
 .. code-block:: bash
 
