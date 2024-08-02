@@ -25,6 +25,12 @@ source multiome_toy_config.sh
 # 4. toygex_barcodes.txt (for subsetting reads in the filtered_bc_matrix.h5 file)
 # 5. toy_barcode.csv (from per_barcode_metrics.csv)
 
+# Create output dir if absent
+if [[ ! -e $TOY_OUT ]]
+then
+    mkdir $TOY_OUT
+fi
+
 # Extract header and save as a csv file
 awk 'NR == 1' $PER_BARCODE_METRICS > $TOY_BARCODE_CSV
 
