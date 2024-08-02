@@ -133,8 +133,8 @@ This dataset will be downloaded in the ``tenx_atac`` directory by running the fo
 .. code-block:: bash
 
     # Assume you are in the test_data directory
-    cd tenx_atac
-    bash download_raw.sh
+    $ cd tenx_atac
+    $ bash download_raw.sh
 
     $ tree
     .
@@ -170,8 +170,8 @@ This dataset will be downloaded in the ``tenx_rna`` directory by running the fol
 .. code-block:: bash
 
     # Assume you are in the test_data directory
-    cd tenx_rna
-    bash download_raw.sh
+    $ cd tenx_rna
+    $ bash download_raw.sh
 
     $ tree
     .
