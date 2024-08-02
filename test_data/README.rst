@@ -37,6 +37,9 @@ All files for creating or downloading toy datasets are listed below:
 
 Directories:
 
+
+- ``tenx_multiome_toy``
+    - Contains pipeline-provided toy dataset for multiome
 - ``tenx_atac``
     - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
       from 10X Genomics
@@ -45,8 +48,6 @@ Directories:
     - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
       from 10X Genomics
     - The scRNA-seq test dataset will be downloaded here
-- ``tenx_multiome_toy``
-    - Contains pipeline-provided toy dataset for multiome
 - ``tenx_process``
     - Contains a pipeline-provided bash script (``download_raw.sh``) for downloading 
       from 10X Genomics
@@ -104,8 +105,7 @@ containing a subset of the full dataset:
 
     $ bash multiome_toy.sh
 
-This 
-The output of this run is found by running the following commands:
+The output of this run is found in ``../tenx_multiome_toy`` as show below:
 
 .. code-block:: bash
 
@@ -125,43 +125,61 @@ The output of this run is found by running the following commands:
 
 
 
-It's technically challenging to subset datasets stored in the `HDF5 (h5) 
-<https://en.wikipedia.org/wiki/Hierarchical_Data_Format>`_ format. As a workaround, the original ``h5`` file 
-is processed in R, which saves data in an ``rds`` file as a replacement of ``h5`` format.
+Downloading 10X Genomics scATAC-seq toy dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This dataset will be downloaded in the ``tenx_atac`` directory by running the following command:
 
 .. code-block:: bash
 
-    $ Rscript GEX.R
+    # Assume you are in the test_data directory
+    cd tenx_atac
+    bash download_raw.sh
 
-This R script will create a subsetted data from the ``filtered_bc_matrix.h5``. 
+    $ tree
+    .
+    ├── download_raw.sh
+    ├── filtered_peak_bc_matrix.h5
+    ├── filtered_tf_bc_matrix.h5
+    ├── fragments.tsv.gz
+    ├── fragments.tsv.gz.tbi
+    ├── peaks.bed
+    └── summary.csv
+
+    0 directories, 7 files
+
+Now you have the following files prepared for your test run:
+
+- ``filtered_peak_bc_matrix.h5``
+- ``filtered_tf_bc_matrix.h5``
+- ``fragments.tsv.gz``
+- ``fragments.tsv.gz.tbi``
+- ``peaks.bed``
+- ``summary.csv``
 
 
+If you wish to download manually, visit 
+`1k Peripheral Blood Mononuclear Cells (PBMCs) from a Healthy Donor (Next GEM v1.1) 
+<https://www.10xgenomics.com/resources/datasets/1-k-peripheral-blood-mononuclear-cells-pbm-cs-from-a-healthy-donor-next-gem-v-1-1-1-1-standard-2-0-0>`_.
 
+Downloading 10X Genomics scRNA-seq toy dataset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+This dataset will be downloaded in the ``tenx_rna`` directory by running the following command:
 
+.. code-block:: bash
 
-- Annotation construction
+    # Assume you are in the test_data directory
+    cd tenx_rna
+    bash download_raw.sh
 
-```bash
-Rscript -e "rmarkdown::render('tenx_process/annotation_ensdb.Rmd')"
-```
+    $ tree
+    .
+    ├── download_raw.sh
+    └── filtered_feature_bc_matrix.h5
 
-- Seurat object construction (optional)
+Now you have the ``filtered_feature_bc_matrix.h5`` ready for your test run.
 
-```bash
-Rscript -e "rmarkdown::render('tenx_process/toy_seurat.Rmd')"
-```
+If you wish to download manually, visit `500 Human PBMCs, 3' LT v3.1, Chromium Controller
+<https://www.10xgenomics.com/resources/datasets/500-human-pbm-cs-3-lt-v-3-1-chromium-controller-3-1-low-6-1-0>`_.
 
-## Test datasets for single modality
-
-- scRNA-seq: [original link](https://www.10xgenomics.com/resources/datasets/500-human-pbm-cs-3-lt-v-3-1-chromium-controller-3-1-low-6-1-0)
-
-```bash
-bash tenx_rna/download_raw.sh
-```
-
-- scATAC-seq: [original link](https://www.10xgenomics.com/resources/datasets/1-k-peripheral-blood-mononuclear-cells-pbm-cs-from-a-healthy-donor-next-gem-v-1-1-1-1-standard-2-0-0)
-
-```bash
-bash tenx_atac/download_raw.sh
-```
