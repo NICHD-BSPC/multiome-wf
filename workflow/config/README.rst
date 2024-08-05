@@ -38,10 +38,11 @@ This is a default sample table and consists of the following columns:
 ``aggregates.tsv``
 ------------------
 
-The aggregates table is used to map library barcode labels to library IDs in aggregated input
-files. The aggregated input contains multiple biological replicates, which can be generated 
-using ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` (scATAC-seq), or 
-``cellranger aggr`` (scRNA-seq). This table consists of the following columns:
+The aggregates table is optional and  used to map library barcode labels to library IDs 
+in aggregated input files. The aggregated input contains multiple biological replicates, 
+which can be generated using ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` 
+(scATAC-seq), or ``cellranger aggr`` (scRNA-seq). This table consists of the following 
+columns:
 
 
 - ``sample``: Unique accession/ID. Letters/numbers, underscores, dashes 
