@@ -39,12 +39,31 @@ This is a default sample table and consists of the following columns:
 ------------------
 
 The aggregates table is used to map library barcode labels to library IDs in aggregated input
-files. The aggregated input is generated using ``cellranger-arc aggr`` (multiome), 
-``cellranger-atac aggr`` (scATAC-seq), or ``cellranger aggr`` (scRNA-seq). This table 
-consists of the following columns:
+files. The aggregated input contains multiple biological replicates, which can be generated 
+using ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` (scATAC-seq), or 
+``cellranger aggr`` (scRNA-seq). This table consists of the following columns:
 
 
 - ``sample``: Unique accession/ID. Letters/numbers, underscores, dashes 
-  or other symbols are accepted without spaces.
-- ``re
+  or other symbols are accepted without spaces
+- ``replicate``: Optional, technical replicates
+- ``library_id``: Optional, labels associated with library barcode suffix for each sample
+- ``bc_suffix``: Optional, a unique library label to all barcodes for each sample
+- ``metadata*``: Optional, columns for additional metadata labels
 
+``assays.tsv``
+--------------
+
+The assay table is only used if you have calculated custom feature-by-barcode counts matrices. 
+For example, if one has a genome annotation file containing gene coordinates and enhancer 
+coordinates, you can count all ATAC reads mapping to a gene and associated enhancers: 
+
+Gene Activity Score = reads mapped within gene + reads mapped to enhancers
+
+This table consists of the following columns:
+
+- ``sample``: Unique accession/ID. Letters/numbers, underscores, dashes 
+  or other symbols are accepted without spaces
+- ``replicate``: Optional, technical replicates
+- ``assay.name``: Optional, the name of custom feature-by-barcode counts matrix
+- ``path``: Optional, the path to the custom feature-by-barcode counts matrix
