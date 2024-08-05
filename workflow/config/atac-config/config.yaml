@@ -229,13 +229,3 @@ diff_analysis:
       latent_vars: 'nCount_Peaks'
       alpha: 0.05
 
-
-# Choose guide options:
-# build - build initial version of guide.rst from config/template_guide.rst
-# render - render guide.html
-# etc - do nothing
-# NOTE:
-# 1. After building the initial guide.rst, you need to manually check input & output file paths
-# 2. Set to "etc" if the guide file is not needed
-# 3. Set to "etc" if main workflow has not run yet (no 'results' directory)
-guide: "etc" # set to "build", "render", or "etc"

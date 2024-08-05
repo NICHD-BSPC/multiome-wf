@@ -183,15 +183,6 @@ def all_input(wildcards):
         "results/combine/seurat_combined.rds"
     )
 
-    if config["guide"] == "build":
-        wanted_input.append(
-            "../report/guide.rst"
-        )
-    elif config["guide"] == "render":
-        wanted_input.append(
-            "../report/guide.html"
-        )
-
     return wanted_input
 
 
@@ -906,14 +897,4 @@ rule build_guide:
         rm reportlist.txt cellrangerlist.txt
         """
 
-rule render_guide:
-    """
-    Renders guide.rst
-    """
-    input:
-        css = "config/other-setup/style.css",
-        rst = "../report/guide.rst"
-    output:
-        "../report/guide.html"
-    shell:
-        "rst2html5 --stylesheet {input.css} -q {input.rst} {output}"  # returns guide.html
+
