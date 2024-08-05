@@ -1,11 +1,8 @@
 ``config`` directory
 ====================
 
-
-This directory contains subdirectories for configuration files such as 
-``atac-config`` (scATAC-seq), ``rna-config`` (scRNA-seq), and
-``multicome-config`` (multiome), and 
-This directory contains ``config.yaml`` and sample tables. All unused entries 
+This directory contains the ``config.yaml`` file and sample tables prepared 
+in subdirectories prepared for each modality condition. All unused entries 
 in the sample tables are left empty.
 
 ``config.yaml``
@@ -22,26 +19,32 @@ Sample tables
 
 This is a default sample table and consists of the following columns:
 
-- ``sample``: unique accession/ID. Letters/numbers, underscores, dashes 
+- ``sample``: Unique accession/ID. Letters/numbers, underscores, dashes 
   or other symbols are accepted without spaces.
-- 
-- ``feature_type``: 
-		'Gene Expression': Gene expression
-		'Peaks': ATAC
-- feature_bc_matrix_h5: absolute path to hdf5 file in outs/ directory from cellranger count, cellranger aggr, cellranger-atac count, cellranger-atac aggr. If present, this file will be prioritized as input over any filtered_feature_bc_matrix paths 
-- feature_bc_matrix_dir: comma separated string of absolute paths to filtered_feature_bc_matrix directories in outs/ directory from cellranger count, cellranger aggr, cellranger-atac count, cellranger-atac aggr. Example: 'outs/filtered_peak_bc_matrix,outs/filtered_tf_bc_matrix'
-- fragments: fragments file in outs/ directory from cellranger-atac count, cellranger-atac aggr
-- singlecell: singlecell.csv file in outs/ directory from cellranger-atac count, cellranger-atac aggr
-
-units.tsv:
-  - sample: unique accession/ID. Letters/numbers, no spaces, underscores, dashes or other symbols
-  - unit:
-  		1: barcode suffix from cellranger count or cellranger-atac counts
-  		[0-9]+: barcode suffix corresponding to library_id in libraries.csv file for input to cellranger aggr and cellranger-atac aggr
-  - library_id:
-  		library ID corresponding to barcode suffix
-  - batch_effect: library batch. Cellranger aggr and cellranger-atac aggr can contain barcodes from multiple batches
+- ``replicates``: Optional, technical replicates
+- ``genome``: Supported reference genomes are hg38 for human and mm10 for mouse.
+- ``HDF5_Multiple_Assays``: Path to a HDF5 file containing multiple feature-by-barcode matrices
+- ``RDS_Multiple_Assays``: Path to an RDS file containing multiple feature-by-barcode matrices,
+  an alternative option to provide multiple feature-by-barcode matrices to HDF
+- ``Gene.Expression``: Path to a single feature-by-barcode matrix containing 5’ or 3’ 
+  Gene Expression counts
+- ``Peaks``: Path to a single feature-by-barcode matrix containing ATAC peaks counts
+- ``TF``: Path to a single feature-by-barcode matrix containing Transcription Factor counts.
+- ``fragments``: Path to a ``fragments.tsv.gz`` file containing
+- ``singlecell``: Optional, path to a csv file for 10X Genomics ATAC and multiome
+- ``meta_*``: Optional, columns for metadata labels such as genotype, tissue, or batch
 
 
+``aggregates.tsv``
+------------------
 
+The aggregates table is used to map library barcode labels to library IDs in aggregated input
+files. The aggregated input is generated using ``cellranger-arc aggr`` (multiome), 
+``cellranger-atac aggr`` (scATAC-seq), or ``cellranger aggr`` (scRNA-seq). This table 
+consists of the following columns:
+
+
+- ``sample``: Unique accession/ID. Letters/numbers, underscores, dashes 
+  or other symbols are accepted without spaces.
+- ``re
 
