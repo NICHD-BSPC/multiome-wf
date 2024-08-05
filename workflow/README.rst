@@ -48,14 +48,14 @@ users can take advantage of this by following the one-time setup below:
 ~~~~~~~~~~~~~~~~~~~~
 
 This directory contains configuration files used to run Snakemake. It includes 
-``config.yaml`` and samples tables.
+``config.yaml`` and sample tables.
 
 
 R scripts
 ~~~~~~~~~
 
 R scripts in the ``Rmd`` and ``R`` files are used to run `Seurat 
-<https://satijalab.org/seurat>`_, `Signac, <https://stuartlab.org/signac>`_, 
+<https://satijalab.org/seurat>`_, `Signac <https://stuartlab.org/signac>`_, 
 and `chooseR <https://github.com/rbpatt2019/chooseR>`_.
 
 ``chooser`` directory
