@@ -80,7 +80,7 @@ if (params[['aggregates_tsv']] != "") {
                                          delim = "\t", escape_double = FALSE,
                                          trim_ws = TRUE)
     
-    cols <- c("sample", "replicate", "library_id", "bc_suffix", "metadata1")
+    cols <- colnames(aggregates_info)
     if (nrow(aggregates_info) == 0) {
         print("Empty aggregates.tsv file found!")
         print("Please fix or delete aggregates.tsv")
