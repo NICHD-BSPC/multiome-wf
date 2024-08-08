@@ -18,10 +18,11 @@ aggregates: config/multiome-config/aggregates.tsv
 assays: config/multiome-config/assays.tsv
 
 
-
-
 # Choose how to build your annotation (e.g. EnsDb or GTF)
-# if "GTF", provide path to annotation file, otherwise null.
+# NOTE:
+# - If you choose "GTF", set ANNO_FILE to the path to your GTF file
+# - If your reads have been mapped to a reference where the chromosomes names are unconventional,
+#   "EnsDb" is not available due to annotation incompatibility. Use "GTF" instead.
 ANNOTATION: "EnsDb"
 ANNO_FILE: "path/to/gene.gtf.gz"
 
