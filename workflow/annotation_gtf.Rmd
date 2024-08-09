@@ -63,33 +63,23 @@ plan("multicore", workers=ncpus)
 
 ```
 
+
 ## Loading path variables
 
 ```{r rule_variables}
-print("working dir:")
-print(getwd())
 
 print('yaml params:')
 print(params)
 
-annotation.file = params[['anno_file']]
-genome = params[['genome']]
+annotation.file <- params[['anno_file']]
+genome <- params[['genome']]
 
-# source("path.R")
 
 ```
 
 
 
 ## Build annotation from generic GTF
-
-
-
-```{r imput_count_matrix}
-
-# counts <- Read10X_h5(to.matrix)
-```
-
 
 
 ```{r annotation_from_generic_GTF, cache=TRUE}
@@ -103,7 +93,7 @@ gtf.ranges <- rtracklayer::import(con = annotation.file)
 # Also avoids the following:
 # Error in GetTSSPositions(ranges = annotations) : Gene annotation does not contain gene_biotype information
 if ( any(colnames(mcols(gtf.ranges)) %in% "gene_type") ) {
-  gtf.ranges$gene_biotype = gtf.ranges$gene_type
+  gtf.ranges$gene_biotype <- gtf.ranges$gene_type
 }
 
 ```
@@ -111,14 +101,20 @@ if ( any(colnames(mcols(gtf.ranges)) %in% "gene_type") ) {
 
 ### Pseudogene types
 
-```{r annotation_from_GTF_pseudogenes, results='asis'}
+```{r annotation_from_GTF_pseudogenes}
 
 # Optional
 # Use all gene/transcript types except pseudogenes:
-pseudogene.types = unique(gtf.ranges$gene_biotype)[grep(".*pseudogene.*", unique(gtf.ranges$gene_biotype) )]
-cat(pseudogene.types)
-remove.genes = c("TEC", pseudogene.types, "Mt_.*")
-remove.index = grepl(paste(remove.genes, collapse="|"), gtf.ranges$gene_biotype)
+pseudogene.types <- unique(gtf.ranges$gene_biotype)[grep(".*pseudogene.*", unique(gtf.ranges$gene_biotype) )]
+
+print("Pseudogene types:")
+for (g in pseudogene.types) {
+    print(g)
+}
+
+# Remove unwanted genes
+remove.genes <- c("TEC", pseudogene.types, "Mt_.*")
+remove.index <- grepl(paste(remove.genes, collapse="|"), gtf.ranges$gene_biotype)
 gtf.ranges <- gtf.ranges[ !remove.index ]
 
 # seqlevelsStyle(gtf.ranges) <- 'UCSC'
@@ -134,9 +130,14 @@ if (genome == 'mm10') {
     genomeStyles.species = 'Homo_sapiens'
 }
 
+
+
 # genomeStyles.species = 'Mus musculus'
-gtf.ranges <- keepStandardChromosomes(gtf.ranges, species = genomeStyles.species, pruning.mode = 'coarse')
-gtf.ranges = gtf.ranges[!seqnames(gtf.ranges) == "chrM"]
+gtf.ranges <- keepStandardChromosomes(
+    gtf.ranges,
+    species = genomeStyles.species,
+    pruning.mode = 'coarse')
+gtf.ranges <- gtf.ranges[!seqnames(gtf.ranges) == "chrM"]
 
 
 ```
