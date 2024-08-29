@@ -26,6 +26,9 @@ and ``assays.tsv`` if you calculated custom count matrices.
 
     - The workflow is optimized based on the software versions in the ``env.yaml``.
 
+    - Snakemake versions compatible with the current verion of `multiome-wf` are
+      ``>=7.29`` and ``<8.0``
+
 
 
 1. Installation

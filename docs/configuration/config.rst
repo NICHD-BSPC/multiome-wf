@@ -6,29 +6,75 @@ Configuration details
 
 
 General configuration
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 The majority of the work in setting up a new project is in the configuration --
 which samples to run, where the data files are located, which references are
 needed, etc.
 
-**The entry point for configuration** is in the ``config/config.yaml`` file found
-in each workflow directory.
+**The entry point for configuration** is found in ``workflow/config`` directory
+as shown below:
 
-See :ref:`config-yaml` for more.
+.. code-block:: bash
 
-The **samples table**, lists sample IDs, filenames, and other metadata. Its path
-is specified in the config file.
+    $ tree workflow/config
+    workflow/config
+    ├── atac-config
+    │   ├── aggregates.tsv
+    │   ├── assays.tsv
+    │   ├── config.yaml
+    │   └── samples.tsv
+    ├── multiome-config
+    │   ├── aggregates.tsv
+    │   ├── assays.tsv
+    │   ├── config.yaml
+    │   └── samples.tsv
+    ├── README.rst
+    └── rna-config
+        ├── aggregates.tsv
+        ├── assays.tsv
+        ├── config.yaml
+        └── samples.tsv
+
+    3 directories, 13 files
+
+
+``config.yaml``
+---------------
+
+This is a `snakemake configuration file 
+<https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html>`_.
+
+See :ref:`config-yaml` for pipeline-specific configuration.
+
+``samples.tsv``
+---------------
+
+This is a default sample table containing input file paths and metadata.
 
 See :ref:`samples-table` for more.
 
-An **aggregates file** only needs to be created if multiple libraries are in
-a sample file. If not using cellranger-aggr, this file does not need to be created.
+
+``aggregates.tsv`` (Optional)
+-----------------------------
+
+
+This table is used to map library barcode labels to library IDs 
+in aggregated input files. The aggregated input contains multiple biological 
+replicates, which can be generated using ``cellranger-arc aggr`` (multiome), 
+``cellranger-atac aggr`` (scATAC-seq), or ``cellranger aggr`` (scRNA-seq). 
 
 See :ref:`aggregates-table` for more.
 
-An **assays file** only needs to be created if custom feature-by-barcode counts
-matrices have been calculated. Otherwise, this file does not need to be created.
+``assays.tsv`` (Optional)
+-------------------------
+
+The assay table is only used if you have calculated custom feature-by-barcode 
+counts matrices. For example, if one has a genome annotation file containing 
+gene coordinates and enhancer coordinates, you can count all ATAC reads mapping 
+to a gene and associated enhancers:
+
+Gene Activity Score = reads mapped within gene + reads mapped to enhancers
 
 See :ref:`assays-table` for more.
 
@@ -36,7 +82,7 @@ See :ref:`assays-table` for more.
 .. _cluster:
 
 Running on a cluster
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 The example commands in :ref:`getting-started` describe running Snakemake
 locally. For larger data sets, you'll want to run them on an HPC cluster.
@@ -50,15 +96,8 @@ don't need to change anything.
 
 If you are running on a different cluster, you should inspect the following files:
 
-- `WRAPPER_SLURM`
-- Before Snakemake 7.29:
-    - the `config/clusterconfig.yaml` file (see :ref:`clusterconfig`)
-    - `lib/cluster_specific.py`. This module currently has a single function that,
-      when called, will inspect the current environment variables and make any
-      necessary changes, returning the temp dir. Other cluster-specific code may go
-      here (see `cluster_specific`)
-- After Snakemake 7.29:
-    - Profile config files from the `NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_
+- ``WRAPPER_SLURM``
+- Profile config files from the `NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_
 
 The default configuration we provide is specific to the NIH Biowulf cluster.
 To run a workflow on Biowulf, from the top-level project directory, 
@@ -72,35 +111,11 @@ The ``WRAPPER_SLURM`` script submits the main Snakemake process on a separate
 node to avoid any restrictions from running on the head node. That main
 Snakemake process then submits each rule separately to the cluster scheduler.
 
-.. _old_cluster_config:
-
-Cluster configuration (Snakemake before 7.29)
----------------------------------------------
-
-For Snakemake versions before 7.29, we specify ``config/clusterconfig.yaml`` as
-containing the rule-specific cluster arguments.
-
-That script also contains the Snakemake arguments
-
-.. code-block:: bash
-
-    --jobname "s.{rulename}.{jobid}.sh" \
-    --cluster 'sbatch {cluster.prefix} 
-    --cpus-per-task={threads} \
-    --output=logs/{rule}.o.%j \
-    --error=logs/{rule}.e.%j'
-
-This means that each job will be named after the rule and job id (the
-``--jobname`` arg). The stdout and stderr go to files in ``logs`` and are
-named after the rule, followed by a ``.o`` or ``.e``, followed by the cluster
-job ID (the ``--cluster`` arg).
-
-
 
 .. _cluster_specific:
 
-TMPDIR handling
-^^^^^^^^^^^^^^^
+``TMPDIR`` handling
+~~~~~~~~~~~~~~~~~~~
 The top of each snakefile sets up a shell prefix that exports the TMPDIR
 variable. The reason for this is that the NIH Biowulf cluster supports nodes
 with temporary local storage in a directory named after the SLURM job ID. This
@@ -121,22 +136,10 @@ However if you use these workflows on a different cluster, you may need to
 provide a different function to return the job-specific temp directory.
 
 
-.. _clusterconfig:
-
-``clusterconfig.yaml`` files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The `snakemake cluster configuration docs
-<https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html#cluster-configuration>`_
-describe how to configure cluster-specific settings so that rules will run on
-the correct size node when submitting batch jobs. This is not needed if you are
-running the workflows locally, but you may need to edit the
-`config/clusterconfig.yaml` file found in each workflow directory.
-
 .. _new_cluster_config:
 
-Cluster configuration (Snakemake after 7.29)
---------------------------------------------
+Cluster configuration
+~~~~~~~~~~~~~~~~~~~~~
 
 For Snakemake versions after 7.29, we use profile established by 
 `NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_. If you're a first-time user,
@@ -155,4 +158,19 @@ Update your bash config by running the following command:
 .. code-block:: bash
 
     source ~/.bashrc
+
+
+After completing your initial configuration for HPC utilization,
+return to the ``WRAPPER_SLURM`` file to set the ``--configfile`` parameter 
+to point to the ``config.yaml`` you're using.
+
+.. code-block:: bash
+
+    # In WRAPPER_SLURM:
+    (
+        time snakemake \
+        <snakemake_parameters>
+        --configfile config/multiome-config/config.yaml \    # IMPORTANT!
+        ) > "Snakefile.log" 2>&1
+
 
