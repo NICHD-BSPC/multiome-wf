@@ -4,26 +4,26 @@ Config YAML
 ===========
 
 This page details the various configuration options and describes how to
-configure a new workflow.
-
-Config files are expected to be in a ``config`` directory next to the the Snakefile. 
-For example, ``config/config.yaml``. Be sure to update the path to the ``config.yaml`` in the Snakefile and/or WRAPPER_SLURM files.
+configure a new workflow. Refer to the :ref:`config` section for general 
+information about configuring `multiome-wf`.
 
 While it is possible to use Snakemake mechanisms such as ``--config`` to
 override a particular config value and ``--configfile`` to update the config
 with a different file, it is easiest to edit the existing
-``config/config.yaml`` in place. This has the additional benefit of reproducibity
+``config.yaml`` in place. This has the additional benefit of reproducibility
 because all of the config information is stored in one place.
 
-The config file uses YAML format, which can be conceptualized as a set of nested key:value pairs. When running the workflow, the YAML document is parsed into a python dictionary.
+The config file uses `YAML <https://en.wikipedia.org/wiki/YAML>`_ format, which 
+can be conceptualized as a set of nested key:value pairs. When running the workflow, 
+the YAML document is parsed into a python dictionary.
 
-By specifying values in various setions of the config.yaml, the workflow automatically
-decides to run analysis variants suitable for scRNA-Seq, scATAC-Seq, or multi-modal
-experiments. With this in mind, there are 2 important points to keep in mind when
-creating a config.yaml.
+By specifying values in various setions of the ``config.yaml``, the workflow 
+automatically decides to run analysis variants suitable for scRNA-Seq, scATAC-Seq, 
+or multi-modal experiments. With this in mind, there are 2 important points to keep 
+in mind when creating a ``config.yaml``.
 
 1. Activating Rules
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Many workflow rules are optional. These rules have a discrete sections in
 the config.yaml. For example, to integrate samples to remove batch effects, there is
