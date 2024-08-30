@@ -25,65 +25,93 @@ in mind when creating a ``config.yaml``.
 1. Activating Rules
 ~~~~~~~~~~~~~~~~~~~
 
-Many workflow rules are optional. These rules have a discrete sections in
-the config.yaml. For example, to integrate samples to remove batch effects, there is
-a section in the config.yaml ``integrate``.
+The following rules are optional:
 
-If a rule is optional, it will have a key named ``activate`` or ``run``.
+- ``merge_macs_prep``/``macs2``/``add_macs_peaks`` for MACS2 peak calling
+- ``integrate`` for `dataset integration using Seurat 
+  <https://satijalab.org/seurat/articles/integration_introduction>`_
+- ``chooser_paral``/``chooser_aggr`` for computing optimal resolution in clustering
+  using `chooseR <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-03957-4>`_
+- ``diff_analysis`` for marker gene computation
+- ``weigted_nn`` for `Weighted Nearest Neighbor Analysis 
+  using Seurat <https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis>`_
+  (cross-modality integration)
 
-To specify which optional rules will be included in the analysis, 
-set ``activate`` to ``true`` or ``false``, or set ``run`` to ``Y`` or ``N``.
+
+These rules have discrete sections in the ``config.yaml`` where users configure the execution of 
+each rule. Refer to the following instruction to activate or inactivate each rule:
+
+.. code-block:: yaml
+
+    # Activate MACS2 peak calling
+    macs2:
+        run: "Y"
+
+    # Activate dataset integration
+    integrate:
+        activate: true
+
+    # Activate chooseR
+    cluster:
+        resolution: null
+
+    # Activate marker gene computation
+    diff_analysis:
+        activate: true
+
+    # Activate Weighted Nearest Neighber
+    weighted_nn:
+        activate: true
+
+
+Note that the ``chooser_paral`` and ``chooser_aggr`` rules only run when no
+pre-defined ``resolution`` is provided by the user in the ``cluster`` section.
 
 2. Analysis Groups
 ------------------
 
-Because of the myriad variants for single cell analysis and preprocessing, it is not
-possible to hard-code all the configuration options in the config.yaml file. Instead,
-we include analysis "group names" in many sections. These rules will have a field named ``group``.
-Each ``group`` must contain a nested dictionary for each analysis variant.
+Because of the myriad variants for single cell analysis and preprocessing, it is 
+not possible to hard-code all the configuration options in the ``config.yaml`` file. 
+Instead, we include analysis "group names" in many sections. These rules will have 
+a field named ``group``. Each ``group`` must contain a nested dictionary for each 
+analysis variant.
 
 To configure these sections, the user must specify the top-level dictionary key value.
 All other keys are hard-coded as options.
 
-Using the config.yaml's ``integrate`` section as an example, we see a single analysis 
-group below. The group value, ``integrated_0``, is itself a dictionary key for this analysis
-variant (integrating RNA batches). This group's dictionary contains additional fields
-which together define the groups' analysis options: ``split_by``, ``reference``, ``query``, 
-``norm_method``, and ``integrate_dims``.
+Using the ``normalize`` section as an example, we see a single analysis group below. 
+The group value, ``unintegrated_0``, is itself a dictionary key for this analysis
+variant (a modality for RNA in multiome). This group's dictionary contains additional fields
+which together define the groups' analysis options: ``assay_name``, and ``norm_method``.
 
 .. code-block:: yaml
 
-  groups:
-    integrated_0:
-      split_by: meta_batch
-      reference:
-        label: batch1
-        assay_name: Gene.Expression
-      query:
-        label: batch2
-        assay_name: Gene.Expression
-      norm_method: sct
-      integrate_dims:
-      - 1
-      - 30
+    groups:
+        unintegrated_0:
+            assay_name: Gene.Expression
+            norm_method: sct
+        unintegrated_1:
+            assay_name: Peaks
+            norm_method: lsi
+        unintegrated_2:
+            assay_name: MACS
+            norm_method: lsi
+        unintegrated_3:
+            assay_name: Gene.Activity
+            norm_method: log
 
-Keep in mind that the ``group`` key values are arbitrary. In the example above, it would be
-acceptable to replace the ``group`` key label with something more intuitive like the assay
-name being integrated: ``group: Gene.Expression`` or ``group: RNA``. This works well for 
-groups that have a single assay. However, in multi-modal analyses, using an assay or sample
-name as a ``group`` key quickly becomes cumbersome and uninformative. As a result, in the 
-following examples we will use ``unintegrated_*`` or ``integrated_*`` keys but feel free to change these.
 
 .. note::
 
     It is possible to specify more analysis groups than the number of assays in your data.
     **Do not** specify analysis groups unless your experiment setup supports the condition.
 
-    For example, in the example config.yaml file, the differential analysis section,
+    For example, in the example ``config.yaml`` file, the differential analysis section,
     ``diff_analysis`` contains 2 group key names, ``unintegrated_0`` and ``integrated_0``, if
-    you are not performing Seurat integration (e.g. if config.yaml['integrate']['activate']: false),
-    delete the ``integrated`` group. If their are superflous groups in the config.yaml,
-    Snakemake will add extra, unwanted rules/jobs when building a DAG.
+    you are not performing Seurat integration by setting the ``activate`` key to ``false`` 
+    in the ``integrate`` section, delete the ``integrated_*`` group in the rest of the sections.
+    If their are superflous groups in the ``config.yaml``, Snakemake will add extra, unwanted 
+    rules/jobs when building a DAG.
 
 
 Field descriptions
