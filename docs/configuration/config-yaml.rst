@@ -68,7 +68,7 @@ Note that the ``chooser_paral`` and ``chooser_aggr`` rules only run when no
 pre-defined ``resolution`` is provided by the user in the ``cluster`` section.
 
 2. Analysis Groups
-------------------
+~~~~~~~~~~~~~~~~~~
 
 Because of the myriad variants for single cell analysis and preprocessing, it is 
 not possible to hard-code all the configuration options in the ``config.yaml`` file. 
@@ -115,178 +115,234 @@ which together define the groups' analysis options: ``assay_name``, and ``norm_m
 
 
 Field descriptions
-------------------
+~~~~~~~~~~~~~~~~~~
 
 Config Tables
-^^^^^^^^^^^^^
+-------------
 
 ``samples`` field
+^^^^^^^^^^^^^^^^^
 
-    string, default "config/aggregates.tsv". Defines path to samples table.
-
+    string, default ``samples.tsv``. Defines path to sampletable.
     See :ref:`samples-table` for more.
 
     Example:
 
     .. code-block:: yaml
 
-        samples: "config/samples.tsv"
+        samples: "config/multiome-config/samples.tsv"
+
+        # OR 
+        # samples: "config/atac-config/samples.tsv" for scATAC-seq
+        # samples: "config/rna-config/samples.tsv" for scRNA-seq
 
 ``aggregates`` field
+^^^^^^^^^^^^^^^^^^^^
 
-    string, default "config/aggregates.tsv". Defines path to aggregates table.
-
-    If an input file is the result of ``cellranger aggr`` (e.g. barcode suffixes map to a library ID), specify path to aggregates.tsv. Otherwise, set to empty string, "".
-
-    See :ref:`aggregates-table` for more.
+    string, default ``aggregates.tsv``. Defines path to aggregates table.
+    If you are using aggregated input of multiple samples created using 
+    ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` (scATAC-seq), 
+    or ``cellranger aggr`` (scRNA-seq), specify the path to ``aggregates.tsv``. 
+    Otherwise, set to an empty string (``""``). See :ref:`aggregates-table` 
+    for more.
 
     Example:
 
     .. code-block:: yaml
 
-        assays: "config/aggregates.tsv"
+        assays: "config/multiome-config/aggregates.tsv"
+
+        # OR
+        # assays: "config/atac-config/aggregates.tsv" for scATAC-seq
+        # assays: "config/rna-config/aggregates.tsv" for scRNA-seq
 
 ``assays`` field
+^^^^^^^^^^^^^^^^
 
-    string, default "config/assays.tsv". Defines path to assays table.
-
-    If using custom counts matrices, specify path to assays.tsv. Otherwise, set to empty string, "".
-
-    See :ref:`assays-table` for more.
+    string, default ``assays.tsv``. Defines path to assays table.
+    If you are using custom counts matrices, specify path to ``assays.tsv``. 
+    Otherwise, set to an empty string (``""``). See :ref:`assays-table` 
+    for more.
 
     Example:
 
     .. code-block:: yaml
 
-        assays: "config/assays.tsv"
+        assays: "config/multiome-config/assays.tsv"
+
+        # OR
+        # assays: "config/atac-config/assays.tsv" for scATAC-seq
+        # assays: "config/rna-config/assays.tsv" for scRNA-seq
 
 Annotation
-^^^^^^^^^^
+----------
 
 ``ANNOTATION`` field
+^^^^^^^^^^^^^^^^^^^^
 
-    {"EnsDb", "GTF"}, default "EnsDb". Defines method to annotate genomic ranges objects used in ATAC and Multiome (Gene Expression + ATAC) analyses.
+    ``"EnsDb"`` or ``"GTF"``, default ``"EnsDb"``. Defines the method to build an 
+    annotation object (``GenomicRanges``) for scATAC-seq and multiome analyses.
+
+    - ``"EnsDb"`` uses the ``EnsDb.Mmusculus.v79`` (mouse mm10) or ``EnsDb.Hsapiens.v86``
+      (human hg38) package in R
+    - ``"GTF"`` uses a user-provided annotation file 
 
 ``ANNO_FILE`` field
+^^^^^^^^^^^^^^^^^^^
 
-    string, default null. If ``GTF`` is specified in ``ANNOTATION``, provide path to annotation file, otherwise null.
+    string, default ``"path/to/genes.gtf.gz"``. If ``"GTF"`` is specified in the 
+    ``ANNOTATION`` field, provide the path to your annotation file (e.g. ``genes.gtf.gz``). 
+    This field is disregarded if the ``ANNOTATION`` field is set to ``"EnsDb"``.
 
-Quality Control
+Quality Control (``qc`` section)
+--------------------------------
+
+``remove_outliers`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    boolean, default ``true``. Specify whether or not to run ``qc`` rule.
+
+``rm_outliers_method`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    ``"sd"`` or  ``"iqr"``, default ``"sd"``. Detect outliers using either standard 
+    deviation (``"sd"``), or Tukey's interquartile range (``"iqr"``). If set to
+    ``"sd"``, the thresholds are determined based on +/- 3 standard deviations.
+
+``meta_labels`` field
+^^^^^^^^^^^^^^^^^^^^^
+
+    list. Which metadata columns to use for filtering?
+
+    See :ref:`samples-table` for more details about how metadata columns are detected. 
+    If a value is specified in this field, but is not present in the data, it will be 
+    disregarded during filtering.
+
+``lower`` field
 ^^^^^^^^^^^^^^^
 
-``qc`` config section
+    dict. Key:value pairs of metadata column and associated lower limit for cutoff, 
+    **below** which exclude cells. If specified, overrides lower limit detected 
+    by outlier method for associated metadata columns in ``meta_labels``. If ``null``, 
+    outlier method tries to remove cells automatically
 
-    Feature based QC filtering of cells. This field has 5 sub-fields. 
+``upper`` field
+^^^^^^^^^^^^^^^
 
-    ``remove_outliers`` field
+    dict. Key:value pairs of metadata column and associated upper limit for cutoff, 
+    **above** which exclude cells. If specified, overrides lower limit detected 
+    by outlier method for associated metadata columns in ``meta_labels``. If ``null``, 
+    outlier method tries to remove cells automatically
 
-        boolean, default true. Specify whether or not to run qc rule.
+.. note::
 
-    ``rm_outliers_method`` field
+    - In the example below, 3 metadata columns are specified. 3 have hard cut-offs 
+      (``nCount_Gene.Expression``, ``nCount_Peaks``, and ``TSS.enrichment``), 
+      1 detects lower outliers automatically (``percent.mt``).
 
-        {"sd", "iqr"}, default "sd". Detect outliers using standard deviation (sd), or Tukey's interquartile range (iqr).
+    - 10X Genomics ATAC and multiome kits use nuclei, so reads will not map to mitochondria. 
+      However, the workflow imputes a value of 0 for ``percent.mt`` in these assays, since 
+      missing values are not generally allowed in the underlying packages. This will not 
+      effect downstream processes such as normalization, dimensional reduction, clustering, 
+      etc.
 
-    ``meta_labels`` field
 
-        list. Which metadata columns to use for filtering?
 
-        See :ref:`samples-table` for more details about how metadata columns are detected. If a value is specified in this field, but is not present in the data, it will be skipped during filtering.
-   
-    ``lower`` field
+Example:
 
-        dict. Key:value pairs of metadata column and associated lower limit for cutoff, below which exclude cells.
-        If specified, overrides lower limit detected by outlier method for associated metadata columns in "meta_labels".
-        If null, outlier method tries to remove cells automatically
+.. code-block:: yaml
 
-    ``upper`` field
-
-        dict. Key:value pairs of metadata column and associated upper limit for cutoff, above which exclude cells.
-        If specified, overrides lower limit detected by outlier method for associated metadata columns in "meta_labels".
-        If null, outlier method tries to remove cells automatically
-
-    .. note::
-
-        In the example below, 3 metadata columns are specified. 2 have hard cut-offs ("nCount_Gene.Expression" and "TSS.enrichment"), 1 detects lower outliers automatically ("percent.mt").
-
-    .. note::
-
-        10X Genomics ATAC and multiome kits use nuclei, so reads will not map to mitochondria. However, the workflow imputes a value of 0 for "percent.mt" in these assays, since missing values are not generally allowed in the underlying packages. This will not effect downstream processes such as normalization, dimensional reduction, clustering, etc.
-
-    Example:
-
-    .. code-block:: yaml
-
-        qc:
-          activate: true
-          rm_outliers_method: sd
-          meta_labels:
-          - nCount_Gene.Expression
-          - percent.mt
-          - TSS.enrichment
-          lower: 
+    qc:
+        remove_outliers: true
+        rm_outliers_method: sd
+        meta_labels:
+            - nCount_Gene.Expression
+            - nCount_Peaks
+            - percent.mt
+            - TSS.enrichment
+        lower:
             nCount_Gene.Expression: 100
+            nCount_Peaks: 1000
             TSS.enrichment: 2
-          upper: null
+        upper: null
 
-MACS
-^^^^
+MACS Peak Calling (``macs2`` section)
+-------------------------------------
 
-``macs2`` config section
+MACS specific parameters.
 
-    MACS specific parameters. This field has 2 sub-fields.
-
-    ``run`` field
-
-        {"Y", "N"}, default "Y". Determine whether or not to run macs2.
-
-        Set to "N" for RNA-seq. Set to "Y" for ATAC and Multiome requiring MACS peak calling.
-
-    ``group_fragments_by`` field
-
-        string, default "genome". Samples.tsv metadata column to generate fragments file. All labels in the specified column must have the same value. This forces generation of a single fragments file for MACS peak calling.
-
-    Example:
-
-    .. code-block:: yaml
-
-        macs2:
-          run: "Y"
-          group_fragments_by: genome
-
-Normalization
+``run`` field
 ^^^^^^^^^^^^^
 
-``normalize`` config section
+    ``"Y"`` or  ``"N"``, default ``"Y"``. Determine whether or not to run MACS.
+    Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and multiome requiring MACS 
+    peak calling. If you don’t run MACS, delete analysis groups where ``assay_name`` 
+    corresponds to ``MACS`` in the remaining sections/fields 
+    (e.g. ``unintegrated_2``).
 
-    Normalization and linear reduction. This field has 3 sub-fields.
+``group_fragments_by`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``groups`` field
+    string, default ``"genome"``. ``samples.tsv`` metadata column to generate 
+    fragments file. All labels in the specified column must have the same value. 
+    This forces generation of a single fragments file for MACS peak calling.
+    Do not change this setting unless under special circumstances.
+
+Example:
+
+.. code-block:: yaml
+
+    macs2:
+        run: "Y"
+        group_fragments_by: genome
+
+Normalization (``normalize`` section)
+-------------------------------------
+
+Normalization and linear dimensionality reduction.
+
+``split_by`` field
+^^^^^^^^^^^^^^^^^^
+
+    string. 
+
+``groups`` field
+^^^^^^^^^^^^^^^^
 
     dict. Each group to perform normalization. Group name (key) must be unique.
 
-    ``assay_name`` field
+``assay_name`` field
+^^^^^^^^^^^^^^^^^^^^
 
     {"Gene.Expression", "Multiplexing.Capture", "Peaks", "Gene.Activity", "MACS"}. Which Seurat assay to use. Note: Seurat assay names are '.' delimited.
 
-    ``norm_method`` field
+``norm_method`` field
+^^^^^^^^^^^^^^^^^^^^^
 
     {"log", "sct", "clr" or "lsi"}, defaul {Gene.Expression: sct, Peaks: lsi, MACS: lsi, Gene.Activity: log, protein: clr}. Method to normalize the group's assay. Normalize using Log (log), SCTransform (sct), CLR (clr) or latent semantic indexing (lsi). Suggestions include: 5' or 3' Gene expression are typically normalized by Log or SCTransform methods, ATAC Peaks by LSI, and protein by CLR.
 
-    Example:
+Example:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        normalize:
-          groups:
+    normalize:
+        split_by: meta_geno
+        groups:
             unintegrated_0:
-              assay_name: Gene.Expression
-              norm_method: sct
+                assay_name: Gene.Expression
+                norm_method: sct
             unintegrated_1:
-              assay_name: Peaks
-              norm_method: lsi
+                assay_name: Peaks
+                norm_method: lsi
+            unintegrated_2:
+                assay_name: MACS
+                norm_method: lsi
+            unintegrated_3:
+                assay_name: Gene.Activity
+                norm_method: log
 
 Integration
-^^^^^^^^^^^
+-----------
 
 ``integrate`` config section
 
@@ -375,7 +431,7 @@ Integration
 
 
 Utilization of Toy Dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 ``dataset_size`` config section
     
@@ -399,7 +455,7 @@ Utilization of Toy Dataset
             toy_k: 10
 
 Coembedding RNA/ATAC
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 ``coembed`` config section
 
@@ -414,7 +470,7 @@ Coembedding RNA/ATAC
         This rule is unfinished. Config fields and suggested values have intentionally been omitted. Until this documentation is updated, keep the activate field set to false.
 
 Cluster Optimization
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 ``chooser`` config section
 
@@ -471,7 +527,7 @@ Cluster Optimization
             - silhouette_grouped
 
 Clustering Resolution
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 ``cluster`` config section
     
@@ -489,7 +545,7 @@ Clustering Resolution
             resolution: 0.6
 
 Weighted Nearest Neighbor
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 
 ``weighted_nn`` config section
 
@@ -550,7 +606,7 @@ Weighted Nearest Neighbor
               resolution: 0.8
 
 Differential Testing
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 ``diff_analysis`` config section
 
@@ -622,7 +678,7 @@ Differential Testing
               latent_vars: null
 
 Generate Reports
-^^^^^^^^^^^^^^^^
+----------------
 
 Generate final report. 
 
