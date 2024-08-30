@@ -24,13 +24,10 @@ assays: config/multiome-config/assays.tsv
 # - If your reads have been mapped to a reference where the chromosomes names are unconventional,
 #   "EnsDb" is not available due to annotation incompatibility. Use "GTF" instead.
 ANNOTATION: "EnsDb"
-ANNO_FILE: "path/to/gene.gtf.gz"
+ANNO_FILE: "path/to/genes.gtf.gz"
 
 # Feature based QC filtering of cells.
 # rm_outliers_method: Detect outliers using standard deviation 'sd' or Tukey's interquartile ranger 'iqr'.
-#
-# meta_labels: Which metadata columns to use for filtering?
-#   Can select from 'feature_type' in samples.tsv, or any column in units.tsv excluding 'sample' and 'unit'.
 #
 # lower: Key:value pairs of metadata column and associated lower limit for cutoff, below which exclude cells.
 #   If present, overrides lower limit detected by outlier method.

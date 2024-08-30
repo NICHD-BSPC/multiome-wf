@@ -24,7 +24,7 @@ assays: config/atac-config/assays.tsv
 # - If your reads have been mapped to a reference where the chromosomes names are unconventional,
 #   "EnsDb" is not available due to annotation incompatibility. Use "GTF" instead.
 ANNOTATION: "EnsDb"
-ANNO_FILE: "path/to/gene.gtf.gz"
+ANNO_FILE: "path/to/genes.gtf.gz"
 
 # Feature based QC filtering of cells.
 # rm_outliers_method: Detect outliers using standard deviation 'sd' or Tukey's interquartile ranger 'iqr'.
