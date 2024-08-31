@@ -38,8 +38,9 @@ The following rules are optional:
   (cross-modality integration)
 
 
-These rules have discrete sections in the ``config.yaml`` where users configure the execution of 
-each rule. Refer to the following instruction to activate or inactivate each rule:
+These rules have discrete sections in the ``config.yaml`` where users configure the 
+execution of each rule. Refer to the following instruction to activate or inactivate 
+each rule:
 
 .. code-block:: yaml
 
@@ -81,8 +82,9 @@ All other keys are hard-coded as options.
 
 Using the ``normalize`` section as an example, we see a single analysis group below. 
 The group value, ``unintegrated_0``, is itself a dictionary key for this analysis
-variant (a modality for RNA in multiome). This group's dictionary contains additional fields
-which together define the groups' analysis options: ``assay_name``, and ``norm_method``.
+variant (a modality for RNA in multiome). This group's dictionary contains additional 
+fields which together define the groups' analysis options: ``assay_name``, and 
+``norm_method``.
 
 .. code-block:: yaml
 
@@ -107,11 +109,11 @@ which together define the groups' analysis options: ``assay_name``, and ``norm_m
     **Do not** specify analysis groups unless your experiment setup supports the condition.
 
     For example, in the example ``config.yaml`` file, the differential analysis section,
-    ``diff_analysis`` contains 2 group key names, ``unintegrated_0`` and ``integrated_0``, if
-    you are not performing Seurat integration by setting the ``activate`` key to ``false`` 
-    in the ``integrate`` section, delete the ``integrated_*`` group in the rest of the sections.
-    If their are superflous groups in the ``config.yaml``, Snakemake will add extra, unwanted 
-    rules/jobs when building a DAG.
+    ``diff_analysis`` contains 2 group key names, ``unintegrated_0`` and ``integrated_0``, 
+    if you are not performing Seurat integration by setting the ``activate`` key to ``false`` 
+    in the ``integrate`` section, delete the ``integrated_*`` group in the rest of the 
+    sections. If their are superflous groups in the ``config.yaml``, Snakemake will add 
+    extra, unwanted rules/jobs when building a DAG.
 
 
 Field descriptions
@@ -180,18 +182,20 @@ Annotation
 ``ANNOTATION`` field
 ^^^^^^^^^^^^^^^^^^^^
 
-    ``"EnsDb"`` or ``"GTF"``, default ``"EnsDb"``. Defines the method to build an 
-    annotation object (``GenomicRanges``) for scATAC-seq and multiome analyses.
+    string of ``"EnsDb"`` or ``"GTF"``, default ``"EnsDb"``. Defines the method 
+    to build an annotation object (``GenomicRanges``) for scATAC-seq and multiome 
+    analyses.
 
-    - ``"EnsDb"`` uses the ``EnsDb.Mmusculus.v79`` (mouse mm10) or ``EnsDb.Hsapiens.v86``
-      (human hg38) package in R
+    - ``"EnsDb"`` uses the ``EnsDb.Mmusculus.v79`` (mouse mm10) or 
+      ``EnsDb.Hsapiens.v86`` (human hg38) package in R
     - ``"GTF"`` uses a user-provided annotation file 
 
 ``ANNO_FILE`` field
 ^^^^^^^^^^^^^^^^^^^
 
     string, default ``"path/to/genes.gtf.gz"``. If ``"GTF"`` is specified in the 
-    ``ANNOTATION`` field, provide the path to your annotation file (e.g. ``genes.gtf.gz``). 
+    ``ANNOTATION`` field, provide the path to your annotation file (e.g. 
+    ``genes.gtf.gz``). 
     This field is disregarded if the ``ANNOTATION`` field is set to ``"EnsDb"``.
 
 Quality Control (``qc`` section)
@@ -205,9 +209,10 @@ Quality Control (``qc`` section)
 ``rm_outliers_method`` field
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``"sd"`` or  ``"iqr"``, default ``"sd"``. Detect outliers using either standard 
-    deviation (``"sd"``), or Tukey's interquartile range (``"iqr"``). If set to
-    ``"sd"``, the thresholds are determined based on +/- 3 standard deviations.
+    string of ``"sd"`` or  ``"iqr"``, default ``"sd"``. Detect outliers using either 
+    standard deviation (``"sd"``), or Tukey's interquartile range (``"iqr"``). 
+    If set to ``"sd"``, the thresholds are determined based on +/- 3 standard 
+    deviations.
 
 ``meta_labels`` field
 ^^^^^^^^^^^^^^^^^^^^^
@@ -240,11 +245,11 @@ Quality Control (``qc`` section)
       (``nCount_Gene.Expression``, ``nCount_Peaks``, and ``TSS.enrichment``), 
       1 detects lower outliers automatically (``percent.mt``).
 
-    - 10X Genomics ATAC and multiome kits use nuclei, so reads will not map to mitochondria. 
-      However, the workflow imputes a value of 0 for ``percent.mt`` in these assays, since 
-      missing values are not generally allowed in the underlying packages. This will not 
-      effect downstream processes such as normalization, dimensional reduction, clustering, 
-      etc.
+    - 10X Genomics ATAC and multiome kits use nuclei, so reads will not map to 
+      mitochondria. However, the workflow imputes a value of 0 for ``percent.mt`` 
+      in these assays, since missing values are not generally allowed in the underlying 
+      packages. This will not effect downstream processes such as normalization, 
+      dimensional reduction, clustering, etc.
 
 
 
@@ -274,10 +279,10 @@ MACS specific parameters.
 ``run`` field
 ^^^^^^^^^^^^^
 
-    ``"Y"`` or  ``"N"``, default ``"Y"``. Determine whether or not to run MACS.
-    Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and multiome requiring MACS 
-    peak calling. If you don’t run MACS, delete analysis groups where ``assay_name`` 
-    corresponds to ``MACS`` in the remaining sections/fields 
+    string of ``"Y"`` or  ``"N"``, default ``"Y"``. Determine whether or not to run 
+    MACS. Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and multiome requiring 
+    MACS peak calling. If you don’t run MACS, delete analysis groups where 
+    ``assay_name`` corresponds to ``MACS`` in the remaining sections/fields 
     (e.g. ``unintegrated_2``).
 
 ``group_fragments_by`` field
@@ -299,27 +304,46 @@ Example:
 Normalization (``normalize`` section)
 -------------------------------------
 
-Normalization and linear dimensionality reduction.
+Normalization and Principal Component Analysis (PCA).
 
 ``split_by`` field
 ^^^^^^^^^^^^^^^^^^
 
-    string. 
+    string. A metadata column in ``samples.tsv`` or ``aggregates.tsv``. Datasets 
+    will be normalized, and dimensionality reduction using PCA will be performed 
+    on each dataset, split by this column. Note that Seurat integration will be 
+    performed based on the metadata column specified by ``split_by`` here and
+    in the ``integrate`` section.
 
 ``groups`` field
 ^^^^^^^^^^^^^^^^
 
     dict. Each group to perform normalization. Group name (key) must be unique.
+    Do not modify the prefix (e.g. ``unintegrated`` and ``integrated``) unless
+    under special circumstances.
 
 ``assay_name`` field
 ^^^^^^^^^^^^^^^^^^^^
 
-    {"Gene.Expression", "Multiplexing.Capture", "Peaks", "Gene.Activity", "MACS"}. Which Seurat assay to use. Note: Seurat assay names are '.' delimited.
+    string of ``Gene.Expression``, ``Multiplexing.Capture``, ``Peaks``, 
+    ``Gene.Activity``, or ``MACS``. Which Seurat assay to use. Note that Seurat 
+    assay names are "." delimited.
 
 ``norm_method`` field
 ^^^^^^^^^^^^^^^^^^^^^
 
-    {"log", "sct", "clr" or "lsi"}, defaul {Gene.Expression: sct, Peaks: lsi, MACS: lsi, Gene.Activity: log, protein: clr}. Method to normalize the group's assay. Normalize using Log (log), SCTransform (sct), CLR (clr) or latent semantic indexing (lsi). Suggestions include: 5' or 3' Gene expression are typically normalized by Log or SCTransform methods, ATAC Peaks by LSI, and protein by CLR.
+    string of ``log``, ``sct``, ``clr`` or ``lsi``, default is the following:
+
+    - ``Gene.Expression``: ``sct``
+    - ``Peaks``: ``lsi``
+    - ``MACS``: ``lsi``
+    - ``Gene.Activity``: ``log``
+    - ``protein``: ``clr`` 
+
+    Method to normalize the group's assay. Normalize using Log (``log``), SCTransform 
+    (``sct``), Centered log ratio (``clr``) or latent semantic indexing (``lsi``). 
+    Typically, 5' or 3' Gene expression is normalized using Log or SCTransform methods, 
+    ATAC Peaks using LSI, and protein using CLR.
 
 Example:
 
@@ -341,93 +365,102 @@ Example:
                 assay_name: Gene.Activity
                 norm_method: log
 
-Integration
------------
+Integration (``integrate`` section)
+-----------------------------------
 
-``integrate`` config section
 
-    Remove technical/batch effects using Seurat integration methods. This field has 3 sub-fields. Integration rule will create a new Seurat object for each integration performed. 
+Remove technical/batch effects using `Seurat integration 
+<https://satijalab.org/seurat/articles/integration_introduction>`_ methods. 
+Integration rule will create a new Seurat object for each integration performed. 
 
-    ``activate`` field
+``activate`` field
+^^^^^^^^^^^^^^^^^^
 
-        boolean, default true. Specify whether or not to run qc rule.
+    boolean, default ``true``. Specify whether or not to run integration.
 
-    ``memory_MB`` field
+``atac_integrate_embeddings`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        integer, default null. Specify memory avaiable to R during integration methods. Default R memory is 500 MB. Integration of large data may need this increased to 5-35 GB, as needed.
+    boolean, default ``true``. If ``true``, integrate low-dimensional cell embeddings 
+    (LSI coordinates) across the datasets. This is the best option for integrating 
+    multiple ATAC Peaks data sets. If ``false``, integrate (transform) ATAC Peaks counts 
+    matrix across datasets (not LSI coordinates). This may over fit. Kept mainly 
+    for legacy support.
 
-    ``atac_integrate_embeddings`` field
 
-        boolean, default true. If True, integrate low-dimensional cell embeddings (LSI coordinates) across the datasets. This is the best option for integrating multiple ATAC Peaks data sets. If False, integrate (transform) ATAC Peaks counts matrix across datasets (not LSI coordinates). This may over fit. Kept mainly for legacy support.
 
-    ``groups`` field
+``split_by`` field
+^^^^^^^^^^^^^^^^^^
 
-        dict. Each group to perform integration. Group name (key) must be unique.
+    string. A metadata column in ``samples.tsv`` or ``aggregates.tsv``. Datasets 
+    are integrated based on this column. Ensure the same column is specified in the 
+    ``normalize`` section above.
 
-    ``split_by`` field
+    See :ref:`samples-table` for more details about how metadata columns are detected.
 
-        string. Metadata column to generate Seurat list prior to integration. 
+``groups`` field
+^^^^^^^^^^^^^^^^
 
-        See :ref:`samples-table` for more details about how metadata columns are detected.
+    dict. Each group to perform integration. Group name (key) must be unique.
 
-    ``n_dataset`` field
+``assay_name`` field
+^^^^^^^^^^^^^^^^^^^^
 
-        integer, the number of datasets to be integrated if more than 2 datasets are integrated.
+    string of ``Gene.Expression``, ``Multiplexing.Capture``, ``Peaks``, 
+    ``Gene.Activity``, or ``MACS``. Ensure the same values are specified as in the
+    ``normalize`` section above.
 
-    ``reference`` field
+``norm_method`` field
+^^^^^^^^^^^^^^^^^^^^^
 
-        dict. Information about the sample(s) to use as a reference during intergation.
+    string
 
-        ``label`` field
+``norm_method`` field
+^^^^^^^^^^^^^^^^^^^^^
 
-            string. A single value/label from ``split_by`` column. Used to subset Seurat object to create reference object.
+    {"log", "sct", "clr" or "lsi"}. Nrmalization method to perform on reference and query assays prior to Seurat integration. Suggested methods for integrating only GEX: 'log' or 'sct'. Suggested method for integrating only ATAC: 'lsi'. Suggested method for integrating GEX and ATAC together: 'log'.
 
-        ``assay_name`` field
+``integrate_dims`` field
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-            {"Gene.Expression", "Multiplexing.Capture", "Peaks", "Gene.Activity", "MACS"}. Which assay to use as reference assay for integration?
+    list of 2 integers, default [1, 30]. Range of dimensions to use for integration stap.
 
-    ``query`` field
+Example:
 
-        dict. Information about the sample(s) to use as a reference during intergation.
+.. code-block:: yaml
 
-        ``label`` field
-
-            string. A single value/label from ``split_by`` column. Used to subset Seurat object to create query object.
-
-        ``assay_name`` field
-
-            {"Gene.Expression", "Multiplexing.Capture", "Peaks", "Gene.Activity", "MACS"}. Which assay to use as query assay for integration?
-
-    ``norm_method`` field
-
-        {"log", "sct", "clr" or "lsi"}. Nrmalization method to perform on reference and query assays prior to Seurat integration. Suggested methods for integrating only GEX: 'log' or 'sct'. Suggested method for integrating only ATAC: 'lsi'. Suggested method for integrating GEX and ATAC together: 'log'.
-
-    ``integrate_dims`` field
-
-        list of 2 integers, default [1, 30]. Range of dimensions to use for integration stap.
-
-    Example:
-
-    .. code-block:: yaml
-
-        integrate:
-          activate: true
-          memory_MB: null
-          atac_integrate_embeddings: true
-          groups:
+    integrate:
+        activate: true
+        atac_integrate_embeddings: true
+        split_by: meta_geno
+        groups:
             integrated_0:
-              split_by: meta_batch
-              n_dataset: 4
-              reference:
-                label: batch1
                 assay_name: Gene.Expression
-              query:
-                label: batch2
-                assay_name: Gene.Expression
-              norm_method: sct
-              integrate_dims:
-              - 1
-              - 30
+                norm_method: sct
+                integrate_method: CCAIntegration  # RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration
+                integrate_dims:
+                    - 1
+                    - 30
+            integrated_1:
+                assay_name: Peaks
+                norm_method: lsi
+                integrate_method: rlsi
+                integrate_dims:
+                    - 1
+                    - 30
+            integrated_2:
+                assay_name: MACS
+                norm_method: lsi
+                integrate_dims:
+                    - 1
+                    - 30
+            integrated_3:
+                assay_name: Gene.Activity
+                norm_method: log
+                integrate_method: CCAIntegration
+                integrate_dims:
+                    - 1
+                    - 30
 
 
 Utilization of Toy Dataset
