@@ -165,7 +165,7 @@ integrate:
 # Is your input a toy dataset?
 # This question is required to adjust the number of neighbors when integrating datasets
 dataset_size:
-  toydataset: true  # true or false
+  toydataset: false  # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # check `https://satijalab.org/seurat/reference/integrateembeddings`
 
