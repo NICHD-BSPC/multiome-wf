@@ -202,6 +202,7 @@ chooser:
     - silhouette_grouped
 
 cluster:
+  detection_method: 3
   resolution: null  # set to null if you wish to determine optimal resolution using chooseR
                      # Go to `weighted_nn` & `resolution` to set the same resolution
 
