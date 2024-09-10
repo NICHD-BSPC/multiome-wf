@@ -37,7 +37,6 @@ options(future.globals.maxSize=40000 * 1024^2,
 plan("multicore", workers=ncpus)
 ```
 
-
 # Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. 
@@ -81,6 +80,15 @@ print(paste('Resolution to use for community detection:', res_use))
 
 # Retrieve the configuration for the number of dimensions
 npcs <- snakemake.config[['chooser']][['groups']][[ params[['seurat']] ]]$npcs
+
+# Break if npcs returns NULL
+if (is.null(npcs)) {
+    msg <- paste0(
+        "npcs missing in chooser[['groups']][['",
+        params[['seurat']],
+        "']]")
+    stop(msg)
+}
 
 # Identify dimensionality reduction performed in the previous step for the input obj
 dim_reductions <- c("pca", "lsi")
@@ -221,7 +229,6 @@ if ("umap" %in% names(obj@reductions)) {
 # Save Seurat object
 
 ```{r save}
-
 cat('Updated Seurat object:')
 print(obj)
 
