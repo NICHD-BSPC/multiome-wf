@@ -413,17 +413,25 @@ Integration rule will create a new Seurat object for each integration performed.
 ``norm_method`` field
 ^^^^^^^^^^^^^^^^^^^^^
 
-    string
+    string of ``log``, ``sct``, ``clr`` or ``lsi``. Ensure the same values are 
+    specified as in the ``normalized`` section above.
 
-``norm_method`` field
-^^^^^^^^^^^^^^^^^^^^^
-
-    {"log", "sct", "clr" or "lsi"}. Nrmalization method to perform on reference and query assays prior to Seurat integration. Suggested methods for integrating only GEX: 'log' or 'sct'. Suggested method for integrating only ATAC: 'lsi'. Suggested method for integrating GEX and ATAC together: 'log'.
+``integrate_method`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+    string of ``CCAIntegration``, ``RPCAIntegration``, ``HarmonyIntegration``, 
+    ``FastMNNIntegration``, ``scVIIntegration``, or ``rlsi``. Method to integrate 
+    unimodal datasets. For any datasets where ``norm_method`` is set to ``log`` or
+    ``sct``, this string is passed into the ``method`` argument of the
+    ``IntegrateLayers`` function of `Seurat 
+    <https://satijalab.org/seurat/reference/integratelayers>`_. If the ``norm_method``
+    is set to ``lsi``, set the ``integrate_method`` to ``rlsi`` to call the 
+    ``IntegrateEmbeddings`` function, as provided in `Signac
+    <https://stuartlab.org/signac/articles/integrate_atac#integration>`_.
 
 ``integrate_dims`` field
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-    list of 2 integers, default [1, 30]. Range of dimensions to use for integration stap.
+    list of 2 integers, default ``[1, 30]``. Range of dimensions to use for integration step.
 
 Example:
 
@@ -451,6 +459,7 @@ Example:
             integrated_2:
                 assay_name: MACS
                 norm_method: lsi
+                integrate_method: rlsi
                 integrate_dims:
                     - 1
                     - 30
@@ -463,28 +472,30 @@ Example:
                     - 30
 
 
-Utilization of Toy Dataset
---------------------------
+Utilization of Toy Dataset (``dataset_size`` config section)
+------------------------------------------------------------
 
-``dataset_size`` config section
+
     
-    Assign the utilization of toy dataset. If dataset size is smaller than default k values in kNN computation during integration, Seurat throws an error. 
+Assign the utilization of toy dataset. If dataset size is smaller than default k values in kNN computation during integration, Seurat throws an error. 
     
 
-    ``toydataset``
-        
-        boolean, set true if input is toy dataset and false otherwise.
+``toydataset`` field
+^^^^^^^^^^^^^^^^^^^^
+    
+    boolean, set true if input is toy dataset and false otherwise.
 
-    ``toy_k``
+``toy_k`` field
+^^^^^^^^^^^^^^^
 
-        size of the number of neighbors when weighting anchors during integration.
+    integer, number of neighbors when weighting anchors during integration.
 
-    Example:
+Example:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        dataset_size:
-            toydataset: true
+    dataset_size:
+        toydataset: true
             toy_k: 10
 
 Coembedding RNA/ATAC
