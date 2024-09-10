@@ -86,7 +86,11 @@ comm_label <- ifelse(comm_detection == 1, "Louvain", ifelse(
 ))))
 
 print(paste('Algorithm to use for community detection:', comm_label))
+reference <- "Ludo Waltmana and Nees Jan van Eck, Eur. Phys. J. B (2013)"
+paper_link <- "https://link.springer.com/article/10.1140/epjb/e2013-40829-0"
 ```
+
+Refer to the following reference for community detection algorithms: [`r reference`](`r paper_link`)
 
 ```{r vars_cluster}
 
