@@ -603,7 +603,7 @@ or rely on a dataset-optimized resolution computed using ``chooser``.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     integer, default ``3``. Algorithm used for community detection during 
-    multimodal clustering. Available options are:
+    unimodal clustering. Available options are:
 
     - ``1``: original Louvain algorithm
     - ``2``: Louvain algorithm with multilevel refinement
@@ -670,11 +670,11 @@ modalities into a global reduced dimensional space.
     - ``wnn_0``: ``unintegrated_0`` and ``unintegrated_1``
     - ``wnn_1``: ``integrated_0`` and ``integrated_1``
 
-    ``groups`` dictionary 
-    values from ``normalize`` and ``integrate`` config sections. Remember, unless performing multimodal 
-    integration, each ``group`` value corresponds to an assay. So in our example from the ``normalize`` 
-    config section, specifying ``unintegrated_0`` and ``unintegrated_1`` would combine the reduced 
-    dimensional weights of ``Gene.Expression`` and ``Peaks`` during weighted nearest neighbor clustering.
+    ``groups`` dictionary values from ``normalize`` and ``integrate`` config sections. Remember, 
+    unless performing multimodal integration, each ``group`` value corresponds to an assay. So in our 
+    example from the ``normalize`` config section, specifying ``unintegrated_0`` and ``unintegrated_1`` 
+    would combine the reduced dimensional weights of ``Gene.Expression`` and ``Peaks`` during WNN 
+    clustering.
 
 ``reduction`` field
 ^^^^^^^^^^^^^^^^^^^
@@ -700,7 +700,7 @@ modalities into a global reduced dimensional space.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     integer, default ``3``. Algorithm used for community detection during 
-    multimodal clustering. Refer to the ``detection_method`` field under 
+    multimodal clustering. Refer to the ``detection_method`` field in
     the ``cluster`` section above.
 
 Example:
@@ -739,220 +739,93 @@ Example:
           resolution: 0.6
           detection_method: 3
 
-Differential Testing
---------------------
+Differential Testing (``diff_analysis`` config section)
+-------------------------------------------------------
 
-``diff_analysis`` config section
+This section configures differential testing (i.e. differential gene expression, 
+chromatin accessibility, TF motifs) using the ``FindAllMarkers`` function in Seurat.
 
-    Differential testing (i.e. differential gene expression, chromatin accessibility, TF motifs). This field has 2 sub-fields. This rule calls the Seurat function FindAllMarkers().
+``activate`` field
+^^^^^^^^^^^^^^^^^^
 
-    ``activate`` field
+    boolean, default ``true``. Specify whether or not to run differential testing.
 
-        boolean, default false. Specify whether or not to run differential testing.
+``groups`` field
+^^^^^^^^^^^^^^^^
 
-    ``groups`` field
+    dict. Each group to perform differential testing. Group name (key) must be unique.
 
-        dict. Each group to perform differential testing. Group name (key) must be unique.
+``cluster_idents`` field
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``cluster_idents`` field
+    string, default ``seurat_clusters``. Which Seurat metadata column to use as labels 
+    for differential testing. Equivalent to ``obj <- SetIdents(cluster_idents)`` before
+    running ``FindAllMarkers(obj)``.
 
-        string, default "seurat_clusters". Which Seurat metadata column to use as labels for differential testing. Equivilent to ``obj = SetIdents(cluster_idents), FindAllMarkers(obj).``
+``assay`` field
+^^^^^^^^^^^^^^^
 
-    ``assay`` field
+    string, default ``null``. Which assay use for differential testing. This value is
+    passed to the ``assay`` argument of the ``FindAllMarkers`` function.
 
-        string, default null. Which assay use for differential testing. Equivilent to ``FindAllMarkers(obj, assay = assay).``
+``slot`` field
+^^^^^^^^^^^^^^
 
-    ``slot`` field
-
-        string, default "data". Which assay use for differential testing. Equivilent to ``FindAllMarkers(obj, slot = slot).``
-
-    ``min_pct`` field
-
-        string, default null. Minimum percent to use for differential testing. Equivilent to ``FindAllMarkers(obj, min.pct = min_pct).``
-
-    ``test_use`` field
-
-        string, default null. Test to use for differential testing. Equivilent to ``FindAllMarkers(obj, test.use = test_use).``
-
-    ``latent_vars`` field
-
-        string, default null. Variables to test, used only when test_use is one of 'LR', 'negbinom', 'poisson', or 'MAST'.
-
-    .. note::
-
-        Only include ``group`` values specified in the config sections: `normalize`, `integrate` (if appicable) and `weighted_nn` (if appicable).
-
-    Example:
-
-    .. code-block:: yaml
-
-        diff_analysis:
-          activate: true
-          groups:
-            unintegrated_0:                     # unintegrated Gene Expression
-              cluster_idents: seurat_clusters
-              assay: null
-              slot: data
-              min_pct: null
-              test_use: null
-              latent_vars: null
-            unintegrated_1:                     # unintegrated ATAC Peaks
-              cluster_idents: seurat_clusters
-              assay: null
-              slot: data
-              min_pct: 0.2
-              test_use: 'LR'
-              latent_vars: 'nCount_Peaks'
-            integrated_0:                       # integrated Gene Expression
-              cluster_idents: seurat_clusters
-              assay: null
-              slot: data
-              min_pct: null
-              test_use: null
-              latent_vars: null
-
-Generate Reports
-----------------
-
-Generate final report. 
-
-``guide`` field
-
-    {"build", "render", "etc"}, default "etc". Specify `build` to generate initial version report in reStructured Text format (e.g. guide.rst) from template at "config/template_guide.rst". Specify `render` to generate final html report (i.e. guide.html). Specify `etc` to skip this rule.
-
-    .. note::
-
-        **Before** the workflow completes, set guide value to `etc`. This value will prevent this rule from running until all results have been created.
-
-        **After** the workflow completes, set `guide` to `build` or `render`. This creates the final guide.
+    string, default ``data``. Which slot to pull data from. This value is passed to the 
+    ``slot`` argument of the ``FindAllMarkers`` function.
 
 
-Example
--------
+``min_pct`` field
+^^^^^^^^^^^^^^^^^
 
-A **basic** example of a config.yaml file using 2 multiome batches is below, analyzing all samples with and without integration will be performed, then clustering, and differential testing. This example also includes automated optimization of clustering parameters.
+    string, default ``null``. Only test genes that are detected in a minimum fraction
+    of cells in either of the two populations. If ``null``, a default value of 0.01 is 
+    applied. This value is passed to the ``min.pct`` argument of the ``FindAllMarkers`` 
+    function.
 
-See :ref: `overview-wf` for more detailed examples of config files.
+``test_use`` field
+^^^^^^^^^^^^^^^^^^
+
+    string, default ``null``. Test used for differential testing. This value is passed
+    to the ``test.use`` argument of the ``FindAllMarkers`` function. If ``null``, the
+    `Wilcoxon Rank Sum test <https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test>`_
+    is used by default. Available methods are:
+
+    - ``wilcox``: Wilcoxon Rank Sum test
+    - ``wilcox_limma``: Limma implementation of the Wilcoxon Rank Sum test
+      (Use this to reproduce results from Seurat v4)
+    - ``bimod``: Likelihood-ratio test
+    - ``roc``: ROC analysis
+    - ``t``: Student's t-test
+    - ``negbinom``: Negative binomial generalized linear model
+    - ``poisson``: Poisson generalized linear model
+    - ``LR``: Logistic regression model
+    - ``MAST``: `MAST <https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0844-5>`_
+      framework. 
+    - ``DESeq2``: `DESeq2 <https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8>`_ 
+      framework. (requires to install DESeq2 package in R)
+
+
+For more details, refer to the `FindAllMarkers <https://satijalab.org/seurat/reference/findallmarkers>`_ 
+function in Seurat.
+
+``latent_vars`` field
+^^^^^^^^^^^^^^^^^^^^^
+
+    string, default ``null``. Variables to test, used only when ``test_use`` is 
+    one of ``LR``, ``negbinom``, ``poisson``, or ``MAST``.
+
+.. note::
+
+    - Only include ``groups`` values specified in the config sections: ``normalize``, 
+      ``integrate`` (if appicable) and ``weighted_nn`` (if appicable).
+
+    - For the current version of `multiome-wf`, ``LR`` has a bug where it grabs more
+      nodes than allocated on a cluster node. Do not use ``LR`` on a cluster node.
+
+Example:
 
 .. code-block:: yaml
-
-    samples: config/samples.tsv
-
-    aggregates: config/aggregates.tsv
-
-    assays: config/assays.tsv
-
-    ANNOTATION: EnsDb
-    ANNO_FILE: null
-
-    qc:
-      remove_outliers: true
-      rm_outliers_method: sd
-      meta_labels:
-      - nCount_Gene.Expression
-      - nCount_Peaks
-      - percent.mt
-      - TSS.enrichment
-      lower: 
-        nCount_Gene.Expression: 100
-        nCount_Peaks: 1000
-        TSS.enrichment: 2
-      upper: null
-
-    macs2:
-      run: "Y"
-      group_fragments_by: genome
-
-    normalize:
-      groups:
-        unintegrated_0:
-          assay_name: Gene.Expression
-          norm_method: sct
-        unintegrated_1:
-          assay_name: Peaks
-          norm_method: lsi
-
-    integrate:
-      activate: true
-      memory_MB: null
-      atac_integrate_embeddings: true
-      groups:
-        integrated_0:
-          split_by: meta_batch
-          reference:
-            label: batch1
-            assay_name: Gene.Expression
-          query:
-            label: batch2
-            assay_name: Gene.Expression
-          norm_method: sct
-          integrate_dims:
-          - 1
-          - 30
-
-    dataset_size:
-      toydataset: true  # true or false
-      toy_k: 10   
-
-    coembed:
-      activate: false
-      reference:
-        type: null
-        slot_name: null
-        norm_method: null
-        reduction: null
-      query:
-        type: null
-        slot_name: null
-        norm_method: null
-        reduction: null
-
-    chooser:
-      groups:
-        unintegrated_0:
-          npcs: 25
-        unintegrated_1:
-          npcs: 20
-        integrated_0:
-          npcs: 25
-      resolutions:
-        - 0.8
-        - 1
-        - 1.2
-        - 1.4
-        - 1.6
-        - 1.8
-        - 2
-        - 4
-        - 6
-        - 8
-        - 12
-        - 16
-      silhouette:
-        - silhouette
-        - frequency_grouped
-        - silhouette_grouped
-
-    cluster:
-      resolution: 0.6
-
-    weighted_nn:
-      activate: true
-      groups:
-        wnn_0:
-          neighbor_method: weighted
-          input_groups:
-          - unintegrated_0
-          - unintegrated_1
-          reduction:
-          - pca
-          - lsi
-          umap_dims:
-          - - 1
-            - 25
-          - - 2
-            - 20
-          resolution: 0.8
 
     diff_analysis:
       activate: true
@@ -964,13 +837,23 @@ See :ref: `overview-wf` for more detailed examples of config files.
           min_pct: null
           test_use: null
           latent_vars: null
+          alpha: 0.05
         unintegrated_1:
           cluster_idents: seurat_clusters
           assay: null
           slot: data
           min_pct: 0.2
-          test_use: 'LR'
+          test_use: null
           latent_vars: 'nCount_Peaks'
+          alpha: 0.05
+        unintegrated_2:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_MACS'
+          alpha: 0.05
         integrated_0:
           cluster_idents: seurat_clusters
           assay: null
@@ -978,6 +861,15 @@ See :ref: `overview-wf` for more detailed examples of config files.
           min_pct: null
           test_use: null
           latent_vars: null
+          alpha: 0.05
+        integrated_1:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Peaks'
+          alpha: 0.05
         wnn_0:
           cluster_idents: seurat_clusters
           assay: SCT
@@ -985,5 +877,264 @@ See :ref: `overview-wf` for more detailed examples of config files.
           min_pct: null
           test_use: null
           latent_vars: null
+          alpha: 0.05
+        wnn_1:
+          cluster_idents: seurat_clusters
+          assay: SCT
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: null
+          alpha: 0.05
 
-    guide: "etc" # set to "build", "render", or "etc"
+
+Example
+~~~~~~~
+
+A **basic** example of a ``config.yaml`` file using 2 multiome batches is provided below. 
+The analysis will be performed on all samples with and without integration, followed by 
+clustering and differential testing. This example also includes automated optimization 
+of clustering parameters.
+
+See :ref:`overview-wf` for more detailed examples of config files.
+
+.. code-block:: yaml
+
+    # Paths to sample tables
+    samples: config/multiome-config/samples.tsv
+    aggregates: config/multiome-config/aggregates.tsv
+    assays: config/multiome-config/assays.tsv
+
+    # Annotation
+    ANNOTATION: "EnsDb"
+    ANNO_FILE: "path/to/gene.gtf.gz"
+
+    # QC
+    qc:
+      remove_outliers: true
+      rm_outliers_method: sd
+      meta_labels:
+        - nCount_Gene.Expression
+        - nCount_Peaks
+        - percent.mt
+        - TSS.enrichment
+      lower: 
+        nCount_Gene.Expression: 100
+        nCount_Peaks: 1000
+        TSS.enrichment: 2
+      upper: null
+
+
+    # MACS2 peak calling
+    macs2:
+      run: "Y"
+      group_fragments_by: genome
+
+    # Normalization
+    normalize:
+      split_by: meta_geno
+      groups:
+        unintegrated_0:
+          assay_name: Gene.Expression
+          norm_method: sct
+        unintegrated_1:
+          assay_name: Peaks
+          norm_method: lsi
+        unintegrated_2:
+          assay_name: MACS
+          norm_method: lsi
+        unintegrated_3:
+          assay_name: Gene.Activity
+          norm_method: log
+
+    # Integration
+    integrate:
+      activate: true
+      atac_integrate_embeddings: true
+      split_by: meta_geno
+      groups:
+        integrated_0:
+          assay_name: Gene.Expression
+          norm_method: sct
+          integrate_method: CCAIntegration
+          integrate_dims:
+            - 1
+            - 30
+        integrated_1:
+          assay_name: Peaks
+          norm_method: lsi
+          integrate_method: rlsi
+          integrate_dims:
+            - 1
+            - 30
+        integrated_2:
+          assay_name: MACS
+          norm_method: lsi
+          integrate_method: rlsi
+          integrate_dims:
+            - 1
+            - 30
+        integrated_3:
+          assay_name: Gene.Activity
+          norm_method: log
+          integrate_method: CCAIntegration
+          integrate_dims:
+            - 1
+            - 30
+
+    # Toy dataset utilization
+    dataset_size:
+      toydataset: false
+      toy_k: 10
+
+    # Cluster optimization
+    chooser:
+      groups:
+        unintegrated_0:
+          npcs: 25
+        unintegrated_1:
+          npcs: 20
+        unintegrated_2:
+          npcs: 20
+        unintegrated_3:
+          npcs: 20
+        integrated_0:
+          npcs: 25
+        integrated_1:
+          npcs: 20
+        integrated_2:
+          npcs: 20
+        integrated_3:
+          npcs: 20
+      resolutions:
+        - 0.6
+        - 0.8
+      silhouette:
+        - silhouette
+        - frequency_grouped
+        - silhouette_grouped
+
+    # Clustering
+    cluster:
+      detection_method: 3
+      resolution: null
+
+    # Multimodal embedding
+    weighted_nn:
+      activate: true
+      groups:
+        wnn_0:
+          input_groups:
+            - unintegrated_0
+            - unintegrated_1
+          reduction:
+            - pca
+            - lsi
+          umap_dims:
+            - - 1
+              - 25
+            - - 1
+              - 20
+          resolution: 0.6
+          detection_method: 3
+        wnn_1:
+          input_groups:
+            - integrated_0
+            - integrated_1
+          reduction:
+            - integrated_pca
+            - integrated_lsi
+          umap_dims:
+            - - 1
+              - 25
+            - - 1
+              - 20
+          resolution: 0.6
+          detection_method: 3
+
+    # Differential testing
+    diff_analysis:
+      activate: true
+      groups:
+        unintegrated_0:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: null
+          alpha: 0.05
+        unintegrated_1:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Peaks'
+          alpha: 0.05
+        unintegrated_2:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_MACS'
+          alpha: 0.05
+        unintegrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: 'Gene.Activity'
+          alpha: 0.05
+        integrated_0:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: null
+          alpha: 0.05
+        integrated_1:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Peaks'
+          alpha: 0.05
+        integrated_2:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_MACS'
+          alpha: 0.05
+        integrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: 'Gene.Activity'
+          alpha: 0.05
+        wnn_0:
+          cluster_idents: seurat_clusters
+          assay: SCT
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: null
+          alpha: 0.05
+        wnn_1:
+          cluster_idents: seurat_clusters
+          assay: SCT
+          slot: data
+          min_pct: null
+          test_use: null
+          latent_vars: null
+          alpha: 0.05
+
+
