@@ -306,6 +306,8 @@ Normalization (``normalize`` section)
 
 Normalization and Principal Component Analysis (PCA).
 
+.. _split-by:
+
 ``split_by`` field
 ^^^^^^^^^^^^^^^^^^
 
@@ -328,6 +330,8 @@ Normalization and Principal Component Analysis (PCA).
     string of ``Gene.Expression``, ``Multiplexing.Capture``, ``Peaks``, 
     ``Gene.Activity``, or ``MACS``. Which Seurat assay to use. Note that Seurat 
     assay names are "." delimited.
+
+.. _norm-method:
 
 ``norm_method`` field
 ^^^^^^^^^^^^^^^^^^^^^
@@ -395,8 +399,8 @@ Integration rule will create a new Seurat object for each integration performed.
 ^^^^^^^^^^^^^^^^^^
 
     string. A metadata column in ``samples.tsv`` or ``aggregates.tsv``. Datasets 
-    are integrated based on this column. Ensure the same column is specified in the 
-    ``normalize`` section above.
+    are integrated based on this column. Ensure the same column is specified as in 
+    the :ref:`split-by` of the ``normalize`` section above.
 
     See :ref:`samples-table` for more details about how metadata columns are detected.
 
@@ -416,7 +420,7 @@ Integration rule will create a new Seurat object for each integration performed.
 ^^^^^^^^^^^^^^^^^^^^^
 
     string of ``log``, ``sct``, ``clr`` or ``lsi``. Ensure the same values are 
-    specified as in the ``normalized`` section above.
+    specified as in the :ref:`norm-method` of the ``normalized`` section above.
 
 ``integrate_method`` field
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -598,6 +602,7 @@ Clustering Resolution (``cluster`` config section)
 Users can determine a specific resolution for clustering or
 or rely on a dataset-optimized resolution computed using ``chooser``.
 
+.. _detection-method:
 
 ``detection_method`` field
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -700,7 +705,7 @@ modalities into a global reduced dimensional space.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     integer, default ``3``. Algorithm used for community detection during 
-    multimodal clustering. Refer to the ``detection_method`` field in
+    multimodal clustering. Refer to the :ref:`detection-method` in
     the ``cluster`` section above.
 
 Example:
