@@ -153,6 +153,10 @@ chooser:
       npcs: 20
     integrated_1:
       npcs: 20
+    integrated_2:
+      npcs: 20
+    integrated_3:
+      npcs: 20
   resolutions:
     - 0.6
     - 0.8
