@@ -16,19 +16,24 @@ Field                                      Used for Multiome Used for RNA-seq Us
 :ref:`TF <samples-tf>`                     yes               no               yes               See notes below
 :ref:`fragments <samples-frags>`           yes               no               yes               yes, ATAC/Multiome
 :ref:`singlecell <samples-singlecell>`     yes               no               yes               no
-:ref:`meta_modality <samples-metadata>`    optional          optional         optional          optional
 :ref:`meta_batch <samples-metadata>`       optional          optional         optional          optional
 :ref:`meta_geno <samples-metadata>`        optional          optional         optional          optional
 ========================================== ================= ================ ================= ===================
 
 .. note::
-    Suppored input file formats include HDF5 (10X Genomics compatible), MEX directory, or RDS.
 
-    For details about 10X Genomic's HDF5 format, see `10X Genomics Support Page <https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices>`_
+    - Suppored input file formats include HDF5 (10X Genomics compatible), 
+      MEX directory, or RDS.
+
+    - For input from non-10X Genomics pipelines, place the ``barcodes.tsv.gz``, 
+      ``features.tsv.gz``, and ``matrix.mtx.gz`` in the MEX directory.
+
+    - For details about 10X Genomics' HDF5 format, refer to the `HDF5 Feature-Barcode Matrix Format
+      <https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices>`_.
 
 
 Field descriptions
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. _samples-sample:
 
