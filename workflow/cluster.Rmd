@@ -46,6 +46,7 @@ We'll also set paths to input files.
 obj_input <- params[['seurat_in']]
 choice_input <- params[['res_choice']]
 snakemake.config <- yaml::read_yaml(params[['config']])
+comm_detection <- snakemake.config[['cluster']][['detection_method']]
 ```
 
 
@@ -68,12 +69,23 @@ res_use <- readRDS(choice_input)
 # Convert to numeric of the resolution is still a character obj
 if (!is.numeric(res_use)) {
     res_use <- as.numeric(res_use)
+
 }
 
 print('Input Seurat object:')
 print(obj)
 
 print(paste('Resolution to use for community detection:', res_use))
+
+# Retrieve community detection algorithm
+comm_detection <- ifelse(is.null(comm_detection), 2, comm_detection)
+comm_label <- ifelse(comm_detection == 1, "Louvain", ifelse(
+    comm_detection == 2, "Louvain with multilevel refinement", ifelse(
+    comm_detection == 3, "Smart local moving (SLM)", ifelse(
+    comm_detection == 4, "Leiden", "Undetermined"
+))))
+
+print(paste('Algorithm to use for community detection:', comm_label))
 ```
 
 ```{r vars_cluster}
@@ -149,14 +161,11 @@ obj <- FindNeighbors(
     dims = npcs_min:npcs
 )
 
-# not really needed not that weighted nn is in new rule, delete later
-# graph_use = paste0(assay_use, '_snn')
-# print(graph_use)
-
 print("Calling FindClusters...")
 obj <- FindClusters(
-  object = obj,
-  resolution = res_use
+    object = obj,
+    algorithm = comm_detection,
+    resolution = res_use
 )
 
 print('Finished finding neighbors for this assay.')
