@@ -46,23 +46,23 @@ each rule:
 
     # Activate MACS2 peak calling
     macs2:
-        run: "Y"
+      run: "Y"
 
     # Activate dataset integration
     integrate:
-        activate: true
+      activate: true
 
     # Activate chooseR
     cluster:
-        resolution: null
+      resolution: null
 
     # Activate marker gene computation
     diff_analysis:
-        activate: true
+      activate: true
 
     # Activate Weighted Nearest Neighber
     weighted_nn:
-        activate: true
+      activate: true
 
 
 Note that the ``chooser_paral`` and ``chooser_aggr`` rules only run when no
@@ -89,18 +89,18 @@ fields which together define the groups' analysis options: ``assay_name``, and
 .. code-block:: yaml
 
     groups:
-        unintegrated_0:
-            assay_name: Gene.Expression
-            norm_method: sct
-        unintegrated_1:
-            assay_name: Peaks
-            norm_method: lsi
-        unintegrated_2:
-            assay_name: MACS
-            norm_method: lsi
-        unintegrated_3:
-            assay_name: Gene.Activity
-            norm_method: log
+      unintegrated_0:
+        assay_name: Gene.Expression
+        norm_method: sct
+      unintegrated_1:
+        assay_name: Peaks
+        norm_method: lsi
+      unintegrated_2:
+        assay_name: MACS
+        norm_method: lsi
+      unintegrated_3:
+        assay_name: Gene.Activity
+        norm_method: log
 
 
 .. note::
@@ -258,18 +258,18 @@ Example:
 .. code-block:: yaml
 
     qc:
-        remove_outliers: true
-        rm_outliers_method: sd
-        meta_labels:
-            - nCount_Gene.Expression
-            - nCount_Peaks
-            - percent.mt
-            - TSS.enrichment
-        lower:
-            nCount_Gene.Expression: 100
-            nCount_Peaks: 1000
-            TSS.enrichment: 2
-        upper: null
+      remove_outliers: true
+      rm_outliers_method: sd
+      meta_labels:
+        - nCount_Gene.Expression
+        - nCount_Peaks
+        - percent.mt
+        - TSS.enrichment
+      lower: 
+        nCount_Gene.Expression: 100
+        nCount_Peaks: 1000
+        TSS.enrichment: 2
+      upper: null
 
 MACS Peak Calling (``macs2`` section)
 -------------------------------------
@@ -298,8 +298,8 @@ Example:
 .. code-block:: yaml
 
     macs2:
-        run: "Y"
-        group_fragments_by: genome
+      run: "Y"
+      group_fragments_by: genome
 
 Normalization (``normalize`` section)
 -------------------------------------
@@ -350,20 +350,22 @@ Example:
 .. code-block:: yaml
 
     normalize:
-        split_by: meta_geno
-        groups:
-            unintegrated_0:
-                assay_name: Gene.Expression
-                norm_method: sct
-            unintegrated_1:
-                assay_name: Peaks
-                norm_method: lsi
-            unintegrated_2:
-                assay_name: MACS
-                norm_method: lsi
-            unintegrated_3:
-                assay_name: Gene.Activity
-                norm_method: log
+      split_by: meta_geno
+      groups:
+        unintegrated_0:
+          assay_name: Gene.Expression
+          norm_method: sct
+        unintegrated_1:
+          assay_name: Peaks
+          norm_method: lsi
+        unintegrated_2:
+          assay_name: MACS
+          norm_method: lsi
+        unintegrated_3:
+          assay_name: Gene.Activity
+          norm_method: log
+
+
 
 Integration (``integrate`` section)
 -----------------------------------
@@ -431,223 +433,311 @@ Integration rule will create a new Seurat object for each integration performed.
 ``integrate_dims`` field
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-    list of 2 integers, default ``[1, 30]``. Range of dimensions to use for integration step.
+    list of 2 integers, default ``[1, 30]``. Range of dimensions to use for 
+    integration step.
 
 Example:
 
 .. code-block:: yaml
 
     integrate:
-        activate: true
-        atac_integrate_embeddings: true
-        split_by: meta_geno
-        groups:
-            integrated_0:
-                assay_name: Gene.Expression
-                norm_method: sct
-                integrate_method: CCAIntegration  # RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration
-                integrate_dims:
-                    - 1
-                    - 30
-            integrated_1:
-                assay_name: Peaks
-                norm_method: lsi
-                integrate_method: rlsi
-                integrate_dims:
-                    - 1
-                    - 30
-            integrated_2:
-                assay_name: MACS
-                norm_method: lsi
-                integrate_method: rlsi
-                integrate_dims:
-                    - 1
-                    - 30
-            integrated_3:
-                assay_name: Gene.Activity
-                norm_method: log
-                integrate_method: CCAIntegration
-                integrate_dims:
-                    - 1
-                    - 30
+      activate: true
+      atac_integrate_embeddings: true
+      split_by: meta_geno # this has to match the column name of your metadata indicating datasets for integrati
+      groups:
+        integrated_0:
+          assay_name: Gene.Expression
+          norm_method: sct
+          integrate_method: CCAIntegration  # RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration
+          integrate_dims:
+            - 1
+            - 30
+        integrated_1:
+          assay_name: Peaks
+          norm_method: lsi
+          integrate_method: rlsi
+          integrate_dims:
+            - 1
+            - 30
+        # integrated_2:
+          # assay_name: MACS
+          # norm_method: lsi
+          # integrate_dims:
+            # - 1
+            # - 30
+        integrated_3:
+          assay_name: Gene.Activity
+          norm_method: log
+          integrate_method: CCAIntegration
+          integrate_dims:
+            - 1
+            - 30
 
 
 Utilization of Toy Dataset (``dataset_size`` config section)
 ------------------------------------------------------------
 
+Assign the utilization of toy dataset. Users can take advantage
+of this functionality for technical purposes such as debugging.
+If dataset size is smaller than default k values in kNN computation 
+during integration, Seurat throws an error. 
 
-    
-Assign the utilization of toy dataset. If dataset size is smaller than default k values in kNN computation during integration, Seurat throws an error. 
-    
 
 ``toydataset`` field
 ^^^^^^^^^^^^^^^^^^^^
     
-    boolean, set true if input is toy dataset and false otherwise.
+    boolean, default ``false``. if ``true``, the computation is adjusted 
+    to handle toy datasets. if ``false``, the input datasets are considered
+    as normal datasets.
 
 ``toy_k`` field
 ^^^^^^^^^^^^^^^
 
-    integer, number of neighbors when weighting anchors during integration.
+    integer, number of neighbors used when weighting anchors.
+    This value is passed to the ``k.weight`` argument in the
+    ``IntegrateLayers`` function during integration.
 
 Example:
 
 .. code-block:: yaml
 
     dataset_size:
-        toydataset: true
-            toy_k: 10
+      toydataset: false
+        toy_k: 10
 
-Coembedding RNA/ATAC
---------------------
 
-``coembed`` config section
+Cluster Optimization (``chooser`` config section)
+-------------------------------------------------
 
-    Integrate single assay 5' or 3' Gene Expression and single assay ATAC data into a common reduced dimensional space. This field has X sub-fields. This is the preferred method to integrate Gene Expression and ATAC data; the standard Seurat integration methods tend to over fit the disparate RNA and ATAC assays. 
+Users can optimize clustering modularity using `ChooseR 
+<https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-03957-4>`_
+with pipeline-specific modifications. This functionality is enabled only if
+the ``resolution`` field in the ``cluster`` section is set to ``null``.
 
-    ``activate`` field
+``groups`` field
+^^^^^^^^^^^^^^^^
 
-        boolean, default false. Specify whether or not to run the coembed rule.
+    dict. Each group to perform clustering parameter optimization. 
+    Group name (key) must be unique. All groups in the ``normalize`` and
+    ``integrate`` (if applicable) sections can be assigned.
 
-    .. note::
+``npcs`` field
+^^^^^^^^^^^^^^
 
-        This rule is unfinished. Config fields and suggested values have intentionally been omitted. Until this documentation is updated, keep the activate field set to false.
+    integer, default values:
 
-Cluster Optimization
---------------------
+    - ``Gene.Expression``: 25
+    - ``Peaks``, ``MACS``, or ``Gene.Activity``: 20
 
-``chooser`` config section
+    The maximum number of linear reduced dimensions, computed from LSI 
+    or PCA, that are used during clustering. 
 
-    Robust selection of parameters for single cell community detection. This field has 3 sub-fields. This rule utilizes methods developed in the ChooseR package. For details about Chooser theory and methods, see `ChooseR Documentaiton Page <https://github.com/rbpatt2019/chooseR>`_
+``resolutions`` field
+^^^^^^^^^^^^^^^^^^^^^
 
-    ``groups`` field
+    list of integers, default ``[0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2]``. 
+    Resolutions to use when bootstrapping cluster methods. Best to have 
+    a range spanning target resolution.
 
-    dict. Each group to perform clustering parameter optimization. Group name (key) must be unique.
+``silhouette`` field
+^^^^^^^^^^^^^^^^^^^^
 
-        ``npcs`` field
+    list of strings. default ``silhouette``, ``frequency_grouped``, 
+    and ``silhouette_grouped``. Values are used during path parameter 
+    expansion in rules executing chooseR. It is advisable to not alter
+    them.
 
-        integer, default {Gene.Expression: 25, ATAC-derived: 20}. The maximum number of linear reduced dimensions dimensional to during clustering. If group contains ATAC Peaks or MACS matrices, this will use LSI components. Otherwise, PCA.
+.. note::
 
-    ``resolutions`` field
+    All ``groups`` values specified in the config sections: 
+    ``normalize`` and ``integrate`` (if appicable) **must** have 
+    a group entry in the ``chooser`` config section.
 
-        list of integers, default [0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 4, 6, 8, 12, 16]. Resolutions to use when bootstrapping cluster methods. Best to have a range spanning target resolution.
+Example:
 
-    ``silhouette`` field
+.. code-block:: yaml
 
-        list of strings. default [silhouette, frequency_grouped, silhouette_grouped]. Values are used during path parameter expansion during chooser rules. Advisable to not alter.
+    chooser:
+      groups:
+        unintegrated_0:
+          npcs: 25
+        unintegrated_1:
+          npcs: 20
+        unintegrated_2:
+          npcs: 20
+        unintegrated_3:
+          npcs: 20
+        integrated_0:
+          npcs: 25
+        integrated_1:
+          npcs: 20
+        integrated_2:
+          npcs: 20
+        integrated_3:
+          npcs: 20
+      resolutions:
+        - 0.6
+        - 0.8
+        - 1.0
+        - 1.2
+        - 1.4
+        - 1.6
+        - 1.8
+        - 2.0
+      silhouette:
+        - silhouette
+        - frequency_grouped
+        - silhouette_grouped
 
-    .. note::
 
-        All ``group`` values specified in the config sections: `normalize` and `integrate` (if appicable) **must** have a group entry in the `chooser` config section.
 
-    Example:
 
-    .. code-block:: yaml
+Clustering Resolution (``cluster`` config section)
+--------------------------------------------------
 
-        chooser:
-          groups:
-            unintegrated_0:     # unintegrated Gene Expression
-              npcs: 25
-            unintegrated_1:     # unintegrated ATAC Peaks
-              npcs: 20
-            integrated_0:       # integrated Gene Expression to remove batch effects
-              npcs: 25
-          resolutions:
-            - 0.8
-            - 1
-            - 1.2
-            - 1.4
-            - 1.6
-            - 1.8
-            - 2
-            - 4
-            - 6
-            - 8
-            - 12
-            - 16
-          silhouette:
-            - silhouette
-            - frequency_grouped
-            - silhouette_grouped
+Users can determine a specific resolution for clustering or
+or rely on a dataset-optimized resolution computed using ``chooser``.
 
-Clustering Resolution
----------------------
 
-``cluster`` config section
-    
-    Set the clustering resolution.
+``detection_method`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``resolution``
+    integer, default ``3``. Algorithm used for community detection during 
+    multimodal clustering. Available options are:
 
-        float, set the clustering resolution manually. If set to ``null``, the resolution is determined through the optimization using the ``chooser``.
+    - ``1``: original Louvain algorithm
+    - ``2``: Louvain algorithm with multilevel refinement
+    - ``3``: SLM algorithm
+    - ``4``: Leiden algorithm (requires the leidenalg python)
 
-    Example:
+    This value is passed to the ``algorithm`` argument of the ``FindClusters`` function. 
+    Refer to Seurat `Cluster Determination <https://satijalab.org/seurat/reference/findclusters>`_ 
+    for more details.
 
-    .. code-block:: yaml
 
-        cluster:
-            resolution: 0.6
 
-Weighted Nearest Neighbor
--------------------------
+``resolution`` field
+^^^^^^^^^^^^^^^^^^^^
 
-``weighted_nn`` config section
+    float or ``null``, default ``null``. If ``null``, clustering is performed
+    using an optimized resolution computed by ``chooser``.
 
-    Perform weighted nearest neighbor (WNN) analysis. This field has 2 sub-fields. WNN is similar to shared nearest neighbor commonly used to build graphs while detecting clusters. WNN uses a list of weights from each specified modality, and is useful for incorporating low dimensional embedings from multiple single cell modalities into a global reduced dimensional space. 
+Example:
 
-    ``activate`` field
+.. code-block:: yaml
 
-        boolean, default false. Specify whether or not to run the coembed rule.
+    cluster:
+      detection_method: 3
+      resolution: null
 
-    ``groups`` field
+Weighted Nearest Neighbor (``weighted_nn`` config section)
+----------------------------------------------------------
 
-        dict. Each group to perform weighted nearest neighbor analysis. Group name (key) must be unique.
-   
-    ``neighbor_method`` field
+This section configures how to perform `Weighted Nearest Neighbor (WNN) analysis
+<https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis#wnn-analysis-of-10x-multiome-rna-atac>`_. 
+WNN is similar to shared nearest neighbor (SNN), which is commonly used to build 
+graphs for multiple modalities. WNN uses a list of weights from each specified modality, 
+and is useful for incorporating low dimensional embeddings from multiple single cell 
+modalities into a global reduced dimensional space. 
 
-        string, default "weighted". 
 
-    ``input_groups`` field
+.. note::
 
-        list of strings, default ["unintegrated_0", "unintegrated_1"]. ``groups`` dictionary values from `normalize` and `integrate` config sections. Remember, unless performing multimodal integration, each ``group`` value corresponds to an assay. So in our example from the `normalize` config section, specifying ``unintegrated_0`` and ``unintegrated_1`` would combine the reduced dimensional weights of ``Gene.Expression`` and ``Peaks`` during weighted nearest neighbor clustering.
+    - All cells for specified assays/groups **must have identical barcodes**, meaning this 
+      rule is currently suitable ONLY for multimodal data. For example 3' Gene Expression + 
+      CRISPR barcodes (Perturb-Seq), 3' Gene Expression + 
+      Protein barcodes (CITE-Seq), 10X Genomics Multiome (Gene Expression + ATAC), etc.
 
-    ``reduction`` field
+    - Disable this functionality if the input dataset is not multimodal.
 
-        list of strings, default ["pca", "lsi"]. Dimension reduction method used for a specified group. In our example from the `normalize` config section, specifying ``unintegrated_0`` and ``unintegrated_1`` would look for ``Gene.Expression`` reduced dimensions in the ``pca`` slot and ``Peaks`` reduced dimensions in the ``lsi`` slot during weighted nearest neighbor clustering.
+``activate`` field
+^^^^^^^^^^^^^^^^^^
 
-    ``umap_dims`` field
+    boolean, default ``true`` (multiome) or ``false`` (RNA/ATAC). Specify whether or not 
+    to run the coembed rule.
 
-        list of integers, default [1, 25, 2, 20]. Dimensions to use for UMAP visualization for a specified group.
+``groups`` field
+^^^^^^^^^^^^^^^^
 
-    ``resolution`` field
+    dict. Each group to perform weighted nearest neighbor analysis. Group name (key) must be 
+    unique.
 
-        integer, default [0.8]. Resolution to use during community detection.
+``input_groups`` field
+^^^^^^^^^^^^^^^^^^^^^^
 
-    .. note::
+    list of strings, default:
 
-        All cells for specified assays/groups **must have identical barcodes**, meaning this rule is currently suitable ONLY for multimodal data. For example 3' Gene Expression + CRISPR barcodes (Perturb-Seq), 3' Gene Expression + Protein barcodes (CITE-Seq), 10X Genomics Multiome (Gene Expression + ATAC), etc.
+    - ``wnn_0``: ``unintegrated_0`` and ``unintegrated_1``
+    - ``wnn_1``: ``integrated_0`` and ``integrated_1``
 
-    Example:
+    ``groups`` dictionary 
+    values from ``normalize`` and ``integrate`` config sections. Remember, unless performing multimodal 
+    integration, each ``group`` value corresponds to an assay. So in our example from the ``normalize`` 
+    config section, specifying ``unintegrated_0`` and ``unintegrated_1`` would combine the reduced 
+    dimensional weights of ``Gene.Expression`` and ``Peaks`` during weighted nearest neighbor clustering.
 
-    .. code-block:: yaml
+``reduction`` field
+^^^^^^^^^^^^^^^^^^^
 
-        weighted_nn:
-          activate: true
-          groups:
-            wnn_0:
-              neighbor_method: weighted
-              input_groups:
-              - unintegrated_0      # unintegrated Gene Expression
-              - unintegrated_1      # unintegrated ATAC Peaks
-              reduction:
-              - pca
-              - lsi
-              umap_dims:
-              - - 1
-                - 25
-              - - 2
-                - 20
-              resolution: 0.8
+    list of strings, default ``pca`` and ``lsi``. Dimensionality reduction method used for a specified 
+    group. In our example from the ``normalize`` config section, specifying ``unintegrated_0`` and 
+    ``unintegrated_1`` would look for ``Gene.Expression`` reduced dimensions in the ``pca`` slot and 
+    ``Peaks`` reduced dimensions in the ``lsi`` slot during WNN clustering.
+
+``umap_dims`` field
+^^^^^^^^^^^^^^^^^^^
+
+    list of integers, default ``[[1, 25], [2, 20]]``. 
+    Dimensions to use for UMAP visualization for a specified group.
+
+``resolution`` field
+^^^^^^^^^^^^^^^^^^^^
+
+    integer, default ``0.6``. Resolution to use during community detection
+    for multimodal clustering.
+
+``detection_method`` field
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    integer, default ``3``. Algorithm used for community detection during 
+    multimodal clustering. Refer to the ``detection_method`` field under 
+    the ``cluster`` section above.
+
+Example:
+
+.. code-block:: yaml
+
+    weighted_nn:
+      activate: true
+      groups:
+        wnn_0:
+          input_groups:
+            - unintegrated_0 # corresponds to SCT
+            - unintegrated_1 # corresponds to Peaks
+          reduction:
+            - pca
+            - lsi
+          umap_dims:
+            - - 1
+              - 25
+            - - 1
+              - 20
+          resolution: 0.6
+          detection_method: 3
+        wnn_1:
+          input_groups:
+            - integrated_0 # corresponds to SCT
+            - integrated_1 # corresponds to Peaks
+          reduction:
+            - integrated_pca
+            - integrated_lsi
+          umap_dims:
+            - - 1
+              - 25
+            - - 1
+              - 20
+          resolution: 0.6
+          detection_method: 3
 
 Differential Testing
 --------------------
