@@ -174,15 +174,59 @@ if (sanity_check['N_dataset'] > 1) {
     print(paste("Integration performed on the following counts:", norm_method))
     if (norm_method %in% c("sct", "log")) {
         # Integrate SCT or log-transformed datasets
-        integrated <- IntegrateLayers(
-            seurat,
-            method=CCAIntegration,
-            orig.reduction="pca",
-            new.reduction="integrated_pca",
-            normalization.method=sanity_check["norm_method"],
-            dims=integrate_dims,
-            k.weight=k.weight
-            )
+        integrated <- if (integrate_method == "CCAIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=CCAIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "RPCAIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=RPCAIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "HarmonyIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=HarmonyIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "FastMNNIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=FastMNNIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "scVIIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=FastMNNIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else {
+            stop("Configure valid integrate_method in config.yaml!")
+        }
 
     } else if (norm_method == "lsi") {
 
