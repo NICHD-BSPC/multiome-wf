@@ -463,12 +463,12 @@ Example:
           integrate_dims:
             - 1
             - 30
-        # integrated_2:
-          # assay_name: MACS
-          # norm_method: lsi
-          # integrate_dims:
-            # - 1
-            # - 30
+        integrated_2:
+          assay_name: MACS
+          norm_method: lsi
+          integrate_dims:
+            - 1
+            - 30
         integrated_3:
           assay_name: Gene.Activity
           norm_method: log
@@ -596,8 +596,8 @@ Example:
 
 
 
-Clustering Resolution (``cluster`` config section)
---------------------------------------------------
+Clustering (``cluster`` config section)
+---------------------------------------
 
 Users can determine a specific resolution for clustering or
 or rely on a dataset-optimized resolution computed using ``chooser``.
