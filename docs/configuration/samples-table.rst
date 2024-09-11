@@ -64,7 +64,9 @@ Field descriptions
     string, default ``hg38``. Defines labels for genome build per sample.
     If samples include "Peaks" or "Transcription Factor" (TF) matrices, 
     as with ATAC and Multiome products, all samples must have genome. 
-    Otherwise, genome labels can differ across samples.
+    Otherwise, genome labels can differ across samples. In the current 
+    version of the `multiome-wf`, ``mm10`` (mouse) and ``hg38`` (human) are
+    available.
 
 .. _samples-hdf5:
 
@@ -170,46 +172,81 @@ Field descriptions
 ``fragments``
 ^^^^^^^^^^^^^
 
-    Path to a ``fragments.tsv.gz`` file containing a table of tagmentation loci, 
-    each with coordinates and de-duplicated counts for 10X Genomics ATAC and 
-    Multiome kits.
+    Path to the ``fragments.tsv.gz`` file containing a table of tagmentation loci, 
+    each with coordinates and de-duplicated counts, created from 10X Genomics ATAC 
+    and Multiome kits.
 
 .. _samples-singlecell:
 
 ``singlecell``
 ^^^^^^^^^^^^^^
 
-    Path to a csv file for 10X Genomics ATAC and Multiome kits.
+    Path to the ``singlecell.csv`` file created from 10X Genomics ATAC and Multiome 
+    kits.
 
 .. _samples-metadata:
 
 ``meta_*``
 ^^^^^^^^^^
 
-    string, default null. Define columns for metadata labels. Columns beginning 
-    with `"meta_"` are placeholders for user specified metadata. They can be 
-    re-renamed to any string, deleted, or additional metadata columns can be 
-    added.
-    
+    string. Optional. Define columns for metadata labels. Columns beginning 
+    with ``meta_`` are placeholders for user-specified metadata. Users can 
+    rename these columns.
+
     .. note::
 
-        In ``samples.tsv``, the following column names are considered immutable: "sample", "replicate", "genome", "HDF5_Multiple_Assays", "RDS_Multiple_Assays", "Gene.Expression", "Peaks", "TF", "fragments", "singlecell".
+        - In ``samples.tsv``, the following column names are considered immutable: 
+          ``sample``, ``replicate``, ``genome``, ``HDF5_Multiple_Assays``, 
+          ``RDS_Multiple_Assays``, ``Gene.Expression``, ``Peaks``, ``TF``, 
+          ``fragments``, ``singlecell``.
 
-        Any additional columns present in ``samples.tsv`` will be considered metadata columns. Metadata columns can have any unique label, not just the `"meta_*"` used in the example samples table.
+        - Any additional columns present in ``samples.tsv`` will be considered 
+          metadata columns. Metadata columns can have any unique label, not just 
+          the ``meta_*`` used in the example samples table.
 
 
-Example
--------
+Examples
+~~~~~~~~
 
-A **basic** example of a samples.tsv file is below. This table represents an experiment where peripheral blood mononuclear cells (PBMC) were sequenced in one batch, and induced pluripotent stem cells (IPSC) and and additional PBMC were sequenced at a later time.
 
-See :ref: `overview-wf` for more detailed examples of config files.
+Multiome
+^^^^^^^^
 
-====== ========= ====== ======================================== =================== ================= ======= === ================================ =========== ============== =========== =========
-sample replicate genome HDF5_Multiple_Assays                     RDS_Multiple_Assays Gene.Expression   Peaks   TF  fragments                        singlecell  meta_modality  meta_batch  meta_geno
-                            
-====== ========= ====== ======================================== =================== ================= ======= === ================================ =========== ============== =========== =========
-pbmc1            hg38   pbmc1/outs/filtered_feature_bc_matrix.h5                                                   pbmc1/outs/atac_fragments.tsv.gz             Multiome       batch1      wt
-ipsc             hg38   ipsc/outs/filtered_feature_bc_matrix.h5                                                    ipsc/outs/atac_fragments.tsv.gz              Multiome       batch2      wt
-pbmc2            hg38   pbmc2/outs/filtered_feature_bc_matrix.h5                                                   pbmc2/outs/atac_fragments.tsv.gz             Multiome       batch2      wt
-====== ========= ====== ======================================== =================== ================= ======= === ================================ =========== ============== =========== =========
+A **basic** examples of a ``samples.tsv`` file for 10X Genomics 
+Multiome analysis is below:
+
+========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
+sample    replicate genome HDF5_Multiple_Assays                      RDS_Multiple_Assays Gene.Expression   Peaks   TF  fragments                         singlecell  meta_batch  meta_geno
+========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
+multiome1           hg38   batch1/outs/filtered_feature_bc_matrix.h5                                                   batch1/outs/atac_fragments.tsv.gz             batch1      wt
+multiome2           hg38   batch2/outs/filtered_feature_bc_matrix.h5                                                   batch2/outs/atac_fragments.tsv.gz             batch2      wt
+========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
+
+RNA-seq
+^^^^^^^
+
+A **basic** examples of a ``samples.tsv`` file for 10X Genomics
+Single Cell 3’ Gene Expression analysis is below:
+
+======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
+sample  replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression                       Peaks   TF  fragments singlecell  meta_batch meta_geno
+======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
+rnaseq1           mm10                                            wt/outs/filtered_feature_bc_matrix.h5                                   batch1     wt
+rnaseq2           mm10                                            ko/outs/filtered_feature_bc_matrix.h5                                   batch1     ko 
+======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
+
+
+ATAC-seq
+^^^^^^^^
+
+A **basic** examples of a ``samples.tsv`` file for 10X Genomics
+Single Cell ATAC analysis is below:
+
+======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
+sample   replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression Peaks                              TF                               fragments                singlecell          meta_batch meta_geno
+======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
+atacseq1           mm10                                                            wt/outs/filtered_peak_bc_matrix.h5 wt/outs/filtered_tf_bc_matrix.h5 wt/outs/fragments.tsv.gz wt/outs/summary.csv batch1     wt
+atacseq2           mm10                                                            ko/outs/filtered_peak_bc_matrix.h5 ko/outs/filtered_tf_bc_matrix.h5 ko/outs/fragments.tsv.gz ko/outs/summary.csv batch1     ko
+======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
+
+See :ref:`overview-wf` for more detailed examples of config files.
