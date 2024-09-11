@@ -14,54 +14,64 @@ Field                               Used for cellranger count Used for cellrange
 =================================== ========================= ======================== ========================= ====================
 
 .. note::
-    Aggregates table is only used if there is a need to map library barcode labels to a specified library ID. 
 
-    When creating loading matrices, `multiome-wf` will map values in `library_id` to the barcode suffix. If using 10X Genomics platforms, cellranger aggr appends the row number of the aggregates.csv to all barcodes for that rows 'sample_id'.
+    - Aggregates table is only used if there is a need to map library barcode 
+      labels to a specified library ID. 
 
-    For details about 10X Genomic's aggregates tables, see:
-    
-    - `10X Genomics Multiome Aggregation Page <https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/using/aggr#csv_setup>`_
+    - When creating loading matrices, `multiome-wf` will map values in 
+      ``library_id`` to the barcode suffix. If using 10X Genomics platforms, 
+      ``cellranger aggr`` appends the row number of the ``aggregates.csv`` to all 
+      barcodes for that rows ``sample_id``.
 
-    - `10X Genomics Gene Expression Aggregation Page <https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/aggregate#csv_setup>`_
-    
-    - `10X Genomics ATAC Aggregation Page <https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/aggr#csv_setup>`_
+    - For details about 10X Genomic's aggregates tables, see:
+
+        - `10X Genomics Multiome Aggregation Page <https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/using/aggr#csv_setup>`_
+        - `10X Genomics Gene Expression Aggregation Page <https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/aggregate#csv_setup>`_
+        - `10X Genomics ATAC Aggregation Page <https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/aggr#csv_setup>`_
 
 
 Field descriptions
 ------------------
 
+The aggregates table is optional and used to map library barcode labels to library 
+IDs in aggregated input files. The aggregated input contains multiple biological 
+replicates, which can be generated using ``cellranger-arc aggr`` (Multiome), 
+``cellranger-atac aggr`` (ATAC), or ``cellranger aggr`` (RNA). This table consists 
+of the following columns:
+
 .. _aggr-sample:
 
 ``sample``
 ^^^^^^^^^^
-    string. Defines labels for each sample.
 
-    Values in ``sample`` column must be unique, unless analyzing technical replicates.
-    If specifying technical replicates, sample label must be the same for all rows containing 
-    techical replicates.
+    string. Defines labels for each sample. Values in ``sample`` column must 
+    be unique, unless analyzing technical replicates. If specifying technical 
+    replicates, sample label must be the same for all rows containing technical 
+    replicates.
 
 .. _aggr-replicate:
 
 ``replicate``
 ^^^^^^^^^^^^^
-    string, default null. Optional. Defines labels for each technical replicate of a sample.
 
-    Values in ``replicate`` column must be unique per sample.
-
-    **If not specified** technical replicates, leave empty.
-
-    **If specified** technical replicates: sample must be the same for all rows containing 
-    techical replicates.
+    string. Optional. Defines labels for each technical replicate of a sample.
+    Values in ``replicate`` column must be unique per sample. **If not specified** 
+    technical replicates, leave empty. **If specified** technical replicates: 
+    sample must be the same for all rows containing technical replicates.
 
 .. _aggr-bc_suffix:
 
 ``bc_suffix``
 ^^^^^^^^^^^^^
-    string, default null. Optional. Defines a unique library label to all barcodes for each sample.
 
-    **If sample is output of cellranger aggr** Values in ``bc_suffix`` column must be the **row number (1 based)** corresponding the 'sample_id' value from cellranger aggr's aggregation CSV.
+    string. Optional. Defines a unique library label to all barcodes for each sample.
+    **If sample is output of cellranger aggr** Values in ``bc_suffix`` column must be 
+    the **row number (1 based)** corresponding the ``sample_id`` value 
+    ``from cellranger aggr``'s aggregation CSV. 
 
-    **If sample is output of non-10X Genomics platform** Values in must be a unique library identifier appended to the barcode. Barcode and library suffix must be separated by a dash "-" in the following pattern: [barcode]"-"[bc_suffix].
+    **If sample is output of non-10X Genomics platform** Values in must be a unique 
+    library identifier appended to the barcode. Barcode and library suffix must be 
+    separated by a dash (``-``) in the following pattern: ``[barcode]-[bc_suffix]``.
 
 .. _aggr-library:
 
