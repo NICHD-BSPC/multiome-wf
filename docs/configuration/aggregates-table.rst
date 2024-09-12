@@ -77,51 +77,100 @@ of the following columns:
 
 ``library_id``
 ^^^^^^^^^^^^^^
-    string, default null. Optional. Defines labels associated with library barcode suffix for each sample.
 
-    Values in ``library_id`` column must be unique per sample.
+    string. Optional. Defines labels associated with library barcode suffix for 
+    each sample. Values in ``library_id`` column must be unique per sample. **If 
+    sample is output of cellranger aggr** Values in ``library_id`` column must be 
+    the 'sample_id' value from cellranger aggr's aggregation CSV. 
 
-    **If sample is output of cellranger aggr** Values in ``library_id`` column must be the 'sample_id' value from cellranger aggr's aggregation CSV.
-
-    **If sample is output of non-10X Genomics platform** Values in must correspond to the unique library suffix specified in ``bc_suffix`` column.
+    **If sample is output of non-10X Genomics platform** Values in must correspond 
+    to the unique library suffix specified in ``bc_suffix`` column.
 
 .. _aggr-metadata:
 
 ``metadata*``
 ^^^^^^^^^^^^^
 
-    string, default null. Define columns for metadata labels.
-    
-    Colums beginning with `"metadata"` are placeholders for user specified metadata. They can be re-renamed to any string, deleted, or additional metadata columns can be added.
+    string. Define columns for metadata labels. Colums beginning with ``metadata`` 
+    are placeholders for user specified metadata. They can be re-renamed to any 
+    string, deleted, or additional metadata columns can be added.
     
     .. note::
-        In ``aggregates.tsv``, the following column names are considered immutable: "sample", "replicate", "bc_suffix", "library_id".
 
-        Any additional columns present in ``aggregates.tsv`` will be considered metadata columns. Metadata columns can have any unique label, not just the `"meta*"` used in the example samples table.
+        - In ``aggregates.tsv``, the following column names are considered immutable:
+          "sample", "replicate", "bc_suffix", "library_id".
+
+        - Any additional columns present in ``aggregates.tsv`` will be considered 
+          metadata columns. Metadata columns can have any unique label, not just 
+          the `"meta*"` used in the example samples table.
 
 Example
 -------
 
-A **basic** example of an aggregates.tsv file is below. This table represents an experiment where 3 libraries of peripheral blood mononuclear cells (PBMC) were sequenced in one batch, and depth normalized using cellranger aggr.
 
-See :ref: `overview-wf` for more detailed examples of config files.
+Multiome
+^^^^^^^^
 
-====== ========= ========== ========== =========
-sample replicate library_id library_id metadata1
-====== ========= ========== ========== =========
-pbmc1            PBMC1      1          wt
-pbmc1            PBMC2      2          wt
-pbmc1            PBMC3      3          wt
-====== ========= ========== ========== =========
+a **basic** example of an aggregation CSV passed to the ``--csv`` parameter of
+``cellranger-arc aggr`` (upper table) and an ``aggregates.tsv`` file configured
+for `multiome-wf` pipeline (lower table):
 
-The corresponding ``cellranger-arc aggr`` aggregates.tsv file would look like:
+========= ========= ========== ========== =========
+sample    replicate library_id library_id metadata1
+========= ========= ========== ========== =========
+rep1_wt             1          1          wt
+rep1_homo           2          2          ko
+========= ========= ========== ========== =========
 
-========== ================================ ================================== ===============================
+
+========== ================================ ================================== ==============================
 library_id atac_fragments                   per_barcode_metrics                gex_molecule_info
-========== ================================ ================================== ===============================
-PBMC1      PBMC1/outs/atac_fragments.tsv.gz PBMC1/outs/per_barcode_metrics.csv PBMC1/outs/gex_molecule_info.h5
-PBMC2      PBMC2/outs/atac_fragments.tsv.gz PBMC2/outs/per_barcode_metrics.csv PBMC2/outs/gex_molecule_info.h5
-PBMC3      PBMC3/outs/atac_fragments.tsv.gz PBMC3/outs/per_barcode_metrics.csv PBMC3/outs/gex_molecule_info.h5
-========== ================================ ================================== ===============================
+ ===================== ================================ ================================== ==============================
+rep1_wt    ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
+rep1_homo  ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
+========== ================================ ================================== ==============================
 
-Notice that there is one sample name for all three libraries (PBMC1, PBMC2, and PBMC3) since cellranger aggr appends a library ID to barcodes within a library. Compare this with :ref: `samples-table` example to see how to incorporate single- and multi-library files for analysis.
+
+RNA-seq
+^^^^^^^
+
+a **basic** example of an aggregation CSV passed to the ``--csv`` parameter of
+``cellranger aggr`` (upper table) and an ``aggregates.tsv`` file configured
+for `multiome-wf` pipeline (lower table):
+
+========= =========================
+sample_id molecule_h5
+========= =========================
+CTX       CTX/outs/molecule_info.h5
+MGE       MGE/outs/molecule_info.h5
+========= =========================
+
+====== ========= ========== ========= ===========
+sample replicate library_id bc_suffix meta_tissue
+====== ========= ========== ========= ===========
+CTX              1          1         CTX
+MGE              2          2         MGE
+====== ========= ========== ========= ===========
+
+ATAC-seq
+^^^^^^^^
+
+a **basic** example of an aggregation CSV passed to the ``--csv`` parameter of
+``cellranger-atac aggr`` (upper table) and an ``aggregates.tsv`` file configured
+for `multiome-wf` pipeline (lower table):
+
+========== =============================== =============================
+library_id fragments                       cells
+========== =============================== =============================
+CTX        CTX_rerun/outs/fragments.tsv.gz CTX_rerun/outs/singlecell.csv
+MGE        MGE_rerun/outs/fragments.tsv.gz MGE_rerun/outs/singlecell.csv
+========== =============================== =============================
+
+====== ========= ========== ========= ===========
+sample replicate library_id bc_suffix meta_tissue
+====== ========= ========== ========= ===========
+CTX              1          1         CTX
+MGE              2          2         MGE
+====== ========= ========== ========= ===========
+
+See :ref:`overview-wf` for more detailed examples of config files.
