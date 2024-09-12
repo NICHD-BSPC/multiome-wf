@@ -5,6 +5,8 @@ Configuration details
 =====================
 
 
+.. _config-general:
+
 General configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
