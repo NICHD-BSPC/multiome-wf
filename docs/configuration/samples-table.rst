@@ -215,12 +215,12 @@ Multiome
 A **basic** examples of a ``samples.tsv`` file for 10X Genomics 
 Multiome analysis is below:
 
-========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
-sample    replicate genome HDF5_Multiple_Assays                      RDS_Multiple_Assays Gene.Expression   Peaks   TF  fragments                         singlecell  meta_batch  meta_geno
-========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
-multiome1           hg38   batch1/outs/filtered_feature_bc_matrix.h5                                                   batch1/outs/atac_fragments.tsv.gz             batch1      wt
-multiome2           hg38   batch2/outs/filtered_feature_bc_matrix.h5                                                   batch2/outs/atac_fragments.tsv.gz             batch2      wt
-========= ========= ====== ========================================= =================== ================= ======= === ================================= =========== =========== =========
+========= ========= ====== =========================================== =================== ================= ======= === ==================================== =========== =========== =========
+sample    replicate genome HDF5_Multiple_Assays                        RDS_Multiple_Assays Gene.Expression   Peaks   TF  fragments                            singlecell  meta_batch  meta_geno
+========= ========= ====== =========================================== =================== ================= ======= === ==================================== =========== =========== =========
+rep1_wt             mm10   rep1_wt/outs/filtered_feature_bc_matrix.h5                                                    rep1_wt/outs/atac_fragments.tsv.gz               batch1      wt
+rep1_homo           mm10   rep_homo/outs/filtered_feature_bc_matrix.h5                                                   rep1_homo/outs/atac_fragments.tsv.gz             batch1      ko
+========= ========= ====== =========================================== =================== ================= ======= === ==================================== =========== =========== =========
 
 RNA-seq
 ^^^^^^^
@@ -228,13 +228,12 @@ RNA-seq
 A **basic** examples of a ``samples.tsv`` file for 10X Genomics
 Single Cell 3’ Gene Expression analysis is below:
 
-======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
-sample  replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression                       Peaks   TF  fragments singlecell  meta_batch meta_geno
-======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
-rnaseq1           mm10                                            wt/outs/filtered_feature_bc_matrix.h5                                   batch1     wt
-rnaseq2           mm10                                            ko/outs/filtered_feature_bc_matrix.h5                                   batch1     ko 
-======= ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== =========
-
+====== ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== ===========
+sample replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression                       Peaks   TF  fragments singlecell  meta_batch meta_tissue
+====== ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== ===========
+CTX              mm10                                            wt/outs/filtered_feature_bc_matrix.h5                                   batch1     CTX
+MGE              mm10                                            ko/outs/filtered_feature_bc_matrix.h5                                   batch1     MGE
+====== ========= ====== ==================== =================== ===================================== ======= === ========= =========== ========== ===========
 
 ATAC-seq
 ^^^^^^^^
@@ -242,11 +241,12 @@ ATAC-seq
 A **basic** examples of a ``samples.tsv`` file for 10X Genomics
 Single Cell ATAC analysis is below:
 
-======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
-sample   replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression Peaks                              TF                               fragments                singlecell          meta_batch meta_geno
-======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
-atacseq1           mm10                                                            wt/outs/filtered_peak_bc_matrix.h5 wt/outs/filtered_tf_bc_matrix.h5 wt/outs/fragments.tsv.gz wt/outs/summary.csv batch1     wt
-atacseq2           mm10                                                            ko/outs/filtered_peak_bc_matrix.h5 ko/outs/filtered_tf_bc_matrix.h5 ko/outs/fragments.tsv.gz ko/outs/summary.csv batch1     ko
-======== ========= ====== ==================== =================== =============== ================================== ================================ ======================== =================== ========== =========
+====== ========= ====== ==================== =================== =============== ========================================= ======================================= =============================== ========================== ========== =========
+sample replicate genome HDF5_Multiple_Assays RDS_Multiple_Assays Gene.Expression Peaks                                     TF                                      fragments                       singlecell                 meta_batch meta_tissue
+====== ========= ====== ==================== =================== =============== ========================================= ======================================= =============================== ========================== ========== =========
+CTX              mm10                                                            CTX_rerun/outs/filtered_peak_bc_matrix.h5 CTX_rerun/outs/filtered_tf_bc_matrix.h5 CTX_rerun/outs/fragments.tsv.gz CTX_rerun/outs/summary.csv batch1     CTX
+MGE              mm10                                                            MGE_rerun/outs/filtered_peak_bc_matrix.h5 MGE_rerun/outs/filtered_tf_bc_matrix.h5 MGE_rerun/outs/fragments.tsv.gz MGE_rerun/outs/summary.csv batch1     MGE
+====== ========= ====== ==================== =================== =============== ========================================= ======================================= =============================== ========================== ========== =========
+
 
 See :ref:`overview-wf` for more detailed examples of config files.

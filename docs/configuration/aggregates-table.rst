@@ -121,12 +121,12 @@ rep1_homo           2          2          ko
 ========= ========= ========== ========== =========
 
 
-========== ================================ ================================== ==============================
-library_id atac_fragments                   per_barcode_metrics                gex_molecule_info
-========== ================================ ================================== ==============================
-rep1_wt    ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
-rep1_homo  ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
-========== ================================ ================================== ==============================
+========== ==================================== ====================================== ==================================
+library_id atac_fragments                       per_barcode_metrics                    gex_molecule_info
+========== ==================================== ====================================== ==================================
+rep1_wt    rep1_wt/outs/atac_fragments.tsv.gz   rep1_wt/outs/per_barcode_metrics.csv   rep1_wt/out/gex_molecule_info.h5
+rep1_homo  rep1_homo/outs/atac_fragments.tsv.gz rep1_homo/outs/per_barcode_metrics.csv rep1_homo/out/gex_molecule_info.h5
+========== ==================================== ====================================== ==================================
 
 
 RNA-seq
