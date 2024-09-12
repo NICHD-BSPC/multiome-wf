@@ -4,6 +4,9 @@
 Overview of workflows
 =====================
 
+Overview
+--------
+
 The main goal of `multiome-wf` is transforming and combining raw data into usable results 
 for downstream analyses. For scRNA-seq, that's differentially-expressed genes (along with 
 comprehensive QC and analysis). For scATAC-seq, that's called peaks or differentially accessible 
@@ -16,10 +19,75 @@ flexibility in single cell analyses. Data derived from many different experiment
 effectively be combined, and by setting up the configuration files properly, `multiome-wf` will decide 
 the best workflow to use.
 
-Each workflow is driven by a ``Snakefile`` and is configured by plain text
-`YAML <https://en.wikipedia.org/wiki/YAML>`_ and `TSV
-<https://en.wikipedia.org/wiki/Tab-separated_values>`_ format files (see
-:ref:`config` for more info).
+.. _pipeline-structure:
+
+Core pipeline structure
+-----------------------
+
+`multiome-wf` is a parallelized pipeline built using Snakemake. The pipeline consists of 
+rules that implement modular workflows, as defined in the ``Snakefile`` within the 
+``workflow`` directory. Each rule runs analysis scripts written in R or Bash. R scripts 
+are executed from individual ``Rmd`` files in the same directory, which also creates 
+analysis reports in ``html`` format in the ``workflow/results`` folder upon completion of
+the analysis.
+
+`multiome-wf` is configured by plain text `YAML <https://en.wikipedia.org/wiki/YAML>`_ 
+and `TSV <https://en.wikipedia.org/wiki/Tab-separated_values>`_ format files located in the
+``config`` directory (see :ref:`config` for more information).
+
+Optionally, the pipeline can run on a High Performance Computing (HPC) cluster. The 
+``WRAPPER_SLURM`` file in the ``workflow`` directory is specially prepared to configure
+high performance computing on `NIH's Biowulf <https://hpc.nih.gov/>`_. Refer to 
+:ref:`cluster` for more details.
+
+.. code-block:: bash
+
+    $ tree workflow/
+    workflow/
+    ├── add_macs_peaks.Rmd
+    ├── annotation_ensdb.Rmd
+    ├── annotation_gtf.Rmd
+    ├── chooser
+    │   ├── env.yaml
+    │   ├── R
+    │   │   └── pipeline.R
+    │   └── requirements.txt
+    ├── chooser_aggr.Rmd
+    ├── chooser_paral.Rmd
+    ├── cluster.Rmd
+    ├── combine.Rmd
+    ├── common.R
+    ├── config
+    │   ├── atac-config
+    │   │   ├── aggregates.tsv
+    │   │   ├── assays.tsv
+    │   │   ├── config.yaml
+    │   │   └── samples.tsv
+    │   ├── multiome-config
+    │   │   ├── aggregates.tsv
+    │   │   ├── assays.tsv
+    │   │   ├── config.yaml
+    │   │   └── samples.tsv
+    │   ├── README.rst
+    │   └── rna-config
+    │       ├── aggregates.tsv
+    │       ├── assays.tsv
+    │       ├── config.yaml
+    │       └── samples.tsv
+    ├── create_seurat.Rmd
+    ├── diff_analysis.Rmd
+    ├── integrate.Rmd
+    ├── merge_macs_prep.Rmd
+    ├── merge_zinba.Rmd
+    ├── normalize_reduce_dims.Rmd
+    ├── qc.Rmd
+    ├── README.rst
+    ├── Snakefile
+    ├── weighted_nn.Rmd
+    └── WRAPPER_SLURM
+
+    6 directories, 35 files
+
 
 The core workflows are:
 
