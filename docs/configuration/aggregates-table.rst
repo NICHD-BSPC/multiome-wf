@@ -15,8 +15,12 @@ Field                               Used for cellranger count Used for cellrange
 
 .. note::
 
-    - Aggregates table is only used if there is a need to map library barcode 
-      labels to a specified library ID. 
+
+    - The aggregates table is optional and used to map library barcode labels 
+      to library IDs in aggregated input files. The aggregated input contains 
+      multiple biological replicates, which can be generated using 
+      ``cellranger-arc aggr`` (Multiome), ``cellranger-atac aggr`` (ATAC), 
+      or ``cellranger aggr`` (RNA).
 
     - When creating loading matrices, `multiome-wf` will map values in 
       ``library_id`` to the barcode suffix. If using 10X Genomics platforms, 
@@ -32,12 +36,6 @@ Field                               Used for cellranger count Used for cellrange
 
 Field descriptions
 ------------------
-
-The aggregates table is optional and used to map library barcode labels to library 
-IDs in aggregated input files. The aggregated input contains multiple biological 
-replicates, which can be generated using ``cellranger-arc aggr`` (Multiome), 
-``cellranger-atac aggr`` (ATAC), or ``cellranger aggr`` (RNA). This table consists 
-of the following columns:
 
 .. _aggr-sample:
 
@@ -91,7 +89,7 @@ of the following columns:
 ``metadata*``
 ^^^^^^^^^^^^^
 
-    string. Define columns for metadata labels. Colums beginning with ``metadata`` 
+    string. Optional. Define columns for metadata labels. Colums beginning with ``metadata`` 
     are placeholders for user specified metadata. They can be re-renamed to any 
     string, deleted, or additional metadata columns can be added.
     
@@ -125,7 +123,7 @@ rep1_homo           2          2          ko
 
 ========== ================================ ================================== ==============================
 library_id atac_fragments                   per_barcode_metrics                gex_molecule_info
- ===================== ================================ ================================== ==============================
+========== ================================ ================================== ==============================
 rep1_wt    ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
 rep1_homo  ../../outs/atac_fragments.tsv.gz ../../outs/per_barcode_metrics.csv ../../out/gex_molecule_info.h5
 ========== ================================ ================================== ==============================
