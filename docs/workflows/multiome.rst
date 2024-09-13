@@ -21,6 +21,7 @@ Specifically, the workflow does the following:
     - Weighted Nearest Neighbor analysis
     - Differential testing of gene expression, chromatin accessibility, and overrepresented motifs.
 
+
 To configure a Multiome experiment, see :ref:`config-multiome`.
 
 .. image:: ../dags/multiome/dag-9.png
