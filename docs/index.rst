@@ -24,6 +24,7 @@
    workflows/rna
    workflows/atac
    workflows/overview-input
+   workflows/overview-output
 
 .. toctree::
    :caption: Configuration
