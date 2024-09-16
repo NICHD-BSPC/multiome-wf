@@ -198,11 +198,11 @@ dimensions, which are available for further specialized analyses.
 ``markers.tsv`` table
 ~~~~~~~~~~~~~~~~~~~~~
 
-Marker genes are saved as excel-readable tab-separated files named ``markers.tsv``. These files are 
-saved in per-modality sub-folders of the ``diff_analysis`` folder.
+Marker genes are saved as excel-readable, tab-separated files named ``markers.tsv``. These files are 
+saved in per-modality sub-folders within the ``diff_analysis`` folder.
 
-Below is an example of the first two rows from the ``markers.tsv`` computed in ``unintegrated_1`` assay
-group:
+Below is an example of the first two rows from the ``markers.tsv`` computed in the ``unintegrated_1`` 
+assay group:
 
 ======================= ===== ================ ===== ===== ========= ======= =============== ===== ====
 Gene                    p_val avg_log2FC       pct.1 pct.2 p_val_adj cluster group           assay slot
@@ -211,17 +211,26 @@ chr4-95840476-95841400  0     2.60136012051654 0.443 0.084 0         0       seu
 chr18-46109191-46110086 0     2.56059989117035 0.402 0.081 0         0       seurat_clusters Peaks data
 ======================= ===== ================ ===== ===== ========= ======= =============== ===== ====
 
-Columns indicate the following:
+The columns indicate the following:
 
 - ``Gene``: Gene symbol (RNA-seq) or locus (ATAC-seq)
-- ``p_val``: raw p-value
-- ``avg_log2FC``: log2-transformed fold changes
-- ``pct.1``, ``pct.2``: % of cells expressing given gene
-- ``p_val_adj``: adjusted p-value (corrected using BH method)
-- ``cluster``: cluster where given marker gene is differentially expressed
-- ``group``: metadata column used in the differential testing
-- ``assay``: modality
-- ``slot``: count matrix used for differential testing (``counts`` for raw, ``data`` for normalized counts)
+- ``p_val``: Raw p-values
+- ``avg_log2FC``: Log2-transformed fold changes
+- ``pct.1``, ``pct.2``: Percentage of cells expressing each gene in cells annotated the ``cluster``
+  (``pct.1``) and not annotated to the ``cluster`` (``pct.2``)
+- ``p_val_adj``: Adjusted p-value, False Discovery Rate (FDR) calculated using the 
+  `Benjamini-Hochberg procedure <https://en.wikipedia.org/wiki/False_discovery_rate#BH_procedure>`_
+- ``cluster``: Cluster where the given marker gene is differentially expressed
+- ``group``: Metadata column used in differential testing
+- ``assay``: Modality
+- ``slot``: Count matrix used for differential testing (``counts`` for raw data, 
+  ``data`` for normalized counts)
 
-Refer to the `FindAllMarkers <https://satijalab.org/seurat/reference/findallmarkers>`_ function in Seurat
-for computational details.
+For computational details, refer to the `FindAllMarkers 
+<https://satijalab.org/seurat/reference/findallmarkers>`_ function in Seurat.
+
+
+MACS2 output
+~~~~~~~~~~~~
+
+
