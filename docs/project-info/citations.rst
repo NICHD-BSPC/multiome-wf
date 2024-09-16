@@ -1,8 +1,10 @@
 
 .. _citations:
 
-Citing
-======
+Citation
+========
 
-When using `multiome-wf` for a publication, **please cite the following article** 
-in you paper: TBD
+When using `multiome-wf` for a publication, **please cite the following repository** 
+in you paper: 
+
+https://github.com/NICHD-BSPC/multiome-wf

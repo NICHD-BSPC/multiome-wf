@@ -83,10 +83,14 @@ Some of the modalities this workflow supports include:
 
 .. note::
 
-    While this workflow does some basic tertiary analyses, such as differential testing, the
-    core purpose of this workflow is preparing a unified dataset to be used as input for standalone
-    downstream analyses, such as Trajectory Inference, Gene-Peak Interactions, etc which are
-    not currently supported by this workflow.
+    - While this workflow does some basic tertiary analyses, such as differential testing, 
+      the core purpose of this workflow is preparing a unified dataset to be used as input 
+      for standalone downstream analyses, such as Trajectory Inference, Gene-Peak Interactions,
+      etc which are not currently supported by this workflow.
+
+    - Users need familarity with `Snakemake <https://snakemake.readthedocs.io/en/stable/>`_, 
+      `Conda <https://conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_, 
+      and `Seurat <https://satijalab.org/seurat>`_ for effective use of `multiome-wf`.
 
 
 Getting Started

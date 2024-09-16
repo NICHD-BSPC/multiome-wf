@@ -139,6 +139,8 @@ from multiple sequencing runs on the same biological materials. This is done
 to improve sequencing depth.
 
 
+.. _non-tenx:
+
 Non-10X Genomics
 ~~~~~~~~~~~~~~~~
 
