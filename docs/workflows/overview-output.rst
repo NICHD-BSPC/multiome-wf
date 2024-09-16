@@ -233,4 +233,16 @@ For computational details, refer to the `FindAllMarkers
 MACS2 output
 ~~~~~~~~~~~~
 
+Optionally, users can call ATAC peaks using `MACS2 
+<https://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137>`_. Configure the MACS2 run
+as instructed in the :ref:`macs-peakcalling`. The output files are summarized below:
+
+- ``*_peaks.narrowPeak``: Peak locations with peak summit, pvalue, and qvalue in BED6+4 format
+- ``*_peaks.xls``: A tabular file which contains information about called peaks, including 
+  pileup and fold enrichment
+- ``*_summits.bed``: Peak summit locations for every peak. Recommended when identifying motifs at the
+  binding sites.
+
+The remaining files (e.g. ``macspeaks.*``) are pre-processed input files for MACS2 and are not considered
+as outputs of the peak calling process.
 
