@@ -271,6 +271,8 @@ Example:
         TSS.enrichment: 2
       upper: null
 
+.. _macs-peakcalling:
+
 MACS Peak Calling (``macs2`` section)
 -------------------------------------
 
