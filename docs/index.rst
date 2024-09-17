@@ -49,6 +49,7 @@
 
    project-info/citations
    project-info/faq
+   project-info/changelog
    project-info/authors
 
 .. _docs-main:
