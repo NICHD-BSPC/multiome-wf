@@ -820,15 +820,23 @@ function in Seurat.
 ^^^^^^^^^^^^^^^^^^^^^
 
     string, default ``null``. Variables to test, used only when ``test_use`` is 
-    one of ``LR``, ``negbinom``, ``poisson``, or ``MAST``.
+    one of ``LR``, ``negbinom``, ``poisson``, or ``MAST``. This value is passed 
+    to the ``latent.vars`` argument of the ``FindAllMarkers`` function.
+
+``alpha`` field
+^^^^^^^^^^^^^^^
+
+    float, default 0.05. False discovery rate (FDR) threshold to filter significant marker genes.
 
 .. note::
 
-    - Only include ``groups`` values specified in the config sections: ``normalize``, 
-      ``integrate`` (if appicable) and ``weighted_nn`` (if appicable).
+    Only include ``groups`` values specified in the config sections: ``normalize``, 
+    ``integrate`` (if appicable) and ``weighted_nn`` (if appicable).
 
-    - For the current version of `multiome-wf`, ``LR`` has a bug where it grabs more
-      nodes than allocated on a cluster node. Do not use ``LR`` on a cluster node.
+.. warning::
+
+    For the current version of `multiome-wf`, ``LR`` has a bug where it grabs more
+    nodes than allocated on a cluster node. Do not use ``LR`` on a cluster node.
 
 Example:
 
