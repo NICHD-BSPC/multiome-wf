@@ -16,6 +16,7 @@ and ``assays.tsv`` if you calculated custom count matrices.
 3. **Run:** activate environment and run the Snakemake file either locally or on a cluster
 
 .. note::
+
     - `multiome-wf` is tested and heavily used on Linux.
 
     - It is likely to work on macOS as long as all relevant conda packages are
@@ -28,6 +29,9 @@ and ``assays.tsv`` if you calculated custom count matrices.
 
     - Snakemake versions compatible with the current verion of `multiome-wf` are
       ``>=7.29`` and ``<8.0``
+
+    - In the current version of `multiome-wf`, input datasets mapped to the **mm10 
+      (mouse)** or **hg38 (human)** reference genomes are compatible.
 
 
 
