@@ -13,10 +13,10 @@ set -euo pipefail
 if [[ ! -e logs ]]; then mkdir -p logs; fi
 
 
-# Prerequisite for biowulf users
-# 1. Run `git clone https://github.com/NIH-HPC/snakemake_profile.git /data/$USER/snakemake_profile`
-# 2. Add `$MULTIOMEWF_SNAKEMAKE_PROFILE="/data/$USER/snakemake_profile"` to your bash config file (`~/.bashrc`)
-# 3. Run `source ~/.bashrc`
+# Prerequisite for HPC users
+# 1. Prepare snakemake profile (e.g. https://github.com/NIH-HPC/snakemake_profile)
+# 2. Add `MULTIOMEWF_SNAKEMAKE_PROFILE="path/to/snakemake_profile"` to your bash config file (`~/.bashrc`)
+# 3. Update your bash configuration by running `source ~/.bashrc` in terminal
 # 4. Ensure to set `--configfile` to correct path 
 
 # use MULTIOMEWF_SNAKEMAKE_PROFILE if one is set in the environment variables
