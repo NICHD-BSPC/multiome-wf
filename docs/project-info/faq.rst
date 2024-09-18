@@ -17,6 +17,7 @@ with the rest of the packages, delete all version information except for the fol
       # In env.yaml
       snakemake<8
       r-seurat>5
+      r-signac>1.10
 
 
 Users may encounter additional version incompatibilities. Manually configure package versions if necessary.
@@ -107,3 +108,19 @@ and metadata to build the required single cell object, or simply convert to anot
 
 Additional data is provided for marker genes, called peaks, and analysis reports at each step, 
 depending on the analysis configurations. Refer to the :ref:`overview-output` for more details.
+
+My Multiome/ATAC-seq input organism is neither human nor mouse
+--------------------------------------------------------------
+
+The current version of `multiome-wf` requires input ATAC reads to be mapped to either the **mm10 
+(mouse) or hg38 (human)** reference genomes. Input from other organisms, or reads from mouse/human 
+mapped to different reference genomes, are not supported at this time.
+
+
+Chromosome names differ from my input in Multiome/ATAC-seq
+----------------------------------------------------------
+
+The `multiome-wf` relies on the ``EnsDb.Mmusculus.v79`` (mm10) or ``EnsDb.Hsapiens.v86`` (hg38)
+annotation packages in R. If the chromosome names in your input files don't match the conventions
+used in these annotation packages, it is highly recommended that you rerun the mapping process 
+using a reference genome with a compatible release version.
