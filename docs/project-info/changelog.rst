@@ -29,7 +29,7 @@ Major update to support Seurat v5
       CPU issues on HPC systems
     - ``guide`` field: deprecated
 - Bugfix: Resolved an issue with incorrect prefixes in clustering columns in the metadata
-  (https://github.com/NICHD-BSPC/multiome-wf/issues/17)
+  (`https://github.com/NICHD-BSPC/multiome-wf/issues/17`)
 
 
 v1.1, v1.2 (July 2024)
@@ -39,7 +39,7 @@ Minor update to upgrade package versions in the Conda environment and enhance fu
 
 - Package version updates in the default Conda environment (``env.yaml``)
 - This update also fixes a clustering error caused by the ``Matrix`` package in R 
-  (https://github.com/NICHD-BSPC/multiome-wf/issues/18)
+  (`https://github.com/NICHD-BSPC/multiome-wf/issues/18`)
 - ``n_dataset`` key added to the ``integrate`` field in ``config.yaml``. This key speficies
   the number of datasets to be integrated for cases where there are more than two datasets.
 

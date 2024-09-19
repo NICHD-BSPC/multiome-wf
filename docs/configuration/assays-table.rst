@@ -25,7 +25,7 @@ Field                               Used for 10X Genomics Used for non-10X Genom
      Scores (GAS) common to ATAC analyses. This is included in the standard 
      ATAC Peaks workflow. For details about the standard GAS included in this
      workflow, see `Signac Documentation 
-     <https://satijalab.org/signac/reference/geneactivity>`_.
+     <https://stuartlab.org/signac/reference/geneactivity>`_.
 
 
 Field descriptions

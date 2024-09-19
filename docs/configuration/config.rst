@@ -150,9 +150,9 @@ you can setup your profile on NIH's Biowulf as demonstrated below:
 .. code-block:: bash
 
     # Clone the profile repo
-    git clone https://github.com/NIH-HPC/snakemake_profile.git /data/$USER/snakemake_profile
+    git clone https://github.com/NIH-HPC/snakemake_profile.git path/to/snakemake_profile
 
-Once the repository is cloned, add ``export MULTIOMEWF_SNAKEMAKE_PROFILE="/data/$USER/snakemake_profile"``
+Once the repository is cloned, add ``export MULTIOMEWF_SNAKEMAKE_PROFILE="path/to/snakemake_profile"``
 to your bash configuration file (``~/.bashrc``). 
 
 Update your bash config by running the following command:
