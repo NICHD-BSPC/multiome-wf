@@ -56,6 +56,12 @@ Field descriptions
     technical replicates: sample must be the same for all rows containing 
     techical replicates.
 
+    
+.. note::
+
+    Refer to the :ref:`replicates` section for the definition of biological and
+    technical replicates.
+
 .. _samples-genome:
 
 ``genome``

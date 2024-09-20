@@ -57,6 +57,11 @@ Field descriptions
     technical replicates, leave empty. **If specified** technical replicates: 
     sample must be the same for all rows containing technical replicates.
 
+.. note::
+
+    Refer to the :ref:`replicates` section for the definition of biological and
+    technical replicates.
+
 .. _aggr-bc_suffix:
 
 ``bc_suffix``
