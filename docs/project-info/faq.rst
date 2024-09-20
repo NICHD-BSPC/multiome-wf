@@ -50,12 +50,9 @@ the error messages in the log files for troubleshooting.
 I have biological and/or technical replicates
 ---------------------------------------------
 
-In general, **technical replicates** refer to samples originating from the same biological source, 
-such as reads from multiple sequencing runs of an identical cell population. In contrast, 
-**biological replicates** refer to samples originating from different biological sources, such as
-reads from multiple sequencing runs where each run contains a unique cell population.
+We define biological and technical replicates as outlined in the :ref:`replicates` section.
 
-Technical replicates are often prepared to improve sequencing coverage. Therefore, read counts are
+Once confirming that all the technical replicates were properly sequenced, read counts are
 summed across technical replicates by setting the input of ``cellranger count`` (RNA-seq), 
 ``cellranger-arc count`` (ATAC-seq), or ``cellranger-arc count`` (Multiome) to technical replicates. 
 Technical replicates prepared using Non-10X Genomics platforms follow equivalent steps. Alternatively, 
