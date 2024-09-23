@@ -6,7 +6,7 @@ workflow for common downstream analysis using `Seurat <https://satijalab.org/seu
 and `MACS2 <https://github.com/macs3-project/MACS>`_. This pipeline is designed to run 
 on Linux.
 
-For documentation, follow the instruction below.
+For documentation, follow the instruction in https://nichd-bspc.github.io/multiome-wf.
 
 Prerequisite
 ~~~~~~~~~~~~
@@ -69,35 +69,5 @@ If you are ready to set up your main conda environment, follow the command below
     $ mamba env create --prefix ./env --file env.yaml
 
 This will create a new conda environment named ``env`` in the current directory.
-
-Documentation
-~~~~~~~~~~~~~
-
-Once you have cloned your repository, you will build your documentation 
-in the ``multiome-wf/docs`` directory.
-
-.. code-block:: bash
-
-    $ cd multiome-wf/docs
-
-
-The documentation is written in the `eStructuredText and Sphinx format 
-<https://sphinx-tutorial.readthedocs.io>`_. Create a conda environment to install 
-required packages for rendering your documentation by running the following command:
-
-.. code-block:: bash
-
-    # Assume you are in multiome-wf/docs
-    $ mamba env create --prefix ./env --file docs.env.yaml
-
-Now you are ready to build your documentation. Run the following commands:
-
-.. code-block:: bash
-
-    # You are still in multiome-wf/docs
-    $ conda activate ./env
-    $ make html
-
-Here's your root document: ``_build/html/index.html``
 
 
