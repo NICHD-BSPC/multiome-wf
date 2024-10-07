@@ -179,6 +179,8 @@ Config Tables
 Annotation
 ----------
 
+.. _config-annotation:
+
 ``ANNOTATION`` field
 ^^^^^^^^^^^^^^^^^^^^
 

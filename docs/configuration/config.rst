@@ -102,8 +102,9 @@ If you are running on a different cluster, you should inspect the following file
 - Profile config files from the `NIH HPC <https://github.com/NIH-HPC/snakemake_profile.git>`_
 
 The default configuration we provide is specific to the NIH Biowulf cluster.
-To run a workflow on Biowulf, from the top-level project directory, 
-run the following command
+To run a workflow on Biowulf, set up your *snakemake profile* as instructed in the 
+:ref:`new_cluster_config`. Afterwards, from the top-level project directory, 
+run the following command:
 
 .. code-block:: bash
 
@@ -153,12 +154,18 @@ you can setup your profile on NIH's Biowulf as demonstrated below:
     git clone https://github.com/NIH-HPC/snakemake_profile.git path/to/snakemake_profile
 
 Once the repository is cloned, add ``export MULTIOMEWF_SNAKEMAKE_PROFILE="path/to/snakemake_profile"``
-to your bash configuration file (``~/.bashrc``). 
+to your bash configuration file (``~/.bashrc``) as shown below:
 
-Update your bash config by running the following command:
 
 .. code-block:: bash
 
+    # NOTE: This is for first-time users. You do not need to repeat this step if you 
+    #       have set this up before.
+
+    # Update your bash config setting to include MULTIOMEWF_SNAKEMAKE_PROFILE
+    echo 'export MULTIOMEWF_SNAKEMAKE_PROFILE="path/to/snakemake_profile"' >> ~/.bashrc
+
+    # Update your bash environment in use
     source ~/.bashrc
 
 
