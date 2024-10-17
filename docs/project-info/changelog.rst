@@ -4,8 +4,8 @@
 Changelog
 =========
 
-v2.0 (September 2024)
----------------------
+v2.0 (October 2024)
+-------------------
 
 Major update to support Seurat v5
 
