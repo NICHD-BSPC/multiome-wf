@@ -6,7 +6,7 @@ workflow for common downstream analysis using `Seurat <https://satijalab.org/seu
 and `MACS2 <https://github.com/macs3-project/MACS>`_. This pipeline is designed to run 
 on Linux.
 
-For documentation, follow the instruction in https://nichd-bspc.github.io/multiome-wf.
+See documentation at https://nichd-bspc.github.io/multiome-wf.
 
 Prerequisite
 ~~~~~~~~~~~~
@@ -70,4 +70,21 @@ If you are ready to set up your main conda environment, follow the command below
 
 This will create a new conda environment named ``env`` in the current directory.
 
+Workflows
+~~~~~~~~~
 
+Multiome
+--------
+
+.. image:: docs/dags/multiome/dag-9.png
+
+scRNA-seq
+---------
+
+.. image:: docs/dags/rna/dag-3.png
+
+
+scATAC-seq
+----------
+
+.. image:: docs/dags/atac/dag-5.png
