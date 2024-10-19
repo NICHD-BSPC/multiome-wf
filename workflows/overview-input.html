@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview of input files &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overview of output files" href="overview-output.html" />
+    <link rel="prev" title="scATAC-Seq Workflow" href="atac.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview of input files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#x-genomics">10X Genomics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#replicates">Replicates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biological-replicates">Biological replicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#technical-replicates">Technical replicates</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#non-10x-genomics">Non-10X Genomics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview of input files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/workflows/overview-input.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview-of-input-files">
+<span id="overview-input"></span><h1>Overview of input files<a class="headerlink" href="#overview-of-input-files" title="Link to this heading"></a></h1>
+<p><cite>multiome-wf</cite> was built around 10X Genomics data structures, but has been generalized
+to support most single cell sequencing experiments. Here we will review how matrices
+generated by 10X Genomics pipelines are organized. The subtle differences in
+10X Genomics pipelines have important implications in setting up config files,
+especially <cite>samples</cite> tables and <cite>aggregates</cite> tables.</p>
+<section id="x-genomics">
+<h2>10X Genomics<a class="headerlink" href="#x-genomics" title="Link to this heading"></a></h2>
+<p>All 10X genomics products utilized droplet encapsulation of cells. Within the droplet,
+2 ID oligo sequences are added to the cDNA or gDNA fragments: 1) a unique oligo for each
+cell, called a cell barcode or 10x barcode; and 2) a unique oligo for each library,
+called a sample index.</p>
+<p>If we consider an example: cells 1, 2 and 3 from sample A, then we can map the cell
+and sample indexes as follows:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p>10x barcode</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>ATATATATATAT</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>library</p></th>
+<th class="head"><p>sample index</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<p>Combining the cell and library dictionary values, we get the following unique IDs
+for cells 1, 2 and 3.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p>ID</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT-1</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA-1</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>ATATATATATAT-1</p></td>
+</tr>
+</tbody>
+</table>
+<p>What happens if we combine more libraries in a single experiment? There are a finite
+number of unique 10x barcodes that can be used for cells, so 10X Genomics recycles
+the same 10X Barcodes for each library, but uses a different sample index.</p>
+<p>If we consider an example: cells 1, 2 and 3 from sample A and cells 1, 2 and 3
+from sample B, then we can map the cell and sample indexes as follows:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p>10x barcode</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>ATATATATATAT</p></td>
+</tr>
+</tbody>
+</table>
+<p>library id: sample index
+{A: GGGCCC}</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>library</p></th>
+<th class="head"><p>sample index</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p>10x barcode</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>ATATATATATAT</p></td>
+</tr>
+</tbody>
+</table>
+<p>library id: sample index
+{B: GGGCCC}</p>
+<p>library id: library count
+{B: 2}</p>
+<p>Combining the cell and library dictionary values, we get the following unique IDs
+for cells 1, 2 and 3.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p>ID</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT-1</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA-1</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>ATATATATATAT-1</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>AAAAAATTTTTT-2</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>TTTTTTAAAAAA-2</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>ATATATATATAT-2</p></td>
+</tr>
+</tbody>
+</table>
+<p>There is now unique mapping of transcripts (or other counts) to unique cell-library
+tuples, even though the individual 10x barcodes are not unique.</p>
+<p>The approaches above are how cellranger pipelines parse count data. In the case of
+<code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">count</span></code>, all the cell-library strings will end with “1”. In the case of
+<code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code>, all the cell-library strings will end with the unique library
+count that has been assigned while combining libraries. In fact, the library count is
+just a 1-based running count of the row number a library id is entered in the
+<code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span> <span class="pre">--csv=aggregates.csv</span> <span class="pre">&lt;more_parameters&gt;</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>cat<span class="w"> </span>aggregates.csv
+sample_id,molecule_h5
+WT,WT/outs/molecule_info.h5
+Het,Het/outs/molecule_info.h5
+KO,KO/outs/molecule_info.h5
+</pre></div>
+</div>
+</section>
+<section id="replicates">
+<span id="id1"></span><h2>Replicates<a class="headerlink" href="#replicates" title="Link to this heading"></a></h2>
+<section id="biological-replicates">
+<h3>Biological replicates<a class="headerlink" href="#biological-replicates" title="Link to this heading"></a></h3>
+<p>Biological replicates are generated by sequencing independent animals sampled
+under the same experimental conditions such as genotype, tissue, and age.
+Having biological replicates allows to capture true biological variability.</p>
+</section>
+<section id="technical-replicates">
+<h3>Technical replicates<a class="headerlink" href="#technical-replicates" title="Link to this heading"></a></h3>
+<p>Technical replicates are generated from multiple sequencing runs on the same
+biological replicate. This can involve multiple flowcells, multiple chips,
+or multiple libraries prepared from a single biological replicate. Technical
+replicates are used to assess technical artifacts arising from sequencing steps
+and/or to increase sequencing coverage.</p>
+</section>
+</section>
+<section id="non-10x-genomics">
+<span id="non-tenx"></span><h2>Non-10X Genomics<a class="headerlink" href="#non-10x-genomics" title="Link to this heading"></a></h2>
+<p>Non-10X Genomics datasets are also compatible with <cite>multiome-wf</cite>. Here’s an example
+downloaded from <a class="reference external" href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE239808">GSE239808</a>,
+which was sequenced using <a class="reference external" href="https://www.nature.com/articles/nprot.2014.006">Smart-seq2</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>smartseq2/
+smartseq2/
+├──<span class="w"> </span>rep1
+│<span class="w">   </span>├──<span class="w"> </span>GSM7674039_HFD_1_barcodes.tsv.gz
+│<span class="w">   </span>├──<span class="w"> </span>GSM7674039_HFD_1_features.tsv.gz
+│<span class="w">   </span>└──<span class="w"> </span>GSM7674039_HFD_1_matrix.mtx.gz
+└──<span class="w"> </span>rep2
+<span class="w">    </span>├──<span class="w"> </span>GSM7674040_HFD_2_barcodes.tsv.gz
+<span class="w">    </span>├──<span class="w"> </span>GSM7674040_HFD_2_features.tsv.gz
+<span class="w">    </span>└──<span class="w"> </span>GSM7674040_HFD_2_matrix.mtx.gz
+</pre></div>
+</div>
+<p>Note that <cite>multiome-wf</cite> requires the following files to be in the same directory:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">barcodes.tsv.gz</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">features.tsv.gz</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matrix.mtx.gz</span></code></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="atac.html" class="btn btn-neutral float-left" title="scATAC-Seq Workflow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="overview-output.html" class="btn btn-neutral float-right" title="Overview of output files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,3 +1,0 @@
-sample	replicate	genome	HDF5_Multiple_Assays	RDS_Multiple_Assays	Gene.Expression	Peaks	TF	fragments	singlecell	meta_modality	meta_batch	meta_geno
-toydataset		hg38		../test_data/tenx_multiome_toy/toy_matrix.rds				../test_data/tenx_multiome_toy/toy_atac.tsv.gz		Multiome	batch1	wt
-toydataset1		hg38		../test_data/tenx_multiome_toy/toy_matrix.rds				../test_data/tenx_multiome_toy/toy_atac.tsv.gz		Multiome	batch2	ko

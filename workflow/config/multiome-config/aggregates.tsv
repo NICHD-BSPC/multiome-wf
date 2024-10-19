@@ -1,5 +1,0 @@
-sample	replicate	library_id	bc_suffix	metadata1
-toydataset		PBMC1	1	wt
-toydataset		PBMC2	2	wt
-toydataset		PBMC3	3	wt
-toydataset1		PBMC1	1	

@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to get started &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Why use multiome-wf?" href="why-use.html" />
+    <link rel="prev" title="Setting up a project" href="setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up a project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to get started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-installing-multiome-wf">Step 1: Installing <cite>multiome-wf</cite></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-configuring-sample-tables">Step 2: Configuring sample tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-configuring-snakemake-pipeline">Step 3: Configuring Snakemake pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-updating-snakefile">Step 4: Updating <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-optional-configuring-high-performance-computing">Step 5 (Optional): Configuring high performance computing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-6-run">Step 6: Run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-7-results">Step 7: Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">How to get started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting-started/tutorial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="how-to-get-started">
+<span id="tutorial"></span><h1>How to get started<a class="headerlink" href="#how-to-get-started" title="Link to this heading"></a></h1>
+<section id="step-1-installing-multiome-wf">
+<h2>Step 1: Installing <cite>multiome-wf</cite><a class="headerlink" href="#step-1-installing-multiome-wf" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> requires the Snakemake pipeline to be cloned to your local
+system, along with necessary packages installed in the conda environment.
+Follow the instructions in the <a class="reference internal" href="setup.html#setup"><span class="std std-ref">Setting up a project</span></a> page.</p>
+<p>If you are new to <cite>multiome-wf</cite>, please review the file system
+described in the <a class="reference internal" href="../workflows/overview-wf.html#pipeline-structure"><span class="std std-ref">Core pipeline structure</span></a> before starting configuration.</p>
+</section>
+<section id="step-2-configuring-sample-tables">
+<h2>Step 2: Configuring sample tables<a class="headerlink" href="#step-2-configuring-sample-tables" title="Link to this heading"></a></h2>
+<p>To use input files created per sample, complete the <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code> in your
+configuration folder. If you are using input files where all samples
+have been aggregated, fill out the <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> in addition to
+<code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>. Refer to <a class="reference internal" href="../configuration/config.html#config-general"><span class="std std-ref">General configuration</span></a> for the hierarchy of
+configuration directories and files.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that <cite>multiome-wf</cite> organizes sample information by modality. Any sample
+tables not related to your analysis modality will be disregarded. For example,
+the sample table for Multiome should be placed in the <code class="docutils literal notranslate"><span class="pre">multiome-config</span></code>
+directory.</p>
+</div>
+</section>
+<section id="step-3-configuring-snakemake-pipeline">
+<h2>Step 3: Configuring Snakemake pipeline<a class="headerlink" href="#step-3-configuring-snakemake-pipeline" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> is designed to use the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file in your
+configuration folder. Modify this file according to the instructions
+in the <a class="reference internal" href="../configuration/config-yaml.html#config-yaml"><span class="std std-ref">Config YAML</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><cite>multiome-wf</cite> assumes that your <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> and sample tables are
+located in the same configuration directory. Any <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> files
+not related to your analysis modality will be disregarded.</p>
+</div>
+</section>
+<section id="step-4-updating-snakefile">
+<h2>Step 4: Updating <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code><a class="headerlink" href="#step-4-updating-snakefile" title="Link to this heading"></a></h2>
+<p>Once you have finished configuring your sample tables and <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>,
+edit your <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> accordingly. First, point the <code class="docutils literal notranslate"><span class="pre">configfile</span></code> to your
+<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file, as shown below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">configfile</span><span class="p">:</span> <span class="s2">&quot;config/multiome-config/config.yaml&quot;</span>
+</pre></div>
+</div>
+<p>Depending on the computation resources required for each rule, update
+the <code class="docutils literal notranslate"><span class="pre">resources</span></code> directive, as shown below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">resources</span><span class="p">:</span>
+    <span class="n">mem_mb</span><span class="o">=</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">disk_mb</span><span class="o">=</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="n">runtime</span><span class="o">=</span><span class="mi">60</span> <span class="o">*</span> <span class="mi">12</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If it is difficult to accurately estimate the required resources, you can
+update them after encoutering out-of-resource errors during the run.</p>
+</div>
+</section>
+<section id="step-5-optional-configuring-high-performance-computing">
+<span id="configure-hpc"></span><h2>Step 5 (Optional): Configuring high performance computing<a class="headerlink" href="#step-5-optional-configuring-high-performance-computing" title="Link to this heading"></a></h2>
+<p>Optionally, users can run the <cite>multiome-wf</cite> on a High Performance Computing (HPC) cluster
+using Snakemake’s cluster execution feature. Refer to the <a class="reference internal" href="../configuration/config.html#cluster"><span class="std std-ref">Running on a cluster</span></a> for more details.</p>
+<p>Once you have finished configuring your sample tables, <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, and
+updated your <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> accordingly, set the <code class="docutils literal notranslate"><span class="pre">--configfile</span></code> parameter to the
+path of your <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file in the <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code> file, as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run snakemake</span>
+<span class="o">(</span>
+<span class="w">  </span><span class="nb">time</span><span class="w"> </span>snakemake<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--directory<span class="w"> </span><span class="nv">$PWD</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-k<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--restart-times<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rerun-incomplete<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rerun-triggers<span class="w"> </span>mtime<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--jobname<span class="w"> </span><span class="s2">&quot;s.{rulename}.{jobid}.sh&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-j<span class="w"> </span><span class="m">999</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--use-conda<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--configfile<span class="w"> </span>config/multiome-config/config.yaml<span class="w"> </span><span class="se">\ </span><span class="w">   </span><span class="c1"># UPDATE THIS PARAMETER!</span>
+<span class="w">  </span><span class="nv">$PROFILE_CMD</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--latency-wait<span class="o">=</span><span class="m">300</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-jobs-per-second<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-status-checks-per-second<span class="w"> </span><span class="m">0</span>.01<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="o">)</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;Snakefile.log&quot;</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that the default configuration of <cite>multiome-wf</cite> is optimized for <a class="reference external" href="https://hpc.nih.gov/">NIH’s Biowulf</a> and may not be suitable for other HPC systems. Users may need
+additional configuration, including modifications to the <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code>, depending
+on their computing environment.</p>
+</div>
+</section>
+<section id="step-6-run">
+<h2>Step 6: Run<a class="headerlink" href="#step-6-run" title="Link to this heading"></a></h2>
+<p>Once everything is ready, users can run the workflow with or without cluster computing. Assuming
+you are in the same directory where your <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> is located, use the following command in your
+terminal to run without submitting a cluster job:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Activate conda environment</span>
+conda<span class="w"> </span>activate<span class="w"> </span>../env
+<span class="c1"># Run Snakemake</span>
+snakemake<span class="w"> </span>--core<span class="w"> </span><span class="m">8</span>
+</pre></div>
+</div>
+<p>If you wish to run <cite>multiome-wf</cite> on a cluster and you have configured the pipeline for cluster
+computing, activate your conda environment and use the following command in the terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run Snakemake by submitting jobs</span>
+sbatch<span class="w"> </span>WRAPPER_SLURM
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The above command is optimized for job submission on NIH’s Biowulf. Consult your HPC
+documentation or administrator for guidance on running Snakemake on a cluster,
+if necessary.</p>
+</div>
+</section>
+<section id="step-7-results">
+<h2>Step 7: Results<a class="headerlink" href="#step-7-results" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> creates a <code class="docutils literal notranslate"><span class="pre">results</span></code> folder in the <code class="docutils literal notranslate"><span class="pre">workflow</span></code> directory upon completion of a run.
+All output files are saved in the <code class="docutils literal notranslate"><span class="pre">results</span></code> folder. Refer to the <a class="reference internal" href="../workflows/overview-output.html#overview-output"><span class="std std-ref">Overview of output files</span></a> for more
+information.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup.html" class="btn btn-neutral float-left" title="Setting up a project" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="why-use.html" class="btn btn-neutral float-right" title="Why use multiome-wf?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

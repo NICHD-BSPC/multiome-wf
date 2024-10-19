@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview of output files &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration details" href="../configuration/config.html" />
+    <link rel="prev" title="Overview of input files" href="overview-input.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview of output files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#results-directory"><code class="docutils literal notranslate"><span class="pre">results</span></code> directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#html-summary-files"><code class="docutils literal notranslate"><span class="pre">html</span></code> summary files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rds-objects"><code class="docutils literal notranslate"><span class="pre">rds</span></code> objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#markers-tsv-table"><code class="docutils literal notranslate"><span class="pre">markers.tsv</span></code> table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#macs2-output">MACS2 output</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview of output files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/workflows/overview-output.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview-of-output-files">
+<span id="overview-output"></span><h1>Overview of output files<a class="headerlink" href="#overview-of-output-files" title="Link to this heading"></a></h1>
+<p>The <cite>multiome-wf</cite> creates a <code class="docutils literal notranslate"><span class="pre">results</span></code> folder in the <code class="docutils literal notranslate"><span class="pre">workflow</span></code> directory upon completion
+of a run. All output files are saved in this directory.</p>
+<section id="results-directory">
+<h2><code class="docutils literal notranslate"><span class="pre">results</span></code> directory<a class="headerlink" href="#results-directory" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">results</span></code> folder contains subfolders and output files. Below is an example of the directory
+structure from a Multiome analysis:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>workflow/results
+workflow/results
+├──<span class="w"> </span>add_macs_peaks
+│<span class="w">   </span>├──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>seurat.rds
+├──<span class="w"> </span>build_annotation
+│<span class="w">   </span>├──<span class="w"> </span>annotation.rds
+│<span class="w">   </span>├──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>report.md
+├──<span class="w"> </span>chooser_plot
+│<span class="w">   </span>└──<span class="w"> </span>intermediates_dir
+├──<span class="w"> </span>cluster
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>intermediates_dir
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">       </span>├──<span class="w"> </span>barcodes.rds
+│<span class="w">       </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">       </span>└──<span class="w"> </span>report.html
+├──<span class="w"> </span>combine
+│<span class="w">   </span>├──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>seurat_combined.rds
+├──<span class="w"> </span>create_seurat
+│<span class="w">   </span>├──<span class="w"> </span>multiome-nan.report.html
+│<span class="w">   </span>└──<span class="w"> </span>multiome-nan.seurat_raw.rds
+├──<span class="w"> </span>diff_analysis
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>wnn_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>wnn_1
+│<span class="w">       </span>├──<span class="w"> </span>markers.tsv
+│<span class="w">       </span>└──<span class="w"> </span>report.html
+├──<span class="w"> </span>integrate
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0.report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1.report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_2.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_2.report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3.rds
+│<span class="w">   </span>└──<span class="w"> </span>integrated_3.report.html
+├──<span class="w"> </span>macs2
+│<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv
+│<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv.gz
+│<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv.gz.tbi
+│<span class="w">   </span>├──<span class="w"> </span>NA_peaks.narrowPeak
+│<span class="w">   </span>├──<span class="w"> </span>NA_peaks.xls
+│<span class="w">   </span>└──<span class="w"> </span>NA_summits.bed
+├──<span class="w"> </span>merge_macs_prep
+│<span class="w">   </span>├──<span class="w"> </span>Multiome.bed
+│<span class="w">   </span>├──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>seurat.rds
+├──<span class="w"> </span>normalize_reduce_dims
+│<span class="w">   </span>├──<span class="w"> </span>intermediates_dir
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>unintegrated_0.report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>unintegrated_1.report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>unintegrated_2.report.html
+│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">       </span>├──<span class="w"> </span>unintegrated_3.rds
+│<span class="w">       </span>└──<span class="w"> </span>unintegrated_3.report.html
+├──<span class="w"> </span>prep_cluster
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_2
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
+│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">       </span>└──<span class="w"> </span>choice.rds
+├──<span class="w"> </span>qc
+│<span class="w">   </span>├──<span class="w"> </span>multiome-nan.report.html
+│<span class="w">   </span>└──<span class="w"> </span>multiome-nan.seurat_qc.rds
+└──<span class="w"> </span>wnn
+<span class="w">    </span>├──<span class="w"> </span>wnn_0
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
+<span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+<span class="w">    </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+<span class="w">    </span>└──<span class="w"> </span>wnn_1
+<span class="w">        </span>├──<span class="w"> </span>barcodes.rds
+<span class="w">        </span>├──<span class="w"> </span>clustered_data.rds
+<span class="w">        </span>└──<span class="w"> </span>report.html
+
+<span class="m">49</span><span class="w"> </span>directories,<span class="w"> </span><span class="m">94</span><span class="w"> </span>files
+</pre></div>
+</div>
+</section>
+<section id="html-summary-files">
+<h2><code class="docutils literal notranslate"><span class="pre">html</span></code> summary files<a class="headerlink" href="#html-summary-files" title="Link to this heading"></a></h2>
+<p>Each <code class="docutils literal notranslate"><span class="pre">html</span></code> file is a summary file for each rule in the <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code>. Users can review computational
+details, related metrics, and visualized data. For example, the <code class="docutils literal notranslate"><span class="pre">html</span></code> summary in the <code class="docutils literal notranslate"><span class="pre">qc</span></code> folder
+provides information about QC metrics, filtering thresholds, and the distribution of cells
+before and after QC filtering.</p>
+</section>
+<section id="rds-objects">
+<h2><code class="docutils literal notranslate"><span class="pre">rds</span></code> objects<a class="headerlink" href="#rds-objects" title="Link to this heading"></a></h2>
+<p>Each <code class="docutils literal notranslate"><span class="pre">rds</span></code> contains an R object passed onto the next step. These objects may be intermediate/final
+Seurat objects, R strings, annotations saved as <code class="docutils literal notranslate"><span class="pre">GenomicRanges</span></code>. Ultimately, users are provided with
+the <code class="docutils literal notranslate"><span class="pre">combined_seurat.rds</span></code> file saved in the <code class="docutils literal notranslate"><span class="pre">combine</span></code> folder. This file contains a processed
+Seurat object, as shown in the following example:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">## An object of class Seurat</span>
+<span class="c1">## 870542 features across 15600 samples within 9 assays</span>
+<span class="c1">## Active assay: SCT (20354 features, 3000 variable features)</span>
+<span class="c1">##  3 layers present: counts, data, scale.data</span>
+<span class="c1">##  8 other assays present: Gene.Expression, Peaks, MACS, Gene.Activity, integrated_0_SCT, integrated_1_Peaks, integrated_2_MACS, integrated_3_Gene.Activity</span>
+<span class="c1">##  19 dimensional reductions calculated: SCT_pca, SCT_umap, Peaks_lsi, Peaks_umap, MACS_lsi, MACS_umap, Gene.Activity_pca, Gene.Activity_umap, pca, integrated_0_pca, integrated_0_umap, integrated_1_lsi, integrated_1_umap, integrated_2_lsi, integrated_2_umap, integrated_3_pca, integrated_3_umap, wnn_0_umap, wnn_1_umap</span>
+</pre></div>
+</div>
+<p>This Seurat object contains raw and normalized count matrices for all modalities, metadata, and reduced
+dimensions, which are available for further specialized analyses.</p>
+</section>
+<section id="markers-tsv-table">
+<h2><code class="docutils literal notranslate"><span class="pre">markers.tsv</span></code> table<a class="headerlink" href="#markers-tsv-table" title="Link to this heading"></a></h2>
+<p>Marker genes are saved as excel-readable, tab-separated files named <code class="docutils literal notranslate"><span class="pre">markers.tsv</span></code>. These files are
+saved in per-modality sub-folders within the <code class="docutils literal notranslate"><span class="pre">diff_analysis</span></code> folder.</p>
+<p>Below is an example of the first two rows from the <code class="docutils literal notranslate"><span class="pre">markers.tsv</span></code> computed in the <code class="docutils literal notranslate"><span class="pre">unintegrated_1</span></code>
+assay group:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Gene</p></th>
+<th class="head"><p>p_val</p></th>
+<th class="head"><p>avg_log2FC</p></th>
+<th class="head"><p>pct.1</p></th>
+<th class="head"><p>pct.2</p></th>
+<th class="head"><p>p_val_adj</p></th>
+<th class="head"><p>cluster</p></th>
+<th class="head"><p>group</p></th>
+<th class="head"><p>assay</p></th>
+<th class="head"><p>slot</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>chr4-95840476-95841400</p></td>
+<td><p>0</p></td>
+<td><p>2.60136012051654</p></td>
+<td><p>0.443</p></td>
+<td><p>0.084</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>seurat_clusters</p></td>
+<td><p>Peaks</p></td>
+<td><p>data</p></td>
+</tr>
+<tr class="row-odd"><td><p>chr18-46109191-46110086</p></td>
+<td><p>0</p></td>
+<td><p>2.56059989117035</p></td>
+<td><p>0.402</p></td>
+<td><p>0.081</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>seurat_clusters</p></td>
+<td><p>Peaks</p></td>
+<td><p>data</p></td>
+</tr>
+</tbody>
+</table>
+<p>The columns indicate the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Gene</span></code>: Gene symbol (RNA-seq) or locus (ATAC-seq)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p_val</span></code>: Raw p-values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">avg_log2FC</span></code>: Log2-transformed fold changes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pct.1</span></code>, <code class="docutils literal notranslate"><span class="pre">pct.2</span></code>: Percentage of cells expressing each gene in cells annotated the <code class="docutils literal notranslate"><span class="pre">cluster</span></code>
+(<code class="docutils literal notranslate"><span class="pre">pct.1</span></code>) and not annotated to the <code class="docutils literal notranslate"><span class="pre">cluster</span></code> (<code class="docutils literal notranslate"><span class="pre">pct.2</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p_val_adj</span></code>: Adjusted p-value, False Discovery Rate (FDR) calculated using the
+<a class="reference external" href="https://en.wikipedia.org/wiki/False_discovery_rate#BH_procedure">Benjamini-Hochberg procedure</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster</span></code>: Cluster where the given marker gene is differentially expressed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">group</span></code>: Metadata column used in differential testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">assay</span></code>: Modality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slot</span></code>: Count matrix used for differential testing (<code class="docutils literal notranslate"><span class="pre">counts</span></code> for raw data,
+<code class="docutils literal notranslate"><span class="pre">data</span></code> for normalized counts)</p></li>
+</ul>
+<p>For computational details, refer to the <a class="reference external" href="https://satijalab.org/seurat/reference/findallmarkers">FindAllMarkers</a> function in Seurat.</p>
+</section>
+<section id="macs2-output">
+<h2>MACS2 output<a class="headerlink" href="#macs2-output" title="Link to this heading"></a></h2>
+<p>Optionally, users can call ATAC peaks using <a class="reference external" href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2008-9-9-r137">MACS2</a>. Configure the MACS2 run
+as instructed in the <a class="reference internal" href="../configuration/config-yaml.html#macs-peakcalling"><span class="std std-ref">MACS Peak Calling (macs2 section)</span></a>. The output files are summarized below:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*_peaks.narrowPeak</span></code>: Peak locations with peak summit, pvalue, and qvalue in BED6+4 format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*_peaks.xls</span></code>: A tabular file which contains information about called peaks, including
+pileup and fold enrichment</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*_summits.bed</span></code>: Peak summit locations for every peak. Recommended when identifying motifs at the
+binding sites.</p></li>
+</ul>
+<p>The remaining files (e.g. <code class="docutils literal notranslate"><span class="pre">macspeaks.*</span></code>) are pre-processed input files for MACS2 and are not considered
+as outputs of the peak calling process.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview-input.html" class="btn btn-neutral float-left" title="Overview of input files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../configuration/config.html" class="btn btn-neutral float-right" title="Configuration details" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

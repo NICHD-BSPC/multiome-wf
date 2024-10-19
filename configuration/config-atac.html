@@ -1,0 +1,225 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scATAC-Seq Examples &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Citation" href="../project-info/citations.html" />
+    <link rel="prev" title="scRNA-Seq Examples" href="config-rna.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">scATAC-Seq Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-samples">Multiple samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-samples-aggregated">Multiple samples, aggregated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-replicates-uncommon">Technical Replicates (Uncommon)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-assays-uncommon">Custom assays (Uncommon)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scATAC-Seq Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/configuration/config-atac.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scatac-seq-examples">
+<span id="config-atac"></span><h1>scATAC-Seq Examples<a class="headerlink" href="#scatac-seq-examples" title="Link to this heading"></a></h1>
+<p>Below are different examples of setting up workflows for scATAC-Seq
+experiments.
+For general configuration details, refer to <a class="reference internal" href="config.html#config"><span class="std std-ref">Configuration details</span></a>.</p>
+<section id="multiple-samples">
+<h2>Multiple samples<a class="headerlink" href="#multiple-samples" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">samples.tsv</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span>   <span class="n">replicate</span> <span class="n">genome</span> <span class="n">HDF5_Multiple_Assays</span> <span class="n">RDS_Multiple_Assays</span> <span class="n">Gene</span><span class="o">.</span><span class="n">Expression</span> <span class="n">Peaks</span>                                       <span class="n">TF</span>                                       <span class="n">fragments</span>                          <span class="n">singlecell</span>                 <span class="n">meta_batch</span>  <span class="n">meta_tissue</span>
+<span class="n">CTX</span>                <span class="n">mm10</span>                                                            <span class="n">CTX_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">.</span><span class="n">h5</span>   <span class="n">CTX_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_tf_bc_matrix</span><span class="o">.</span><span class="n">h5</span>  <span class="n">CTX_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>    <span class="n">CTX_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">summary</span><span class="o">.</span><span class="n">csv</span> <span class="n">batch1</span>      <span class="n">CTX</span>
+<span class="n">MGE</span>                <span class="n">mm10</span>                                                            <span class="n">MGE_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">.</span><span class="n">h5</span>   <span class="n">MGE_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_tf_bc_matrix</span><span class="o">.</span><span class="n">h5</span>  <span class="n">MGE_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>    <span class="n">MGE_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">summary</span><span class="o">.</span><span class="n">csv</span> <span class="n">batch1</span>      <span class="n">MGE</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Alternatively, the <code class="docutils literal notranslate"><span class="pre">Peaks</span></code> column can point to a directory
+(e.g. <code class="docutils literal notranslate"><span class="pre">path/to/outs/filtered_peak_bc_matrix/</span></code>) containing a MEX
+format sparse matrix along with barcodes and peaks, as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>filtered_peak_bc_matrix
+filtered_peak_bc_matrix
+├──<span class="w"> </span>barcodes.tsv
+├──<span class="w"> </span>matrix.mtx
+└──<span class="w"> </span>peaks.bed
+</pre></div>
+</div>
+</div>
+</section>
+<section id="multiple-samples-aggregated">
+<h2>Multiple samples, aggregated<a class="headerlink" href="#multiple-samples-aggregated" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">samples.tsv</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span>  <span class="n">replicate</span>  <span class="n">genome</span>  <span class="n">HDF5_Multiple_Assays</span>    <span class="n">RDS_Multiple_Assays</span>   <span class="n">Gene</span><span class="o">.</span><span class="n">Expression</span> <span class="n">Peaks</span>                                      <span class="n">TF</span>      <span class="n">fragments</span>                           <span class="n">singlecell</span>                      <span class="n">meta_batch</span>
+<span class="n">aggr</span>               <span class="n">mm10</span>                                                                  <span class="n">aggr_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">.</span><span class="n">h5</span>         <span class="n">aggr_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>    <span class="n">aggr_rerun</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">singlecell</span><span class="o">.</span><span class="n">csv</span>  <span class="n">batch1</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">aggregates.tsv</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span> <span class="n">replicate</span> <span class="n">library_id</span> <span class="n">bc_suffix</span> <span class="n">meta_tissue</span>
+<span class="n">CTX</span>              <span class="mi">1</span>          <span class="mi">1</span>         <span class="n">CTX</span>
+<span class="n">MGE</span>              <span class="mi">2</span>          <span class="mi">2</span>         <span class="n">MGE</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="technical-replicates-uncommon">
+<h2>Technical Replicates (Uncommon)<a class="headerlink" href="#technical-replicates-uncommon" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">samples.tsv</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span> <span class="n">replicate</span> <span class="n">genome</span> <span class="n">HDF5_Multiple_Assays</span> <span class="n">RDS_Multiple_Assays</span> <span class="n">Gene</span><span class="o">.</span><span class="n">Expression</span> <span class="n">Peaks</span>                                <span class="n">TF</span>  <span class="n">fragments</span>                   <span class="n">singlecell</span>  <span class="n">meta_batch</span>  <span class="n">meta_geno</span>
+<span class="n">pbmc1</span>  <span class="n">A</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">ipsc</span>   <span class="n">A</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">ipsc</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>              <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">pbmc2</span>  <span class="n">A</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc2</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">pbmc1</span>  <span class="n">B</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">ipsc</span>   <span class="n">B</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">ipsc</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>              <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">pbmc2</span>  <span class="n">B</span>         <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc2</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="custom-assays-uncommon">
+<h2>Custom assays (Uncommon)<a class="headerlink" href="#custom-assays-uncommon" title="Link to this heading"></a></h2>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">samples.tsv</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span> <span class="n">replicate</span> <span class="n">genome</span> <span class="n">HDF5_Multiple_Assays</span> <span class="n">RDS_Multiple_Assays</span> <span class="n">Gene</span><span class="o">.</span><span class="n">Expression</span> <span class="n">Peaks</span>                                <span class="n">TF</span>  <span class="n">fragments</span>                   <span class="n">singlecell</span>  <span class="n">meta_batch</span>  <span class="n">meta_geno</span>
+<span class="n">pbmc1</span>            <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">ipsc</span>             <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">ipsc</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>              <span class="n">batch1</span>      <span class="n">wt</span>
+<span class="n">pbmc2</span>            <span class="n">hg38</span>                                                            <span class="n">pbmc1</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">filtered_peak_bc_matrix</span><span class="o">/</span>      <span class="n">pbmc2</span><span class="o">/</span><span class="n">outs</span><span class="o">/</span><span class="n">fragments</span><span class="o">.</span><span class="n">tsv</span><span class="o">.</span><span class="n">gz</span>             <span class="n">batch1</span>      <span class="n">wt</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">assays.tsv</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sample</span> <span class="n">replicate</span> <span class="n">assay</span><span class="o">.</span><span class="n">name</span> <span class="n">path</span>
+<span class="n">pbmc1</span>
+<span class="n">ipsc</span>             <span class="n">enhancer</span>   <span class="n">pbmc1</span><span class="o">/</span><span class="n">assays</span><span class="o">/</span><span class="n">enhancer_bc_matrix</span><span class="o">.</span><span class="n">h5</span>
+<span class="n">pbmc1</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="config-rna.html" class="btn btn-neutral float-left" title="scRNA-Seq Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../project-info/citations.html" class="btn btn-neutral float-right" title="Citation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

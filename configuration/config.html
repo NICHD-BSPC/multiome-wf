@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration details &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Config YAML" href="config-yaml.html" />
+    <link rel="prev" title="Overview of output files" href="../workflows/overview-output.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration details</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-configuration">General configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#config-yaml"><code class="docutils literal notranslate"><span class="pre">config.yaml</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#samples-tsv"><code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#aggregates-tsv-optional"><code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> (Optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assays-tsv-optional"><code class="docutils literal notranslate"><span class="pre">assays.tsv</span></code> (Optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-on-a-cluster">Running on a cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tmpdir-handling"><code class="docutils literal notranslate"><span class="pre">TMPDIR</span></code> handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-configuration">Cluster configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Configuration details</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/configuration/config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration-details">
+<span id="config"></span><h1>Configuration details<a class="headerlink" href="#configuration-details" title="Link to this heading"></a></h1>
+<section id="general-configuration">
+<span id="config-general"></span><h2>General configuration<a class="headerlink" href="#general-configuration" title="Link to this heading"></a></h2>
+<p>The majority of the work in setting up a new project is in the configuration –
+which samples to run, where the data files are located, which references are
+needed, etc.</p>
+<p><strong>The entry point for configuration</strong> is found in <code class="docutils literal notranslate"><span class="pre">workflow/config</span></code> directory
+as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>workflow/config
+workflow/config
+├──<span class="w"> </span>atac-config
+│<span class="w">   </span>├──<span class="w"> </span>aggregates.tsv
+│<span class="w">   </span>├──<span class="w"> </span>assays.tsv
+│<span class="w">   </span>├──<span class="w"> </span>config.yaml
+│<span class="w">   </span>└──<span class="w"> </span>samples.tsv
+├──<span class="w"> </span>multiome-config
+│<span class="w">   </span>├──<span class="w"> </span>aggregates.tsv
+│<span class="w">   </span>├──<span class="w"> </span>assays.tsv
+│<span class="w">   </span>├──<span class="w"> </span>config.yaml
+│<span class="w">   </span>└──<span class="w"> </span>samples.tsv
+├──<span class="w"> </span>README.rst
+└──<span class="w"> </span>rna-config
+<span class="w">    </span>├──<span class="w"> </span>aggregates.tsv
+<span class="w">    </span>├──<span class="w"> </span>assays.tsv
+<span class="w">    </span>├──<span class="w"> </span>config.yaml
+<span class="w">    </span>└──<span class="w"> </span>samples.tsv
+
+<span class="m">3</span><span class="w"> </span>directories,<span class="w"> </span><span class="m">13</span><span class="w"> </span>files
+</pre></div>
+</div>
+<section id="config-yaml">
+<h3><code class="docutils literal notranslate"><span class="pre">config.yaml</span></code><a class="headerlink" href="#config-yaml" title="Link to this heading"></a></h3>
+<p>This is a <a class="reference external" href="https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html">snakemake configuration file</a>.</p>
+<p>See <a class="reference internal" href="config-yaml.html#config-yaml"><span class="std std-ref">Config YAML</span></a> for pipeline-specific configuration.</p>
+</section>
+<section id="samples-tsv">
+<h3><code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code><a class="headerlink" href="#samples-tsv" title="Link to this heading"></a></h3>
+<p>This is a default sample table containing input file paths and metadata.</p>
+<p>See <a class="reference internal" href="samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a> for more.</p>
+</section>
+<section id="aggregates-tsv-optional">
+<h3><code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> (Optional)<a class="headerlink" href="#aggregates-tsv-optional" title="Link to this heading"></a></h3>
+<p>This table is used to map library barcode labels to library IDs
+in aggregated input files. The aggregated input contains multiple biological
+replicates, which can be generated using <code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> (multiome),
+<code class="docutils literal notranslate"><span class="pre">cellranger-atac</span> <span class="pre">aggr</span></code> (scATAC-seq), or <code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> (scRNA-seq).</p>
+<p>See <a class="reference internal" href="aggregates-table.html#aggregates-table"><span class="std std-ref">Aggregates Table</span></a> for more.</p>
+</section>
+<section id="assays-tsv-optional">
+<h3><code class="docutils literal notranslate"><span class="pre">assays.tsv</span></code> (Optional)<a class="headerlink" href="#assays-tsv-optional" title="Link to this heading"></a></h3>
+<p>The assay table is only used if you have calculated custom feature-by-barcode
+counts matrices. For example, if one has a genome annotation file containing
+gene coordinates and enhancer coordinates, you can count all ATAC reads mapping
+to a gene and associated enhancers:</p>
+<p>Gene Activity Score = reads mapped within gene + reads mapped to enhancers</p>
+<p>See <a class="reference internal" href="assays-table.html#assays-table"><span class="std std-ref">Assays Table</span></a> for more.</p>
+</section>
+</section>
+<section id="running-on-a-cluster">
+<span id="cluster"></span><h2>Running on a cluster<a class="headerlink" href="#running-on-a-cluster" title="Link to this heading"></a></h2>
+<p>The example commands in <a class="reference internal" href="../index.html#getting-started"><span class="std std-ref">Getting Started</span></a> describe running Snakemake
+locally. For larger data sets, you’ll want to run them on an HPC cluster.
+Snakemake <a class="reference external" href="http://snakemake.readthedocs.io/en/latest/snakefiles/configuration.html">supports arbitrary cluster commands</a>,
+making it easy to run these workflows on many different cluster environments.</p>
+<p>Snakemake and these workflows are designed to decouple the code from the
+configuration. If you are running the workflows on NIH’s Biowulf cluster, you
+don’t need to change anything.</p>
+<p>If you are running on a different cluster, you should inspect the following files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code></p></li>
+<li><p>Profile config files from the <a class="reference external" href="https://github.com/NIH-HPC/snakemake_profile.git">NIH HPC</a></p></li>
+</ul>
+<p>The default configuration we provide is specific to the NIH Biowulf cluster.
+To run a workflow on Biowulf, set up your <em>snakemake profile</em> as instructed in the
+<a class="reference internal" href="#new-cluster-config"><span class="std std-ref">Cluster configuration</span></a>. Afterwards, from the top-level project directory,
+run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>WRAPPER_SLURM
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code> script submits the main Snakemake process on a separate
+node to avoid any restrictions from running on the head node. That main
+Snakemake process then submits each rule separately to the cluster scheduler.</p>
+</section>
+<section id="tmpdir-handling">
+<span id="cluster-specific"></span><h2><code class="docutils literal notranslate"><span class="pre">TMPDIR</span></code> handling<a class="headerlink" href="#tmpdir-handling" title="Link to this heading"></a></h2>
+<p>The top of each snakefile sets up a shell prefix that exports the TMPDIR
+variable. The reason for this is that the NIH Biowulf cluster supports nodes
+with temporary local storage in a directory named after the SLURM job ID. This
+ID is not known ahead of time, but is stored in the <code class="docutils literal notranslate"><span class="pre">SLURM_JOBID</span></code> env var.</p>
+<p>Since each rule executed on a cluster node calls the snakefile (see the job
+scripts created by snakemake for more on this), we can look for the job ID and
+set the tempdir appropriately. Upon setting <code class="docutils literal notranslate"><span class="pre">$TMPDIR</span></code>, the Python
+<code class="docutils literal notranslate"><span class="pre">tempfile</span></code> module will use that directory to store temp files. Any wrappers
+can additionally use <code class="docutils literal notranslate"><span class="pre">$TMPDIR</span></code> in shell commands and it will use this
+directory.</p>
+<p>Note that the default behavior – if the <code class="docutils literal notranslate"><span class="pre">SLURM_JOBID</span></code> env var is not set –
+is to set <code class="docutils literal notranslate"><span class="pre">$TMPDIR</span></code> to the default temp directory as documented in Python’s
+<a class="reference external" href="https://docs.python.org/3/library/tempfile.html#tempfile.gettempdir">tempfile module</a>.
+However if you use these workflows on a different cluster, you may need to
+provide a different function to return the job-specific temp directory.</p>
+</section>
+<section id="cluster-configuration">
+<span id="new-cluster-config"></span><h2>Cluster configuration<a class="headerlink" href="#cluster-configuration" title="Link to this heading"></a></h2>
+<p>For Snakemake versions after 7.29, we use profile established by
+<a class="reference external" href="https://github.com/NIH-HPC/snakemake_profile.git">NIH HPC</a>. If you’re a first-time user,
+you can setup your profile on NIH’s Biowulf as demonstrated below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone the profile repo</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/NIH-HPC/snakemake_profile.git<span class="w"> </span>path/to/snakemake_profile
+</pre></div>
+</div>
+<p>Once the repository is cloned, add <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">MULTIOMEWF_SNAKEMAKE_PROFILE=&quot;path/to/snakemake_profile&quot;</span></code>
+to your bash configuration file (<code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code>) as shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE: This is for first-time users. You do not need to repeat this step if you</span>
+<span class="c1">#       have set this up before.</span>
+
+<span class="c1"># Update your bash config setting to include MULTIOMEWF_SNAKEMAKE_PROFILE</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;export MULTIOMEWF_SNAKEMAKE_PROFILE=&quot;path/to/snakemake_profile&quot;&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+
+<span class="c1"># Update your bash environment in use</span>
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</pre></div>
+</div>
+<p>After completing your initial configuration for HPC utilization,
+return to the <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code> file to set the <code class="docutils literal notranslate"><span class="pre">--configfile</span></code> parameter
+to point to the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> you’re using.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># In WRAPPER_SLURM:</span>
+<span class="o">(</span>
+<span class="w">    </span><span class="nb">time</span><span class="w"> </span>snakemake<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>&lt;snakemake_parameters&gt;
+<span class="w">    </span>--configfile<span class="w"> </span>config/multiome-config/config.yaml<span class="w"> </span><span class="se">\ </span><span class="w">   </span><span class="c1"># IMPORTANT!</span>
+<span class="w">    </span><span class="o">)</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;Snakefile.log&quot;</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../workflows/overview-output.html" class="btn btn-neutral float-left" title="Overview of output files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config-yaml.html" class="btn btn-neutral float-right" title="Config YAML" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

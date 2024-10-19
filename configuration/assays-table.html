@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assays Table &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Multiome Examples" href="config-multiome.html" />
+    <link rel="prev" title="Aggregates Table" href="aggregates-table.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Assays Table</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#field-descriptions">Field descriptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample"><code class="docutils literal notranslate"><span class="pre">sample</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replicate"><code class="docutils literal notranslate"><span class="pre">replicate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#assay-name"><code class="docutils literal notranslate"><span class="pre">assay.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#path"><code class="docutils literal notranslate"><span class="pre">path</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Assays Table</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/configuration/assays-table.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="assays-table">
+<span id="id1"></span><h1>Assays Table<a class="headerlink" href="#assays-table" title="Link to this heading"></a></h1>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Used for 10X Genomics</p></th>
+<th class="head"><p>Used for non-10X Genomics</p></th>
+<th class="head"><p>Used for Custom Matrices</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#assays-sample"><span class="std std-ref">sample</span></a></p></td>
+<td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#assays-replicate"><span class="std std-ref">replicate</span></a></p></td>
+<td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#assays-name"><span class="std std-ref">assay.name</span></a></p></td>
+<td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#assays-path"><span class="std std-ref">path</span></a></p></td>
+<td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>Assay table is only used if you have calculated custom feature-by-barcode
+counts matrices. For example, if one has a genome annotation file containing
+gene coordinates and enhancer coordinates, you can count all ATAC reads mapping
+to a gene and associated enhancers:</p>
+<blockquote>
+<div><p>Gene Activity Score = reads mapped within gene + reads mapped to enhancers.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Do not</strong> use this table for calculating standard Gene Activity
+Scores (GAS) common to ATAC analyses. This is included in the standard
+ATAC Peaks workflow. For details about the standard GAS included in this
+workflow, see <a class="reference external" href="https://stuartlab.org/signac/reference/geneactivity">Signac Documentation</a>.</p></li>
+</ul>
+</div>
+<section id="field-descriptions">
+<h2>Field descriptions<a class="headerlink" href="#field-descriptions" title="Link to this heading"></a></h2>
+<section id="sample">
+<span id="assays-sample"></span><h3><code class="docutils literal notranslate"><span class="pre">sample</span></code><a class="headerlink" href="#sample" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Defines labels for each sample. Values in <code class="docutils literal notranslate"><span class="pre">sample</span></code> column must be unique,
+unless analyzing technical replicates. If specifying technical replicates, sample
+label must be the same for all rows containing techical replicates.</p>
+</div></blockquote>
+</section>
+<section id="replicate">
+<span id="assays-replicate"></span><h3><code class="docutils literal notranslate"><span class="pre">replicate</span></code><a class="headerlink" href="#replicate" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Defines labels for each technical replicate of a sample.
+Values in <code class="docutils literal notranslate"><span class="pre">replicate</span></code> column must be unique per sample. <strong>If not specified</strong>
+technical replicates, leave empty. <strong>If specified</strong> technical replicates:
+sample must be the same for all rows containing techical replicates.</p>
+</div></blockquote>
+</section>
+<section id="assay-name">
+<span id="assays-name"></span><h3><code class="docutils literal notranslate"><span class="pre">assay.name</span></code><a class="headerlink" href="#assay-name" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Name of custom feature-by-barcode counts matrix.
+<strong>If not specified</strong> Leave empty. <strong>If specified</strong> Name of custom
+feature-by-barcode counts matrix (string). Cannot be <code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Peaks</span></code>, or <code class="docutils literal notranslate"><span class="pre">TF</span></code>.</p>
+</div></blockquote>
+</section>
+<section id="path">
+<span id="assays-path"></span><h3><code class="docutils literal notranslate"><span class="pre">path</span></code><a class="headerlink" href="#path" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Path to custom feature-by-barcode counts matrix.
+<strong>If not specified</strong> Leave empty. <strong>If specified</strong> Path to custom
+feature-by-barcode counts matrix in HDF5 or RDS format, or path to
+parent directory of MEX formatted matrix, barcode and features files.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>A <strong>basic</strong> example of an assays.tsv file is below. This table represents
+an experiment where a custom enhancer counts matrix was calculated
+<strong>in addition to</strong> ‘core’ cellranger analyses.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>sample</p></th>
+<th class="head"><p>replicate</p></th>
+<th class="head"><p>assay.name</p></th>
+<th class="head"><p>path</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>pbmc1</p></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ipsc</p></td>
+<td></td>
+<td><p>enhancer</p></td>
+<td><p>pbmc1/assays/enhancer_bc_matrix.h5</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="../workflows/overview-wf.html#overview-wf"><span class="std std-ref">Overview of workflows</span></a> for more detailed examples of config files.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="aggregates-table.html" class="btn btn-neutral float-left" title="Aggregates Table" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config-multiome.html" class="btn btn-neutral float-right" title="Multiome Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

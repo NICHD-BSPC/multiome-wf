@@ -1,0 +1,1342 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Config YAML &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Samples Table" href="samples-table.html" />
+    <link rel="prev" title="Configuration details" href="config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration details</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Config YAML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#activating-rules">1. Activating Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-groups">2. Analysis Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#field-descriptions">Field descriptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#config-tables">Config Tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#samples-field"><code class="docutils literal notranslate"><span class="pre">samples</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#aggregates-field"><code class="docutils literal notranslate"><span class="pre">aggregates</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assays-field"><code class="docutils literal notranslate"><span class="pre">assays</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#annotation">Annotation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#annotation-field"><code class="docutils literal notranslate"><span class="pre">ANNOTATION</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anno-file-field"><code class="docutils literal notranslate"><span class="pre">ANNO_FILE</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-control-qc-section">Quality Control (<code class="docutils literal notranslate"><span class="pre">qc</span></code> section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remove-outliers-field"><code class="docutils literal notranslate"><span class="pre">remove_outliers</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rm-outliers-method-field"><code class="docutils literal notranslate"><span class="pre">rm_outliers_method</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#meta-labels-field"><code class="docutils literal notranslate"><span class="pre">meta_labels</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#lower-field"><code class="docutils literal notranslate"><span class="pre">lower</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#upper-field"><code class="docutils literal notranslate"><span class="pre">upper</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#macs-peak-calling-macs2-section">MACS Peak Calling (<code class="docutils literal notranslate"><span class="pre">macs2</span></code> section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#run-field"><code class="docutils literal notranslate"><span class="pre">run</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#group-fragments-by-field"><code class="docutils literal notranslate"><span class="pre">group_fragments_by</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#normalization-normalize-section">Normalization (<code class="docutils literal notranslate"><span class="pre">normalize</span></code> section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#split-by-field"><code class="docutils literal notranslate"><span class="pre">split_by</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#groups-field"><code class="docutils literal notranslate"><span class="pre">groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assay-name-field"><code class="docutils literal notranslate"><span class="pre">assay_name</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#norm-method-field"><code class="docutils literal notranslate"><span class="pre">norm_method</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-integrate-section">Integration (<code class="docutils literal notranslate"><span class="pre">integrate</span></code> section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#activate-field"><code class="docutils literal notranslate"><span class="pre">activate</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#atac-integrate-embeddings-field"><code class="docutils literal notranslate"><span class="pre">atac_integrate_embeddings</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">split_by</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">assay_name</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">norm_method</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integrate-method-field"><code class="docutils literal notranslate"><span class="pre">integrate_method</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#integrate-dims-field"><code class="docutils literal notranslate"><span class="pre">integrate_dims</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#utilization-of-toy-dataset-dataset-size-config-section">Utilization of Toy Dataset (<code class="docutils literal notranslate"><span class="pre">dataset_size</span></code> config section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#toydataset-field"><code class="docutils literal notranslate"><span class="pre">toydataset</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#toy-k-field"><code class="docutils literal notranslate"><span class="pre">toy_k</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cluster-optimization-chooser-config-section">Cluster Optimization (<code class="docutils literal notranslate"><span class="pre">chooser</span></code> config section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#npcs-field"><code class="docutils literal notranslate"><span class="pre">npcs</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resolutions-field"><code class="docutils literal notranslate"><span class="pre">resolutions</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#silhouette-field"><code class="docutils literal notranslate"><span class="pre">silhouette</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#clustering-cluster-config-section">Clustering (<code class="docutils literal notranslate"><span class="pre">cluster</span></code> config section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#detection-method-field"><code class="docutils literal notranslate"><span class="pre">detection_method</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resolution-field"><code class="docutils literal notranslate"><span class="pre">resolution</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#weighted-nearest-neighbor-weighted-nn-config-section">Weighted Nearest Neighbor (<code class="docutils literal notranslate"><span class="pre">weighted_nn</span></code> config section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">activate</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#input-groups-field"><code class="docutils literal notranslate"><span class="pre">input_groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reduction-field"><code class="docutils literal notranslate"><span class="pre">reduction</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#umap-dims-field"><code class="docutils literal notranslate"><span class="pre">umap_dims</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">resolution</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">detection_method</span></code> field</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#differential-testing-diff-analysis-config-section">Differential Testing (<code class="docutils literal notranslate"><span class="pre">diff_analysis</span></code> config section)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">activate</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">groups</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cluster-idents-field"><code class="docutils literal notranslate"><span class="pre">cluster_idents</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assay-field"><code class="docutils literal notranslate"><span class="pre">assay</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#slot-field"><code class="docutils literal notranslate"><span class="pre">slot</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#min-pct-field"><code class="docutils literal notranslate"><span class="pre">min_pct</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-use-field"><code class="docutils literal notranslate"><span class="pre">test_use</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#latent-vars-field"><code class="docutils literal notranslate"><span class="pre">latent_vars</span></code> field</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alpha-field"><code class="docutils literal notranslate"><span class="pre">alpha</span></code> field</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Config YAML</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/configuration/config-yaml.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="config-yaml">
+<span id="id1"></span><h1>Config YAML<a class="headerlink" href="#config-yaml" title="Link to this heading"></a></h1>
+<p>This page details the various configuration options and describes how to
+configure a new workflow. Refer to the <a class="reference internal" href="config.html#config"><span class="std std-ref">Configuration details</span></a> section for general
+information about configuring <cite>multiome-wf</cite>.</p>
+<p>While it is possible to use Snakemake mechanisms such as <code class="docutils literal notranslate"><span class="pre">--config</span></code> to
+override a particular config value and <code class="docutils literal notranslate"><span class="pre">--configfile</span></code> to update the config
+with a different file, it is easiest to edit the existing
+<code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> in place. This has the additional benefit of reproducibility
+because all of the config information is stored in one place.</p>
+<p>The config file uses <a class="reference external" href="https://en.wikipedia.org/wiki/YAML">YAML</a> format, which
+can be conceptualized as a set of nested key:value pairs. When running the workflow,
+the YAML document is parsed into a python dictionary.</p>
+<p>By specifying values in various setions of the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, the workflow
+automatically decides to run analysis variants suitable for scRNA-Seq, scATAC-Seq,
+or multi-modal experiments. With this in mind, there are 2 important points to keep
+in mind when creating a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
+<section id="activating-rules">
+<h2>1. Activating Rules<a class="headerlink" href="#activating-rules" title="Link to this heading"></a></h2>
+<p>The following rules are optional:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">merge_macs_prep</span></code>/<code class="docutils literal notranslate"><span class="pre">macs2</span></code>/<code class="docutils literal notranslate"><span class="pre">add_macs_peaks</span></code> for MACS2 peak calling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">integrate</span></code> for <a class="reference external" href="https://satijalab.org/seurat/articles/integration_introduction">dataset integration using Seurat</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chooser_paral</span></code>/<code class="docutils literal notranslate"><span class="pre">chooser_aggr</span></code> for computing optimal resolution in clustering
+using <a class="reference external" href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-03957-4">chooseR</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diff_analysis</span></code> for marker gene computation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weigted_nn</span></code> for <a class="reference external" href="https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis">Weighted Nearest Neighbor Analysis
+using Seurat</a>
+(cross-modality integration)</p></li>
+</ul>
+<p>These rules have discrete sections in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> where users configure the
+execution of each rule. Refer to the following instruction to activate or inactivate
+each rule:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Activate MACS2 peak calling</span>
+<span class="nt">macs2</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+
+<span class="c1"># Activate dataset integration</span>
+<span class="nt">integrate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="c1"># Activate chooseR</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+
+<span class="c1"># Activate marker gene computation</span>
+<span class="nt">diff_analysis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="c1"># Activate Weighted Nearest Neighber</span>
+<span class="nt">weighted_nn</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">chooser_paral</span></code> and <code class="docutils literal notranslate"><span class="pre">chooser_aggr</span></code> rules only run when no
+pre-defined <code class="docutils literal notranslate"><span class="pre">resolution</span></code> is provided by the user in the <code class="docutils literal notranslate"><span class="pre">cluster</span></code> section.</p>
+</section>
+<section id="analysis-groups">
+<h2>2. Analysis Groups<a class="headerlink" href="#analysis-groups" title="Link to this heading"></a></h2>
+<p>Because of the myriad variants for single cell analysis and preprocessing, it is
+not possible to hard-code all the configuration options in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file.
+Instead, we include analysis “group names” in many sections. These rules will have
+a field named <code class="docutils literal notranslate"><span class="pre">group</span></code>. Each <code class="docutils literal notranslate"><span class="pre">group</span></code> must contain a nested dictionary for each
+analysis variant.</p>
+<p>To configure these sections, the user must specify the top-level dictionary key value.
+All other keys are hard-coded as options.</p>
+<p>Using the <code class="docutils literal notranslate"><span class="pre">normalize</span></code> section as an example, we see a single analysis group below.
+The group value, <code class="docutils literal notranslate"><span class="pre">unintegrated_0</span></code>, is itself a dictionary key for this analysis
+variant (a modality for RNA in multiome). This group’s dictionary contains additional
+fields which together define the groups’ analysis options: <code class="docutils literal notranslate"><span class="pre">assay_name</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">norm_method</span></code>.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Expression</span>
+<span class="w">    </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sct</span>
+<span class="w">  </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Peaks</span>
+<span class="w">    </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">  </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MACS</span>
+<span class="w">    </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">  </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Activity</span>
+<span class="w">    </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is possible to specify more analysis groups than the number of assays in your data.
+<strong>Do not</strong> specify analysis groups unless your experiment setup supports the condition.</p>
+<p>For example, in the example <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file, the differential analysis section,
+<code class="docutils literal notranslate"><span class="pre">diff_analysis</span></code> contains 2 group key names, <code class="docutils literal notranslate"><span class="pre">unintegrated_0</span></code> and <code class="docutils literal notranslate"><span class="pre">integrated_0</span></code>,
+if you are not performing Seurat integration by setting the <code class="docutils literal notranslate"><span class="pre">activate</span></code> key to <code class="docutils literal notranslate"><span class="pre">false</span></code>
+in the <code class="docutils literal notranslate"><span class="pre">integrate</span></code> section, delete the <code class="docutils literal notranslate"><span class="pre">integrated_*</span></code> group in the rest of the
+sections. If their are superflous groups in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, Snakemake will add
+extra, unwanted rules/jobs when building a DAG.</p>
+</div>
+</section>
+<section id="field-descriptions">
+<h2>Field descriptions<a class="headerlink" href="#field-descriptions" title="Link to this heading"></a></h2>
+<section id="config-tables">
+<h3>Config Tables<a class="headerlink" href="#config-tables" title="Link to this heading"></a></h3>
+<section id="samples-field">
+<h4><code class="docutils literal notranslate"><span class="pre">samples</span></code> field<a class="headerlink" href="#samples-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>. Defines path to sampletable.
+See <a class="reference internal" href="samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a> for more.</p>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">samples</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/samples.tsv&quot;</span>
+
+<span class="c1"># OR</span>
+<span class="c1"># samples: &quot;config/atac-config/samples.tsv&quot; for scATAC-seq</span>
+<span class="c1"># samples: &quot;config/rna-config/samples.tsv&quot; for scRNA-seq</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="aggregates-field">
+<h4><code class="docutils literal notranslate"><span class="pre">aggregates</span></code> field<a class="headerlink" href="#aggregates-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>. Defines path to aggregates table.
+If you are using aggregated input of multiple samples created using
+<code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> (multiome), <code class="docutils literal notranslate"><span class="pre">cellranger-atac</span> <span class="pre">aggr</span></code> (scATAC-seq),
+or <code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> (scRNA-seq), specify the path to <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>.
+Otherwise, set to an empty string (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>). See <a class="reference internal" href="aggregates-table.html#aggregates-table"><span class="std std-ref">Aggregates Table</span></a>
+for more.</p>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/aggregates.tsv&quot;</span>
+
+<span class="c1"># OR</span>
+<span class="c1"># assays: &quot;config/atac-config/aggregates.tsv&quot; for scATAC-seq</span>
+<span class="c1"># assays: &quot;config/rna-config/aggregates.tsv&quot; for scRNA-seq</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="assays-field">
+<h4><code class="docutils literal notranslate"><span class="pre">assays</span></code> field<a class="headerlink" href="#assays-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">assays.tsv</span></code>. Defines path to assays table.
+If you are using custom counts matrices, specify path to <code class="docutils literal notranslate"><span class="pre">assays.tsv</span></code>.
+Otherwise, set to an empty string (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>). See <a class="reference internal" href="assays-table.html#assays-table"><span class="std std-ref">Assays Table</span></a>
+for more.</p>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/assays.tsv&quot;</span>
+
+<span class="c1"># OR</span>
+<span class="c1"># assays: &quot;config/atac-config/assays.tsv&quot; for scATAC-seq</span>
+<span class="c1"># assays: &quot;config/rna-config/assays.tsv&quot; for scRNA-seq</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="annotation">
+<h3>Annotation<a class="headerlink" href="#annotation" title="Link to this heading"></a></h3>
+<section id="annotation-field">
+<span id="config-annotation"></span><h4><code class="docutils literal notranslate"><span class="pre">ANNOTATION</span></code> field<a class="headerlink" href="#annotation-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">&quot;EnsDb&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;GTF&quot;</span></code>, default <code class="docutils literal notranslate"><span class="pre">&quot;EnsDb&quot;</span></code>. Defines the method
+to build an annotation object (<code class="docutils literal notranslate"><span class="pre">GenomicRanges</span></code>) for scATAC-seq and multiome
+analyses.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;EnsDb&quot;</span></code> uses the <code class="docutils literal notranslate"><span class="pre">EnsDb.Mmusculus.v79</span></code> (mouse mm10) or
+<code class="docutils literal notranslate"><span class="pre">EnsDb.Hsapiens.v86</span></code> (human hg38) package in R</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;GTF&quot;</span></code> uses a user-provided annotation file</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="anno-file-field">
+<h4><code class="docutils literal notranslate"><span class="pre">ANNO_FILE</span></code> field<a class="headerlink" href="#anno-file-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">&quot;path/to/genes.gtf.gz&quot;</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;GTF&quot;</span></code> is specified in the
+<code class="docutils literal notranslate"><span class="pre">ANNOTATION</span></code> field, provide the path to your annotation file (e.g.
+<code class="docutils literal notranslate"><span class="pre">genes.gtf.gz</span></code>).
+This field is disregarded if the <code class="docutils literal notranslate"><span class="pre">ANNOTATION</span></code> field is set to <code class="docutils literal notranslate"><span class="pre">&quot;EnsDb&quot;</span></code>.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="quality-control-qc-section">
+<h3>Quality Control (<code class="docutils literal notranslate"><span class="pre">qc</span></code> section)<a class="headerlink" href="#quality-control-qc-section" title="Link to this heading"></a></h3>
+<section id="remove-outliers-field">
+<h4><code class="docutils literal notranslate"><span class="pre">remove_outliers</span></code> field<a class="headerlink" href="#remove-outliers-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">true</span></code>. Specify whether or not to run <code class="docutils literal notranslate"><span class="pre">qc</span></code> rule.</p>
+</div></blockquote>
+</section>
+<section id="rm-outliers-method-field">
+<h4><code class="docutils literal notranslate"><span class="pre">rm_outliers_method</span></code> field<a class="headerlink" href="#rm-outliers-method-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">&quot;sd&quot;</span></code> or  <code class="docutils literal notranslate"><span class="pre">&quot;iqr&quot;</span></code>, default <code class="docutils literal notranslate"><span class="pre">&quot;sd&quot;</span></code>. Detect outliers using either
+standard deviation (<code class="docutils literal notranslate"><span class="pre">&quot;sd&quot;</span></code>), or Tukey’s interquartile range (<code class="docutils literal notranslate"><span class="pre">&quot;iqr&quot;</span></code>).
+If set to <code class="docutils literal notranslate"><span class="pre">&quot;sd&quot;</span></code>, the thresholds are determined based on +/- 3 standard
+deviations.</p>
+</div></blockquote>
+</section>
+<section id="meta-labels-field">
+<h4><code class="docutils literal notranslate"><span class="pre">meta_labels</span></code> field<a class="headerlink" href="#meta-labels-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list. Which metadata columns to use for filtering?</p>
+<p>See <a class="reference internal" href="samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a> for more details about how metadata columns are detected.
+If a value is specified in this field, but is not present in the data, it will be
+disregarded during filtering.</p>
+</div></blockquote>
+</section>
+<section id="lower-field">
+<h4><code class="docutils literal notranslate"><span class="pre">lower</span></code> field<a class="headerlink" href="#lower-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Key:value pairs of metadata column and associated lower limit for cutoff,
+<strong>below</strong> which exclude cells. If specified, overrides lower limit detected
+by outlier method for associated metadata columns in <code class="docutils literal notranslate"><span class="pre">meta_labels</span></code>. If <code class="docutils literal notranslate"><span class="pre">null</span></code>,
+outlier method tries to remove cells automatically</p>
+</div></blockquote>
+</section>
+<section id="upper-field">
+<h4><code class="docutils literal notranslate"><span class="pre">upper</span></code> field<a class="headerlink" href="#upper-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Key:value pairs of metadata column and associated upper limit for cutoff,
+<strong>above</strong> which exclude cells. If specified, overrides lower limit detected
+by outlier method for associated metadata columns in <code class="docutils literal notranslate"><span class="pre">meta_labels</span></code>. If <code class="docutils literal notranslate"><span class="pre">null</span></code>,
+outlier method tries to remove cells automatically</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In the example below, 3 metadata columns are specified. 3 have hard cut-offs
+(<code class="docutils literal notranslate"><span class="pre">nCount_Gene.Expression</span></code>, <code class="docutils literal notranslate"><span class="pre">nCount_Peaks</span></code>, and <code class="docutils literal notranslate"><span class="pre">TSS.enrichment</span></code>),
+1 detects lower outliers automatically (<code class="docutils literal notranslate"><span class="pre">percent.mt</span></code>).</p></li>
+<li><p>10X Genomics ATAC and multiome kits use nuclei, so reads will not map to
+mitochondria. However, the workflow imputes a value of 0 for <code class="docutils literal notranslate"><span class="pre">percent.mt</span></code>
+in these assays, since missing values are not generally allowed in the underlying
+packages. This will not effect downstream processes such as normalization,
+dimensional reduction, clustering, etc.</p></li>
+</ul>
+</div>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">qc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">remove_outliers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">rm_outliers_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sd</span>
+<span class="w">  </span><span class="nt">meta_labels</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nCount_Gene.Expression</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nCount_Peaks</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">percent.mt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TSS.enrichment</span>
+<span class="w">  </span><span class="nt">lower</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nCount_Gene.Expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">nCount_Peaks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">TSS.enrichment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">upper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="macs-peak-calling-macs2-section">
+<span id="macs-peakcalling"></span><h3>MACS Peak Calling (<code class="docutils literal notranslate"><span class="pre">macs2</span></code> section)<a class="headerlink" href="#macs-peak-calling-macs2-section" title="Link to this heading"></a></h3>
+<p>MACS specific parameters.</p>
+<section id="run-field">
+<h4><code class="docutils literal notranslate"><span class="pre">run</span></code> field<a class="headerlink" href="#run-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">&quot;Y&quot;</span></code> or  <code class="docutils literal notranslate"><span class="pre">&quot;N&quot;</span></code>, default <code class="docutils literal notranslate"><span class="pre">&quot;Y&quot;</span></code>. Determine whether or not to run
+MACS. Set to <code class="docutils literal notranslate"><span class="pre">&quot;N&quot;</span></code> for RNA-seq. Set to <code class="docutils literal notranslate"><span class="pre">&quot;Y&quot;</span></code> for ATAC and multiome requiring
+MACS peak calling. If you don’t run MACS, delete analysis groups where
+<code class="docutils literal notranslate"><span class="pre">assay_name</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">MACS</span></code> in the remaining sections/fields
+(e.g. <code class="docutils literal notranslate"><span class="pre">unintegrated_2</span></code>).</p>
+</div></blockquote>
+</section>
+<section id="group-fragments-by-field">
+<h4><code class="docutils literal notranslate"><span class="pre">group_fragments_by</span></code> field<a class="headerlink" href="#group-fragments-by-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">&quot;genome&quot;</span></code>. <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code> metadata column to generate
+fragments file. All labels in the specified column must have the same value.
+This forces generation of a single fragments file for MACS peak calling.
+Do not change this setting unless under special circumstances.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">macs2</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<span class="w">  </span><span class="nt">group_fragments_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">genome</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="normalization-normalize-section">
+<h3>Normalization (<code class="docutils literal notranslate"><span class="pre">normalize</span></code> section)<a class="headerlink" href="#normalization-normalize-section" title="Link to this heading"></a></h3>
+<p>Normalization and Principal Component Analysis (PCA).</p>
+<section id="split-by-field">
+<span id="split-by"></span><h4><code class="docutils literal notranslate"><span class="pre">split_by</span></code> field<a class="headerlink" href="#split-by-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string. A metadata column in <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code> or <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>. Datasets
+will be normalized, and dimensionality reduction using PCA will be performed
+on each dataset, split by this column. Note that Seurat integration will be
+performed based on the metadata column specified by <code class="docutils literal notranslate"><span class="pre">split_by</span></code> here and
+in the <code class="docutils literal notranslate"><span class="pre">integrate</span></code> section.</p>
+</div></blockquote>
+</section>
+<section id="groups-field">
+<h4><code class="docutils literal notranslate"><span class="pre">groups</span></code> field<a class="headerlink" href="#groups-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Each group to perform normalization. Group name (key) must be unique.
+Do not modify the prefix (e.g. <code class="docutils literal notranslate"><span class="pre">unintegrated</span></code> and <code class="docutils literal notranslate"><span class="pre">integrated</span></code>) unless
+under special circumstances.</p>
+</div></blockquote>
+</section>
+<section id="assay-name-field">
+<h4><code class="docutils literal notranslate"><span class="pre">assay_name</span></code> field<a class="headerlink" href="#assay-name-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiplexing.Capture</span></code>, <code class="docutils literal notranslate"><span class="pre">Peaks</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Gene.Activity</span></code>, or <code class="docutils literal notranslate"><span class="pre">MACS</span></code>. Which Seurat assay to use. Note that Seurat
+assay names are “.” delimited.</p>
+</div></blockquote>
+</section>
+<section id="norm-method-field">
+<span id="norm-method"></span><h4><code class="docutils literal notranslate"><span class="pre">norm_method</span></code> field<a class="headerlink" href="#norm-method-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">log</span></code>, <code class="docutils literal notranslate"><span class="pre">sct</span></code>, <code class="docutils literal notranslate"><span class="pre">clr</span></code> or <code class="docutils literal notranslate"><span class="pre">lsi</span></code>, default is the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code>: <code class="docutils literal notranslate"><span class="pre">sct</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Peaks</span></code>: <code class="docutils literal notranslate"><span class="pre">lsi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MACS</span></code>: <code class="docutils literal notranslate"><span class="pre">lsi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Gene.Activity</span></code>: <code class="docutils literal notranslate"><span class="pre">log</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">protein</span></code>: <code class="docutils literal notranslate"><span class="pre">clr</span></code></p></li>
+</ul>
+<p>Method to normalize the group’s assay. Normalize using Log (<code class="docutils literal notranslate"><span class="pre">log</span></code>), SCTransform
+(<code class="docutils literal notranslate"><span class="pre">sct</span></code>), Centered log ratio (<code class="docutils literal notranslate"><span class="pre">clr</span></code>) or latent semantic indexing (<code class="docutils literal notranslate"><span class="pre">lsi</span></code>).
+Typically, 5’ or 3’ Gene expression is normalized using Log or SCTransform methods,
+ATAC Peaks using LSI, and protein using CLR.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">normalize</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">split_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta_geno</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Expression</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sct</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Peaks</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MACS</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Activity</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-integrate-section">
+<h3>Integration (<code class="docutils literal notranslate"><span class="pre">integrate</span></code> section)<a class="headerlink" href="#integration-integrate-section" title="Link to this heading"></a></h3>
+<p>Remove technical/batch effects using <a class="reference external" href="https://satijalab.org/seurat/articles/integration_introduction">Seurat integration</a> methods.
+Integration rule will create a new Seurat object for each integration performed.</p>
+<section id="activate-field">
+<h4><code class="docutils literal notranslate"><span class="pre">activate</span></code> field<a class="headerlink" href="#activate-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">true</span></code>. Specify whether or not to run integration.</p>
+</div></blockquote>
+</section>
+<section id="atac-integrate-embeddings-field">
+<h4><code class="docutils literal notranslate"><span class="pre">atac_integrate_embeddings</span></code> field<a class="headerlink" href="#atac-integrate-embeddings-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">true</span></code>. If <code class="docutils literal notranslate"><span class="pre">true</span></code>, integrate low-dimensional cell embeddings
+(LSI coordinates) across the datasets. This is the best option for integrating
+multiple ATAC Peaks data sets. If <code class="docutils literal notranslate"><span class="pre">false</span></code>, integrate (transform) ATAC Peaks counts
+matrix across datasets (not LSI coordinates). This may over fit. Kept mainly
+for legacy support.</p>
+</div></blockquote>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">split_by</span></code> field<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string. A metadata column in <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code> or <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>. Datasets
+are integrated based on this column. Ensure the same column is specified as in
+the <a class="reference internal" href="#split-by"><span class="std std-ref">split_by field</span></a> of the <code class="docutils literal notranslate"><span class="pre">normalize</span></code> section above.</p>
+<p>See <a class="reference internal" href="samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a> for more details about how metadata columns are detected.</p>
+</div></blockquote>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">groups</span></code> field<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Each group to perform integration. Group name (key) must be unique.</p>
+</div></blockquote>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">assay_name</span></code> field<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code>, <code class="docutils literal notranslate"><span class="pre">Multiplexing.Capture</span></code>, <code class="docutils literal notranslate"><span class="pre">Peaks</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Gene.Activity</span></code>, or <code class="docutils literal notranslate"><span class="pre">MACS</span></code>. Ensure the same values are specified as in the
+<code class="docutils literal notranslate"><span class="pre">normalize</span></code> section above.</p>
+</div></blockquote>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">norm_method</span></code> field<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">log</span></code>, <code class="docutils literal notranslate"><span class="pre">sct</span></code>, <code class="docutils literal notranslate"><span class="pre">clr</span></code> or <code class="docutils literal notranslate"><span class="pre">lsi</span></code>. Ensure the same values are
+specified as in the <a class="reference internal" href="#norm-method"><span class="std std-ref">norm_method field</span></a> of the <code class="docutils literal notranslate"><span class="pre">normalized</span></code> section above.</p>
+</div></blockquote>
+</section>
+<section id="integrate-method-field">
+<h4><code class="docutils literal notranslate"><span class="pre">integrate_method</span></code> field<a class="headerlink" href="#integrate-method-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string of <code class="docutils literal notranslate"><span class="pre">CCAIntegration</span></code>, <code class="docutils literal notranslate"><span class="pre">RPCAIntegration</span></code>, <code class="docutils literal notranslate"><span class="pre">HarmonyIntegration</span></code>,
+<code class="docutils literal notranslate"><span class="pre">FastMNNIntegration</span></code>, <code class="docutils literal notranslate"><span class="pre">scVIIntegration</span></code>, or <code class="docutils literal notranslate"><span class="pre">rlsi</span></code>. Method to integrate
+unimodal datasets. For any datasets where <code class="docutils literal notranslate"><span class="pre">norm_method</span></code> is set to <code class="docutils literal notranslate"><span class="pre">log</span></code> or
+<code class="docutils literal notranslate"><span class="pre">sct</span></code>, this string is passed into the <code class="docutils literal notranslate"><span class="pre">method</span></code> argument of the
+<code class="docutils literal notranslate"><span class="pre">IntegrateLayers</span></code> function of <a class="reference external" href="https://satijalab.org/seurat/reference/integratelayers">Seurat</a>. If the <code class="docutils literal notranslate"><span class="pre">norm_method</span></code>
+is set to <code class="docutils literal notranslate"><span class="pre">lsi</span></code>, set the <code class="docutils literal notranslate"><span class="pre">integrate_method</span></code> to <code class="docutils literal notranslate"><span class="pre">rlsi</span></code> to call the
+<code class="docutils literal notranslate"><span class="pre">IntegrateEmbeddings</span></code> function, as provided in <a class="reference external" href="https://stuartlab.org/signac/articles/integrate_atac#integration">Signac</a>.</p>
+</div></blockquote>
+</section>
+<section id="integrate-dims-field">
+<h4><code class="docutils literal notranslate"><span class="pre">integrate_dims</span></code> field<a class="headerlink" href="#integrate-dims-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of 2 integers, default <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">30]</span></code>. Range of dimensions to use for
+integration step.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">integrate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">atac_integrate_embeddings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">split_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta_geno</span><span class="w"> </span><span class="c1"># this has to match the column name of your metadata indicating datasets for integrati</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Expression</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sct</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CCAIntegration</span><span class="w">  </span><span class="c1"># RPCAIntegration, HarmonyIntegration, FastMNNIntegration, scVIIntegration</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Peaks</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rlsi</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MACS</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Activity</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CCAIntegration</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="utilization-of-toy-dataset-dataset-size-config-section">
+<h3>Utilization of Toy Dataset (<code class="docutils literal notranslate"><span class="pre">dataset_size</span></code> config section)<a class="headerlink" href="#utilization-of-toy-dataset-dataset-size-config-section" title="Link to this heading"></a></h3>
+<p>Assign the utilization of toy dataset. Users can take advantage
+of this functionality for technical purposes such as debugging.
+If dataset size is smaller than default k values in kNN computation
+during integration, Seurat throws an error.</p>
+<section id="toydataset-field">
+<h4><code class="docutils literal notranslate"><span class="pre">toydataset</span></code> field<a class="headerlink" href="#toydataset-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">false</span></code>. if <code class="docutils literal notranslate"><span class="pre">true</span></code>, the computation is adjusted
+to handle toy datasets. if <code class="docutils literal notranslate"><span class="pre">false</span></code>, the input datasets are considered
+as normal datasets.</p>
+</div></blockquote>
+</section>
+<section id="toy-k-field">
+<h4><code class="docutils literal notranslate"><span class="pre">toy_k</span></code> field<a class="headerlink" href="#toy-k-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>integer, number of neighbors used when weighting anchors.
+This value is passed to the <code class="docutils literal notranslate"><span class="pre">k.weight</span></code> argument in the
+<code class="docutils literal notranslate"><span class="pre">IntegrateLayers</span></code> function during integration.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataset_size</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">toydataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">toy_k</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="cluster-optimization-chooser-config-section">
+<h3>Cluster Optimization (<code class="docutils literal notranslate"><span class="pre">chooser</span></code> config section)<a class="headerlink" href="#cluster-optimization-chooser-config-section" title="Link to this heading"></a></h3>
+<p>Users can optimize clustering modularity using <a class="reference external" href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-03957-4">ChooseR</a>
+with pipeline-specific modifications. This functionality is enabled only if
+the <code class="docutils literal notranslate"><span class="pre">resolution</span></code> field in the <code class="docutils literal notranslate"><span class="pre">cluster</span></code> section is set to <code class="docutils literal notranslate"><span class="pre">null</span></code>.</p>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">groups</span></code> field<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Each group to perform clustering parameter optimization.
+Group name (key) must be unique. All groups in the <code class="docutils literal notranslate"><span class="pre">normalize</span></code> and
+<code class="docutils literal notranslate"><span class="pre">integrate</span></code> (if applicable) sections can be assigned.</p>
+</div></blockquote>
+</section>
+<section id="npcs-field">
+<h4><code class="docutils literal notranslate"><span class="pre">npcs</span></code> field<a class="headerlink" href="#npcs-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>integer, default values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code>: 25</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Peaks</span></code>, <code class="docutils literal notranslate"><span class="pre">MACS</span></code>, or <code class="docutils literal notranslate"><span class="pre">Gene.Activity</span></code>: 20</p></li>
+</ul>
+<p>The maximum number of linear reduced dimensions, computed from LSI
+or PCA, that are used during clustering.</p>
+</div></blockquote>
+</section>
+<section id="resolutions-field">
+<h4><code class="docutils literal notranslate"><span class="pre">resolutions</span></code> field<a class="headerlink" href="#resolutions-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of integers, default <code class="docutils literal notranslate"><span class="pre">[0.6,</span> <span class="pre">0.8,</span> <span class="pre">1,</span> <span class="pre">1.2,</span> <span class="pre">1.4,</span> <span class="pre">1.6,</span> <span class="pre">1.8,</span> <span class="pre">2]</span></code>.
+Resolutions to use when bootstrapping cluster methods. Best to have
+a range spanning target resolution.</p>
+</div></blockquote>
+</section>
+<section id="silhouette-field">
+<h4><code class="docutils literal notranslate"><span class="pre">silhouette</span></code> field<a class="headerlink" href="#silhouette-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of strings. default <code class="docutils literal notranslate"><span class="pre">silhouette</span></code>, <code class="docutils literal notranslate"><span class="pre">frequency_grouped</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">silhouette_grouped</span></code>. Values are used during path parameter
+expansion in rules executing chooseR. It is advisable to not alter
+them.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All <code class="docutils literal notranslate"><span class="pre">groups</span></code> values specified in the config sections:
+<code class="docutils literal notranslate"><span class="pre">normalize</span></code> and <code class="docutils literal notranslate"><span class="pre">integrate</span></code> (if appicable) <strong>must</strong> have
+a group entry in the <code class="docutils literal notranslate"><span class="pre">chooser</span></code> config section.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">chooser</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">  </span><span class="nt">resolutions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.2</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.4</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.6</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.8</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+<span class="w">  </span><span class="nt">silhouette</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">silhouette</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frequency_grouped</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">silhouette_grouped</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="clustering-cluster-config-section">
+<h3>Clustering (<code class="docutils literal notranslate"><span class="pre">cluster</span></code> config section)<a class="headerlink" href="#clustering-cluster-config-section" title="Link to this heading"></a></h3>
+<p>Users can determine a specific resolution for clustering or
+or rely on a dataset-optimized resolution computed using <code class="docutils literal notranslate"><span class="pre">chooser</span></code>.</p>
+<section id="detection-method-field">
+<span id="detection-method"></span><h4><code class="docutils literal notranslate"><span class="pre">detection_method</span></code> field<a class="headerlink" href="#detection-method-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>integer, default <code class="docutils literal notranslate"><span class="pre">3</span></code>. Algorithm used for community detection during
+unimodal clustering. Available options are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: original Louvain algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Louvain algorithm with multilevel refinement</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: SLM algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: Leiden algorithm (requires the leidenalg python)</p></li>
+</ul>
+<p>This value is passed to the <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindClusters</span></code> function.
+Refer to Seurat <a class="reference external" href="https://satijalab.org/seurat/reference/findclusters">Cluster Determination</a>
+for more details.</p>
+</div></blockquote>
+</section>
+<section id="resolution-field">
+<h4><code class="docutils literal notranslate"><span class="pre">resolution</span></code> field<a class="headerlink" href="#resolution-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>float or <code class="docutils literal notranslate"><span class="pre">null</span></code>, default <code class="docutils literal notranslate"><span class="pre">null</span></code>. If <code class="docutils literal notranslate"><span class="pre">null</span></code>, clustering is performed
+using an optimized resolution computed by <code class="docutils literal notranslate"><span class="pre">chooser</span></code>.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="weighted-nearest-neighbor-weighted-nn-config-section">
+<h3>Weighted Nearest Neighbor (<code class="docutils literal notranslate"><span class="pre">weighted_nn</span></code> config section)<a class="headerlink" href="#weighted-nearest-neighbor-weighted-nn-config-section" title="Link to this heading"></a></h3>
+<p>This section configures how to perform <a class="reference external" href="https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis#wnn-analysis-of-10x-multiome-rna-atac">Weighted Nearest Neighbor (WNN) analysis</a>.
+WNN is similar to shared nearest neighbor (SNN), which is commonly used to build
+graphs for multiple modalities. WNN uses a list of weights from each specified modality,
+and is useful for incorporating low dimensional embeddings from multiple single cell
+modalities into a global reduced dimensional space.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>All cells for specified assays/groups <strong>must have identical barcodes</strong>, meaning this
+rule is currently suitable ONLY for multimodal data. For example 3’ Gene Expression +
+CRISPR barcodes (Perturb-Seq), 3’ Gene Expression +
+Protein barcodes (CITE-Seq), 10X Genomics Multiome (Gene Expression + ATAC), etc.</p></li>
+<li><p>Disable this functionality if the input dataset is not multimodal.</p></li>
+</ul>
+</div>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">activate</span></code> field<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">true</span></code> (multiome) or <code class="docutils literal notranslate"><span class="pre">false</span></code> (RNA/ATAC). Specify whether or not
+to run the coembed rule.</p>
+</div></blockquote>
+</section>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">groups</span></code> field<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Each group to perform weighted nearest neighbor analysis. Group name (key) must be
+unique.</p>
+</div></blockquote>
+</section>
+<section id="input-groups-field">
+<h4><code class="docutils literal notranslate"><span class="pre">input_groups</span></code> field<a class="headerlink" href="#input-groups-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of strings, default:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wnn_0</span></code>: <code class="docutils literal notranslate"><span class="pre">unintegrated_0</span></code> and <code class="docutils literal notranslate"><span class="pre">unintegrated_1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wnn_1</span></code>: <code class="docutils literal notranslate"><span class="pre">integrated_0</span></code> and <code class="docutils literal notranslate"><span class="pre">integrated_1</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">groups</span></code> dictionary values from <code class="docutils literal notranslate"><span class="pre">normalize</span></code> and <code class="docutils literal notranslate"><span class="pre">integrate</span></code> config sections. Remember,
+unless performing multimodal integration, each <code class="docutils literal notranslate"><span class="pre">group</span></code> value corresponds to an assay. So in our
+example from the <code class="docutils literal notranslate"><span class="pre">normalize</span></code> config section, specifying <code class="docutils literal notranslate"><span class="pre">unintegrated_0</span></code> and <code class="docutils literal notranslate"><span class="pre">unintegrated_1</span></code>
+would combine the reduced dimensional weights of <code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code> and <code class="docutils literal notranslate"><span class="pre">Peaks</span></code> during WNN
+clustering.</p>
+</div></blockquote>
+</section>
+<section id="reduction-field">
+<h4><code class="docutils literal notranslate"><span class="pre">reduction</span></code> field<a class="headerlink" href="#reduction-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of strings, default <code class="docutils literal notranslate"><span class="pre">pca</span></code> and <code class="docutils literal notranslate"><span class="pre">lsi</span></code>. Dimensionality reduction method used for a specified
+group. In our example from the <code class="docutils literal notranslate"><span class="pre">normalize</span></code> config section, specifying <code class="docutils literal notranslate"><span class="pre">unintegrated_0</span></code> and
+<code class="docutils literal notranslate"><span class="pre">unintegrated_1</span></code> would look for <code class="docutils literal notranslate"><span class="pre">Gene.Expression</span></code> reduced dimensions in the <code class="docutils literal notranslate"><span class="pre">pca</span></code> slot and
+<code class="docutils literal notranslate"><span class="pre">Peaks</span></code> reduced dimensions in the <code class="docutils literal notranslate"><span class="pre">lsi</span></code> slot during WNN clustering.</p>
+</div></blockquote>
+</section>
+<section id="umap-dims-field">
+<h4><code class="docutils literal notranslate"><span class="pre">umap_dims</span></code> field<a class="headerlink" href="#umap-dims-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>list of integers, default <code class="docutils literal notranslate"><span class="pre">[[1,</span> <span class="pre">25],</span> <span class="pre">[2,</span> <span class="pre">20]]</span></code>.
+Dimensions to use for UMAP visualization for a specified group.</p>
+</div></blockquote>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">resolution</span></code> field<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>integer, default <code class="docutils literal notranslate"><span class="pre">0.6</span></code>. Resolution to use during community detection
+for multimodal clustering.</p>
+</div></blockquote>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">detection_method</span></code> field<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>integer, default <code class="docutils literal notranslate"><span class="pre">3</span></code>. Algorithm used for community detection during
+multimodal clustering. Refer to the <a class="reference internal" href="#detection-method"><span class="std std-ref">detection_method field</span></a> in
+the <code class="docutils literal notranslate"><span class="pre">cluster</span></code> section above.</p>
+</div></blockquote>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">weighted_nn</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">input_groups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unintegrated_0</span><span class="w"> </span><span class="c1"># corresponds to SCT</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unintegrated_1</span><span class="w"> </span><span class="c1"># corresponds to Peaks</span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pca</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">umap_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">      </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="nt">wnn_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">input_groups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_0</span><span class="w"> </span><span class="c1"># corresponds to SCT</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_1</span><span class="w"> </span><span class="c1"># corresponds to Peaks</span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_pca</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_lsi</span>
+<span class="w">      </span><span class="nt">umap_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">      </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="differential-testing-diff-analysis-config-section">
+<h3>Differential Testing (<code class="docutils literal notranslate"><span class="pre">diff_analysis</span></code> config section)<a class="headerlink" href="#differential-testing-diff-analysis-config-section" title="Link to this heading"></a></h3>
+<p>This section configures differential testing (i.e. differential gene expression,
+chromatin accessibility, TF motifs) using the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code> function in Seurat.</p>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">activate</span></code> field<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>boolean, default <code class="docutils literal notranslate"><span class="pre">true</span></code>. Specify whether or not to run differential testing.</p>
+</div></blockquote>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">groups</span></code> field<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>dict. Each group to perform differential testing. Group name (key) must be unique.</p>
+</div></blockquote>
+</section>
+<section id="cluster-idents-field">
+<h4><code class="docutils literal notranslate"><span class="pre">cluster_idents</span></code> field<a class="headerlink" href="#cluster-idents-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">seurat_clusters</span></code>. Which Seurat metadata column to use as labels
+for differential testing. Equivalent to <code class="docutils literal notranslate"><span class="pre">obj</span> <span class="pre">&lt;-</span> <span class="pre">SetIdents(cluster_idents)</span></code> before
+running <code class="docutils literal notranslate"><span class="pre">FindAllMarkers(obj)</span></code>.</p>
+</div></blockquote>
+</section>
+<section id="assay-field">
+<h4><code class="docutils literal notranslate"><span class="pre">assay</span></code> field<a class="headerlink" href="#assay-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">null</span></code>. Which assay use for differential testing. This value is
+passed to the <code class="docutils literal notranslate"><span class="pre">assay</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code> function.</p>
+</div></blockquote>
+</section>
+<section id="slot-field">
+<h4><code class="docutils literal notranslate"><span class="pre">slot</span></code> field<a class="headerlink" href="#slot-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">data</span></code>. Which slot to pull data from. This value is passed to the
+<code class="docutils literal notranslate"><span class="pre">slot</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code> function.</p>
+</div></blockquote>
+</section>
+<section id="min-pct-field">
+<h4><code class="docutils literal notranslate"><span class="pre">min_pct</span></code> field<a class="headerlink" href="#min-pct-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">null</span></code>. Only test genes that are detected in a minimum fraction
+of cells in either of the two populations. If <code class="docutils literal notranslate"><span class="pre">null</span></code>, a default value of 0.01 is
+applied. This value is passed to the <code class="docutils literal notranslate"><span class="pre">min.pct</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code>
+function.</p>
+</div></blockquote>
+</section>
+<section id="test-use-field">
+<h4><code class="docutils literal notranslate"><span class="pre">test_use</span></code> field<a class="headerlink" href="#test-use-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">null</span></code>. Test used for differential testing. This value is passed
+to the <code class="docutils literal notranslate"><span class="pre">test.use</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code> function. If <code class="docutils literal notranslate"><span class="pre">null</span></code>, the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">Wilcoxon Rank Sum test</a>
+is used by default. Available methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wilcox</span></code>: Wilcoxon Rank Sum test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wilcox_limma</span></code>: Limma implementation of the Wilcoxon Rank Sum test
+(Use this to reproduce results from Seurat v4)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bimod</span></code>: Likelihood-ratio test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">roc</span></code>: ROC analysis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code>: Student’s t-test</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">negbinom</span></code>: Negative binomial generalized linear model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>: Poisson generalized linear model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LR</span></code>: Logistic regression model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MAST</span></code>: <a class="reference external" href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0844-5">MAST</a>
+framework.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DESeq2</span></code>: <a class="reference external" href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">DESeq2</a>
+framework. (requires to install DESeq2 package in R)</p></li>
+</ul>
+</div></blockquote>
+<p>For more details, refer to the <a class="reference external" href="https://satijalab.org/seurat/reference/findallmarkers">FindAllMarkers</a>
+function in Seurat.</p>
+</section>
+<section id="latent-vars-field">
+<h4><code class="docutils literal notranslate"><span class="pre">latent_vars</span></code> field<a class="headerlink" href="#latent-vars-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>string, default <code class="docutils literal notranslate"><span class="pre">null</span></code>. Variables to test, used only when <code class="docutils literal notranslate"><span class="pre">test_use</span></code> is
+one of <code class="docutils literal notranslate"><span class="pre">LR</span></code>, <code class="docutils literal notranslate"><span class="pre">negbinom</span></code>, <code class="docutils literal notranslate"><span class="pre">poisson</span></code>, or <code class="docutils literal notranslate"><span class="pre">MAST</span></code>. This value is passed
+to the <code class="docutils literal notranslate"><span class="pre">latent.vars</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">FindAllMarkers</span></code> function.</p>
+</div></blockquote>
+</section>
+<section id="alpha-field">
+<h4><code class="docutils literal notranslate"><span class="pre">alpha</span></code> field<a class="headerlink" href="#alpha-field" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p>float, default 0.05. False discovery rate (FDR) threshold to filter significant marker genes.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only include <code class="docutils literal notranslate"><span class="pre">groups</span></code> values specified in the config sections: <code class="docutils literal notranslate"><span class="pre">normalize</span></code>,
+<code class="docutils literal notranslate"><span class="pre">integrate</span></code> (if appicable) and <code class="docutils literal notranslate"><span class="pre">weighted_nn</span></code> (if appicable).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For the current version of <cite>multiome-wf</cite>, <code class="docutils literal notranslate"><span class="pre">LR</span></code> has a bug where it grabs more
+nodes than allocated on a cluster node. Do not use <code class="docutils literal notranslate"><span class="pre">LR</span></code> on a cluster node.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">diff_analysis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_MACS&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SCT</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">wnn_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SCT</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>A <strong>basic</strong> example of a <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file using 2 multiome batches is provided below.
+The analysis will be performed on all samples with and without integration, followed by
+clustering and differential testing. This example also includes automated optimization
+of clustering parameters.</p>
+<p>See <a class="reference internal" href="../workflows/overview-wf.html#overview-wf"><span class="std std-ref">Overview of workflows</span></a> for more detailed examples of config files.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Paths to sample tables</span>
+<span class="nt">samples</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config/multiome-config/samples.tsv</span>
+<span class="nt">aggregates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config/multiome-config/aggregates.tsv</span>
+<span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config/multiome-config/assays.tsv</span>
+
+<span class="c1"># Annotation</span>
+<span class="nt">ANNOTATION</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;EnsDb&quot;</span>
+<span class="nt">ANNO_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;path/to/gene.gtf.gz&quot;</span>
+
+<span class="c1"># QC</span>
+<span class="nt">qc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">remove_outliers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">rm_outliers_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sd</span>
+<span class="w">  </span><span class="nt">meta_labels</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nCount_Gene.Expression</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nCount_Peaks</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">percent.mt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TSS.enrichment</span>
+<span class="w">  </span><span class="nt">lower</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nCount_Gene.Expression</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">nCount_Peaks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">TSS.enrichment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">upper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+
+
+<span class="c1"># MACS2 peak calling</span>
+<span class="nt">macs2</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<span class="w">  </span><span class="nt">group_fragments_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">genome</span>
+
+<span class="c1"># Normalization</span>
+<span class="nt">normalize</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">split_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta_geno</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Expression</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sct</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Peaks</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MACS</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Activity</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+
+<span class="c1"># Integration</span>
+<span class="nt">integrate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">atac_integrate_embeddings</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">split_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta_geno</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Expression</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sct</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CCAIntegration</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Peaks</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rlsi</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MACS</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rlsi</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">assay_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gene.Activity</span>
+<span class="w">      </span><span class="nt">norm_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+<span class="w">      </span><span class="nt">integrate_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CCAIntegration</span>
+<span class="w">      </span><span class="nt">integrate_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+
+<span class="c1"># Toy dataset utilization</span>
+<span class="nt">dataset_size</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">toydataset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">toy_k</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+
+<span class="c1"># Cluster optimization</span>
+<span class="nt">chooser</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">npcs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">  </span><span class="nt">resolutions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<span class="w">  </span><span class="nt">silhouette</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">silhouette</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frequency_grouped</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">silhouette_grouped</span>
+
+<span class="c1"># Clustering</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+
+<span class="c1"># Multimodal embedding</span>
+<span class="nt">weighted_nn</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">input_groups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unintegrated_0</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unintegrated_1</span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pca</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lsi</span>
+<span class="w">      </span><span class="nt">umap_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">      </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">    </span><span class="nt">wnn_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">input_groups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_0</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_1</span>
+<span class="w">      </span><span class="nt">reduction</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_pca</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integrated_lsi</span>
+<span class="w">      </span><span class="nt">umap_dims</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+<span class="w">      </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.6</span>
+<span class="w">      </span><span class="nt">detection_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="c1"># Differential testing</span>
+<span class="nt">diff_analysis</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">activate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">unintegrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">unintegrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_MACS&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_2</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_MACS&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SCT</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+<span class="w">    </span><span class="nt">wnn_1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
+<span class="w">      </span><span class="nt">assay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SCT</span>
+<span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
+<span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="config.html" class="btn btn-neutral float-left" title="Configuration details" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="samples-table.html" class="btn btn-neutral float-right" title="Samples Table" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

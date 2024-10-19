@@ -1,0 +1,434 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aggregates Table &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Assays Table" href="assays-table.html" />
+    <link rel="prev" title="Samples Table" href="samples-table.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="samples-table.html">Samples Table</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Aggregates Table</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#field-descriptions">Field descriptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample"><code class="docutils literal notranslate"><span class="pre">sample</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replicate"><code class="docutils literal notranslate"><span class="pre">replicate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bc-suffix"><code class="docutils literal notranslate"><span class="pre">bc_suffix</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#library-id"><code class="docutils literal notranslate"><span class="pre">library_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata"><code class="docutils literal notranslate"><span class="pre">metadata*</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#multiome">Multiome</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rna-seq">RNA-seq</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#atac-seq">ATAC-seq</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Aggregates Table</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/configuration/aggregates-table.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aggregates-table">
+<span id="id1"></span><h1>Aggregates Table<a class="headerlink" href="#aggregates-table" title="Link to this heading"></a></h1>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Used for cellranger count</p></th>
+<th class="head"><p>Used for cellranger aggr</p></th>
+<th class="head"><p>Used for non-10X Genomics</p></th>
+<th class="head"><p>Required</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#aggr-sample"><span class="std std-ref">sample</span></a></p></td>
+<td><p>optional</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+<td><p>yes, cellranger aggr</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aggr-replicate"><span class="std std-ref">replicate</span></a></p></td>
+<td><p>optional</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+<td><p>yes, cellranger aggr</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aggr-bc-suffix"><span class="std std-ref">bc_suffix</span></a></p></td>
+<td><p>optional</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+<td><p>yes, cellranger aggr</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aggr-library"><span class="std std-ref">library_id</span></a></p></td>
+<td><p>optional</p></td>
+<td><p>yes</p></td>
+<td><p>optional</p></td>
+<td><p>yes, cellranger aggr</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aggr-metadata"><span class="std std-ref">metadata1</span></a></p></td>
+<td><p>optional</p></td>
+<td><p>optional</p></td>
+<td><p>optional</p></td>
+<td><p>optional</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>The aggregates table is optional and used to map library barcode labels
+to library IDs in aggregated input files. The aggregated input contains
+multiple biological replicates, which can be generated using
+<code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> (Multiome), <code class="docutils literal notranslate"><span class="pre">cellranger-atac</span> <span class="pre">aggr</span></code> (ATAC),
+or <code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> (RNA).</p></li>
+<li><p>When creating loading matrices, <cite>multiome-wf</cite> will map values in
+<code class="docutils literal notranslate"><span class="pre">library_id</span></code> to the barcode suffix. If using 10X Genomics platforms,
+<code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> appends the row number of the <code class="docutils literal notranslate"><span class="pre">aggregates.csv</span></code> to all
+barcodes for that rows <code class="docutils literal notranslate"><span class="pre">sample_id</span></code>.</p></li>
+<li><p>For details about 10X Genomic’s aggregates tables, see:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="https://support.10xgenomics.com/single-cell-multiome-atac-gex/software/pipelines/latest/using/aggr#csv_setup">10X Genomics Multiome Aggregation Page</a></p></li>
+<li><p><a class="reference external" href="https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/aggregate#csv_setup">10X Genomics Gene Expression Aggregation Page</a></p></li>
+<li><p><a class="reference external" href="https://support.10xgenomics.com/single-cell-atac/software/pipelines/latest/using/aggr#csv_setup">10X Genomics ATAC Aggregation Page</a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<section id="field-descriptions">
+<h2>Field descriptions<a class="headerlink" href="#field-descriptions" title="Link to this heading"></a></h2>
+<section id="sample">
+<span id="aggr-sample"></span><h3><code class="docutils literal notranslate"><span class="pre">sample</span></code><a class="headerlink" href="#sample" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Defines labels for each sample. Values in <code class="docutils literal notranslate"><span class="pre">sample</span></code> column must
+be unique, unless analyzing technical replicates. If specifying technical
+replicates, sample label must be the same for all rows containing technical
+replicates.</p>
+</div></blockquote>
+</section>
+<section id="replicate">
+<span id="aggr-replicate"></span><h3><code class="docutils literal notranslate"><span class="pre">replicate</span></code><a class="headerlink" href="#replicate" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Defines labels for each technical replicate of a sample.
+Values in <code class="docutils literal notranslate"><span class="pre">replicate</span></code> column must be unique per sample. <strong>If not specified</strong>
+technical replicates, leave empty. <strong>If specified</strong> technical replicates:
+sample must be the same for all rows containing technical replicates.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Refer to the <a class="reference internal" href="../workflows/overview-input.html#replicates"><span class="std std-ref">Replicates</span></a> section for the definition of biological and
+technical replicates.</p>
+</div>
+</section>
+<section id="bc-suffix">
+<span id="aggr-bc-suffix"></span><h3><code class="docutils literal notranslate"><span class="pre">bc_suffix</span></code><a class="headerlink" href="#bc-suffix" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Defines a unique library label to all barcodes for each sample.
+<strong>If sample is output of cellranger aggr</strong> Values in <code class="docutils literal notranslate"><span class="pre">bc_suffix</span></code> column must be
+the <strong>row number (1 based)</strong> corresponding the <code class="docutils literal notranslate"><span class="pre">sample_id</span></code> value
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">cellranger</span> <span class="pre">aggr</span></code>’s aggregation CSV.</p>
+<p><strong>If sample is output of non-10X Genomics platform</strong> Values in must be a unique
+library identifier appended to the barcode. Barcode and library suffix must be
+separated by a dash (<code class="docutils literal notranslate"><span class="pre">-</span></code>) in the following pattern: <code class="docutils literal notranslate"><span class="pre">[barcode]-[bc_suffix]</span></code>.</p>
+</div></blockquote>
+</section>
+<section id="library-id">
+<span id="aggr-library"></span><h3><code class="docutils literal notranslate"><span class="pre">library_id</span></code><a class="headerlink" href="#library-id" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Defines labels associated with library barcode suffix for
+each sample. Values in <code class="docutils literal notranslate"><span class="pre">library_id</span></code> column must be unique per sample. <strong>If
+sample is output of cellranger aggr</strong> Values in <code class="docutils literal notranslate"><span class="pre">library_id</span></code> column must be
+the ‘sample_id’ value from cellranger aggr’s aggregation CSV.</p>
+<p><strong>If sample is output of non-10X Genomics platform</strong> Values in must correspond
+to the unique library suffix specified in <code class="docutils literal notranslate"><span class="pre">bc_suffix</span></code> column.</p>
+</div></blockquote>
+</section>
+<section id="metadata">
+<span id="aggr-metadata"></span><h3><code class="docutils literal notranslate"><span class="pre">metadata*</span></code><a class="headerlink" href="#metadata" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>string. Optional. Define columns for metadata labels. Colums beginning with <code class="docutils literal notranslate"><span class="pre">metadata</span></code>
+are placeholders for user specified metadata. They can be re-renamed to any
+string, deleted, or additional metadata columns can be added.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>, the following column names are considered immutable:
+“sample”, “replicate”, “bc_suffix”, “library_id”.</p></li>
+<li><p>Any additional columns present in <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> will be considered
+metadata columns. Metadata columns can have any unique label, not just
+the <cite>“meta*”</cite> used in the example samples table.</p></li>
+</ul>
+</div>
+</div></blockquote>
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<section id="multiome">
+<h3>Multiome<a class="headerlink" href="#multiome" title="Link to this heading"></a></h3>
+<p>a <strong>basic</strong> example of an aggregation CSV passed to the <code class="docutils literal notranslate"><span class="pre">--csv</span></code> parameter of
+<code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> (upper table) and an <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> file configured
+for <cite>multiome-wf</cite> pipeline (lower table):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>sample</p></th>
+<th class="head"><p>replicate</p></th>
+<th class="head"><p>library_id</p></th>
+<th class="head"><p>library_id</p></th>
+<th class="head"><p>metadata1</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>rep1_wt</p></td>
+<td></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>wt</p></td>
+</tr>
+<tr class="row-odd"><td><p>rep1_homo</p></td>
+<td></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>ko</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>library_id</p></th>
+<th class="head"><p>atac_fragments</p></th>
+<th class="head"><p>per_barcode_metrics</p></th>
+<th class="head"><p>gex_molecule_info</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>rep1_wt</p></td>
+<td><p>rep1_wt/outs/atac_fragments.tsv.gz</p></td>
+<td><p>rep1_wt/outs/per_barcode_metrics.csv</p></td>
+<td><p>rep1_wt/out/gex_molecule_info.h5</p></td>
+</tr>
+<tr class="row-odd"><td><p>rep1_homo</p></td>
+<td><p>rep1_homo/outs/atac_fragments.tsv.gz</p></td>
+<td><p>rep1_homo/outs/per_barcode_metrics.csv</p></td>
+<td><p>rep1_homo/out/gex_molecule_info.h5</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rna-seq">
+<h3>RNA-seq<a class="headerlink" href="#rna-seq" title="Link to this heading"></a></h3>
+<p>a <strong>basic</strong> example of an aggregation CSV passed to the <code class="docutils literal notranslate"><span class="pre">--csv</span></code> parameter of
+<code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> (upper table) and an <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> file configured
+for <cite>multiome-wf</cite> pipeline (lower table):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>sample_id</p></th>
+<th class="head"><p>molecule_h5</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CTX</p></td>
+<td><p>CTX/outs/molecule_info.h5</p></td>
+</tr>
+<tr class="row-odd"><td><p>MGE</p></td>
+<td><p>MGE/outs/molecule_info.h5</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>sample</p></th>
+<th class="head"><p>replicate</p></th>
+<th class="head"><p>library_id</p></th>
+<th class="head"><p>bc_suffix</p></th>
+<th class="head"><p>meta_tissue</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CTX</p></td>
+<td></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>CTX</p></td>
+</tr>
+<tr class="row-odd"><td><p>MGE</p></td>
+<td></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>MGE</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="atac-seq">
+<h3>ATAC-seq<a class="headerlink" href="#atac-seq" title="Link to this heading"></a></h3>
+<p>a <strong>basic</strong> example of an aggregation CSV passed to the <code class="docutils literal notranslate"><span class="pre">--csv</span></code> parameter of
+<code class="docutils literal notranslate"><span class="pre">cellranger-atac</span> <span class="pre">aggr</span></code> (upper table) and an <code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code> file configured
+for <cite>multiome-wf</cite> pipeline (lower table):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>library_id</p></th>
+<th class="head"><p>fragments</p></th>
+<th class="head"><p>cells</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CTX</p></td>
+<td><p>CTX_rerun/outs/fragments.tsv.gz</p></td>
+<td><p>CTX_rerun/outs/singlecell.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>MGE</p></td>
+<td><p>MGE_rerun/outs/fragments.tsv.gz</p></td>
+<td><p>MGE_rerun/outs/singlecell.csv</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>sample</p></th>
+<th class="head"><p>replicate</p></th>
+<th class="head"><p>library_id</p></th>
+<th class="head"><p>bc_suffix</p></th>
+<th class="head"><p>meta_tissue</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CTX</p></td>
+<td></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>CTX</p></td>
+</tr>
+<tr class="row-odd"><td><p>MGE</p></td>
+<td></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>MGE</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="../workflows/overview-wf.html#overview-wf"><span class="std std-ref">Overview of workflows</span></a> for more detailed examples of config files.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="samples-table.html" class="btn btn-neutral float-left" title="Samples Table" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="assays-table.html" class="btn btn-neutral float-right" title="Assays Table" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

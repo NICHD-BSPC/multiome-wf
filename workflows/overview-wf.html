@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview of workflows &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Multiome Workflow" href="multiome.html" />
+    <link rel="prev" title="Why use multiome-wf?" href="../getting-started/why-use.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview of workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#core-pipeline-structure">Core pipeline structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features-common-to-workflows">Features common to workflows</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/citations.html">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../project-info/authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview of workflows</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/workflows/overview-wf.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview-of-workflows">
+<span id="overview-wf"></span><h1>Overview of workflows<a class="headerlink" href="#overview-of-workflows" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The main goal of <cite>multiome-wf</cite> is transforming and combining raw data into usable results
+for downstream analyses. For scRNA-seq, that’s differentially-expressed genes (along with
+comprehensive QC and analysis). For scATAC-seq, that’s called peaks or differentially accessible
+chromatin regions.</p>
+<p><cite>multiome-wf</cite> is a framework that supports a number of analysis variants based on how it is configured.
+Each class of analysis variants, such as scRNA-Seq or scATAC-Seq is a “core” workflow since a different
+directed acyclic graph (DAG) is constructed for each analysis variant. Using a single framework promotes
+flexibility in single cell analyses. Data derived from many different experimental strategies can
+effectively be combined, and by setting up the configuration files properly, <cite>multiome-wf</cite> will decide
+the best workflow to use.</p>
+</section>
+<section id="core-pipeline-structure">
+<span id="pipeline-structure"></span><h2>Core pipeline structure<a class="headerlink" href="#core-pipeline-structure" title="Link to this heading"></a></h2>
+<p><cite>multiome-wf</cite> is a parallelized pipeline built using Snakemake. The pipeline consists of
+rules that implement modular workflows, as defined in the <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> within the
+<code class="docutils literal notranslate"><span class="pre">workflow</span></code> directory. Each rule runs analysis scripts written in R or Bash. R scripts
+are executed from individual <code class="docutils literal notranslate"><span class="pre">Rmd</span></code> files in the same directory, which also creates
+analysis reports in <code class="docutils literal notranslate"><span class="pre">html</span></code> format in the <code class="docutils literal notranslate"><span class="pre">workflow/results</span></code> folder upon completion of
+the analysis.</p>
+<p><cite>multiome-wf</cite> is configured by plain text <a class="reference external" href="https://en.wikipedia.org/wiki/YAML">YAML</a>
+and <a class="reference external" href="https://en.wikipedia.org/wiki/Tab-separated_values">TSV</a> format files located in the
+<code class="docutils literal notranslate"><span class="pre">config</span></code> directory (see <a class="reference internal" href="../configuration/config.html#config"><span class="std std-ref">Configuration details</span></a> for more information).</p>
+<p>Optionally, the pipeline can run on a High Performance Computing (HPC) cluster. The
+<code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code> file in the <code class="docutils literal notranslate"><span class="pre">workflow</span></code> directory is specially prepared to configure
+high performance computing on <a class="reference external" href="https://hpc.nih.gov/">NIH’s Biowulf</a>. Refer to
+<a class="reference internal" href="../configuration/config.html#cluster"><span class="std std-ref">Running on a cluster</span></a> for more details.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>workflow/
+workflow/
+├──<span class="w"> </span>add_macs_peaks.Rmd
+├──<span class="w"> </span>annotation_ensdb.Rmd
+├──<span class="w"> </span>annotation_gtf.Rmd
+├──<span class="w"> </span>chooser
+│<span class="w">   </span>├──<span class="w"> </span>env.yaml
+│<span class="w">   </span>├──<span class="w"> </span>R
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>pipeline.R
+│<span class="w">   </span>└──<span class="w"> </span>requirements.txt
+├──<span class="w"> </span>chooser_aggr.Rmd
+├──<span class="w"> </span>chooser_paral.Rmd
+├──<span class="w"> </span>cluster.Rmd
+├──<span class="w"> </span>combine.Rmd
+├──<span class="w"> </span>common.R
+├──<span class="w"> </span>config
+│<span class="w">   </span>├──<span class="w"> </span>atac-config
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>aggregates.tsv
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>assays.tsv
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>config.yaml
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>samples.tsv
+│<span class="w">   </span>├──<span class="w"> </span>multiome-config
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>aggregates.tsv
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>assays.tsv
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>config.yaml
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>samples.tsv
+│<span class="w">   </span>├──<span class="w"> </span>README.rst
+│<span class="w">   </span>└──<span class="w"> </span>rna-config
+│<span class="w">       </span>├──<span class="w"> </span>aggregates.tsv
+│<span class="w">       </span>├──<span class="w"> </span>assays.tsv
+│<span class="w">       </span>├──<span class="w"> </span>config.yaml
+│<span class="w">       </span>└──<span class="w"> </span>samples.tsv
+├──<span class="w"> </span>create_seurat.Rmd
+├──<span class="w"> </span>diff_analysis.Rmd
+├──<span class="w"> </span>integrate.Rmd
+├──<span class="w"> </span>merge_macs_prep.Rmd
+├──<span class="w"> </span>merge_zinba.Rmd
+├──<span class="w"> </span>normalize_reduce_dims.Rmd
+├──<span class="w"> </span>qc.Rmd
+├──<span class="w"> </span>README.rst
+├──<span class="w"> </span>Snakefile
+├──<span class="w"> </span>weighted_nn.Rmd
+└──<span class="w"> </span>WRAPPER_SLURM
+
+<span class="m">6</span><span class="w"> </span>directories,<span class="w"> </span><span class="m">35</span><span class="w"> </span>files
+</pre></div>
+</div>
+<p>The core workflows are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="multiome.html#multiome"><span class="std std-ref">Multiome Workflow</span></a></p></li>
+<li><p><a class="reference internal" href="rna.html#rna"><span class="std std-ref">scRNA-Seq Workflow</span></a></p></li>
+<li><p><a class="reference internal" href="atac.html#atac"><span class="std std-ref">scATAC-Seq Workflow</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>A number of additional analyses can be added to core workflows, such as quantifyng CRISPR sgRNA
+barcodes or surface protein associated oligos, by updating relevant config files.</p>
+<p>In all cases, search for the string <strong>NOTE:</strong> in the <code class="docutils literal notranslate"><span class="pre">Snakefile</span></code> to read notes on
+how to configure each rule, and make adjustments as necessary.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have two different scATAC-seq experiments, from different species, they
+have to be run separately. However, if downstream analyses will use them both
+then you would like to keep them in the same project. In this case, you can copy
+the <code class="docutils literal notranslate"><span class="pre">workflow</span></code> directory to two other directories:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>rsync<span class="w"> </span>-rvt<span class="w"> </span>workflow/<span class="w"> </span>workflow-genome1-atac/
+$<span class="w"> </span>rsync<span class="w"> </span>-rvt<span class="w"> </span>workflow/<span class="w"> </span>workflow-genome2-atac/
+</pre></div>
+</div>
+<p>Now, downstream analyses can link to and utilize results from these individual
+folders, while the whole project remains self-contained.</p>
+</div>
+</section>
+<section id="features-common-to-workflows">
+<h2>Features common to workflows<a class="headerlink" href="#features-common-to-workflows" title="Link to this heading"></a></h2>
+<p>In this section, we will take a higher-level look at the features common to
+all workflows.</p>
+<ul class="simple">
+<li><p>The config file is hard-coded to use one of the following:
+<code class="docutils literal notranslate"><span class="pre">workflow/config/multiome-config/config.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow/config/atac-config/config.yaml</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">workflow/config/rna-config/config.yaml</span></code>. This allows the config file to be
+in the <code class="docutils literal notranslate"><span class="pre">config</span></code> dir with other config files without having to be specified on
+the command line, while also affording the user flexibility. For instance, a custom
+config can be specified at the command-line, using  <code class="docutils literal notranslate"><span class="pre">snakemake</span>
+<span class="pre">--configfile</span> <span class="pre">&lt;path</span> <span class="pre">to</span> <span class="pre">other</span> <span class="pre">config</span> <span class="pre">file&gt;</span></code>.</p></li>
+<li><p>The config file is loaded using <code class="docutils literal notranslate"><span class="pre">common.load_config</span></code>. This function resolves
+various paths (especially the references config section) and checks to see
+if the config is well-formatted.</p></li>
+<li><p>Various files can be used to specify cluster-specific parameters if the workflows
+are being run in a high-performance cluster environment. For more
+details, carefully read the section <a class="reference internal" href="../configuration/config.html#cluster"><span class="std std-ref">Running on a cluster</span></a>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../getting-started/why-use.html" class="btn btn-neutral float-left" title="Why use multiome-wf?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multiome.html" class="btn btn-neutral float-right" title="Multiome Workflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

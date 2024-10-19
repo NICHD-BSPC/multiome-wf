@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequently Asked Questions &mdash; multiome-wf  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="Citation" href="citations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            multiome-wf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/setup.html">Setting up a project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/tutorial.html">How to get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started/why-use.html">Why use <cite>multiome-wf</cite>?</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Workflows</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-wf.html">Overview of workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/multiome.html">Multiome Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/rna.html">scRNA-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/atac.html">scATAC-Seq Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-input.html">Overview of input files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflows/overview-output.html">Overview of output files</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config.html">Configuration details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-yaml.html">Config YAML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/samples-table.html">Samples Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/aggregates-table.html">Aggregates Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/assays-table.html">Assays Table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-multiome.html">Multiome Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-rna.html">scRNA-Seq Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/config-atac.html">scATAC-Seq Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="citations.html">Citation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Frequently Asked Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#some-package-versions-configured-in-env-yaml-are-unavailable-on-conda">Some package versions configured in <code class="docutils literal notranslate"><span class="pre">env.yaml</span></code> are unavailable on conda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-input-is-non-10x-genomics-dataset">My input is non-10X Genomics dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiome-wf-is-incompatible-with-my-hpc-environment"><cite>multiome-wf</cite> is incompatible with my HPC environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-troubleshoot-if-i-encounter-errors">How do I troubleshoot if I encounter errors?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#i-have-biological-and-or-technical-replicates">I have biological and/or technical replicates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-do-i-explore-my-data">How do I explore my data?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-multiome-atac-seq-input-organism-is-neither-human-nor-mouse">My Multiome/ATAC-seq input organism is neither human nor mouse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#chromosome-names-differ-from-my-input-in-multiome-atac-seq">Chromosome names differ from my input in Multiome/ATAC-seq</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Development Team</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">multiome-wf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Frequently Asked Questions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/project-info/faq.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="frequently-asked-questions">
+<span id="faq"></span><h1>Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Link to this heading"></a></h1>
+<section id="some-package-versions-configured-in-env-yaml-are-unavailable-on-conda">
+<h2>Some package versions configured in <code class="docutils literal notranslate"><span class="pre">env.yaml</span></code> are unavailable on conda<a class="headerlink" href="#some-package-versions-configured-in-env-yaml-are-unavailable-on-conda" title="Link to this heading"></a></h2>
+<p>Specific package versions can become deprecated over time. The most straightforward approach is to delete
+the version information for unavailable packages in <code class="docutils literal notranslate"><span class="pre">env.yaml</span></code>. If alternative versions are incompatible
+with the rest of the packages, delete all version information except for the following packages:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># In env.yaml</span>
+<span class="l l-Scalar l-Scalar-Plain">snakemake&lt;8</span>
+<span class="l l-Scalar l-Scalar-Plain">r-seurat&gt;5</span>
+<span class="l l-Scalar l-Scalar-Plain">r-signac&gt;1.10</span>
+</pre></div>
+</div>
+<p>Users may encounter additional version incompatibilities. Manually configure package versions if necessary.</p>
+</section>
+<section id="my-input-is-non-10x-genomics-dataset">
+<h2>My input is non-10X Genomics dataset<a class="headerlink" href="#my-input-is-non-10x-genomics-dataset" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> has been designed for use with both 10X Genomics and non-10X Genomics datasets.
+Place your input matrices for barcodes, features, and read counts in the same folder, as instructed
+in the <a class="reference internal" href="../workflows/overview-input.html#non-tenx"><span class="std std-ref">Non-10X Genomics</span></a>. Once your input files are ready, provide this the path to this folder
+in the sample table (<code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>), as instructed in the <a class="reference internal" href="../configuration/samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a>.</p>
+</section>
+<section id="multiome-wf-is-incompatible-with-my-hpc-environment">
+<h2><cite>multiome-wf</cite> is incompatible with my HPC environment<a class="headerlink" href="#multiome-wf-is-incompatible-with-my-hpc-environment" title="Link to this heading"></a></h2>
+<p>Consult with your HPC staff to update your configuration based on the supported environment. Refer to
+the following pages for the default configuration:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../configuration/config.html#cluster"><span class="std std-ref">Running on a cluster</span></a></p></li>
+<li><p><a class="reference internal" href="../getting-started/tutorial.html#configure-hpc"><span class="std std-ref">Step 5 (Optional): Configuring high performance computing</span></a></p></li>
+</ul>
+</section>
+<section id="how-do-i-troubleshoot-if-i-encounter-errors">
+<h2>How do I troubleshoot if I encounter errors?<a class="headerlink" href="#how-do-i-troubleshoot-if-i-encounter-errors" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> is designed to create Snakemake log files in the <code class="docutils literal notranslate"><span class="pre">workflow/logs</span></code> directory. Refer to
+the error messages in the log files for troubleshooting.</p>
+</section>
+<section id="i-have-biological-and-or-technical-replicates">
+<h2>I have biological and/or technical replicates<a class="headerlink" href="#i-have-biological-and-or-technical-replicates" title="Link to this heading"></a></h2>
+<p>We define biological and technical replicates as outlined in the <a class="reference internal" href="../workflows/overview-input.html#replicates"><span class="std std-ref">Replicates</span></a> section.</p>
+<p>Once confirming that all the technical replicates were properly sequenced, read counts are
+summed across technical replicates by setting the input of <code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">count</span></code> (RNA-seq),
+<code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">count</span></code> (ATAC-seq), or <code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">count</span></code> (Multiome) to technical replicates.
+Technical replicates prepared using Non-10X Genomics platforms follow equivalent steps. Alternatively,
+the <cite>multiome-wf</cite> performs count aggregation for samples labeled with the same value
+in the <code class="docutils literal notranslate"><span class="pre">replicate</span></code> column of the sample table (<code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>) or the aggregates table
+(<code class="docutils literal notranslate"><span class="pre">aggregates.tsv</span></code>).</p>
+<p>Read counts from independent biological replicates are not aggregated to preserve biological
+variability. For users analyzing 10X Genomics datasets, <code class="docutils literal notranslate"><span class="pre">cellranger</span> <span class="pre">aggr</span></code> (RNA-seq),
+<code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> (ATAC-seq), or <code class="docutils literal notranslate"><span class="pre">cellranger-arc</span> <span class="pre">aggr</span></code> is optionally available for creating
+a concatenated feature-barcode matrix along with a <a class="reference external" href="https://www.10xgenomics.com/support/software/loupe-browser/latest">cloupe</a> file. The sample table
+(<code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>) accepts input for both per-biological replicate matrices and a concatenated matrix.
+If you provide per-biological replicate matrices, each row corresponds to a single biological replicate
+in the sample table. If you provide a concatenated matrix, users can provide per-biological replicate
+metadata in the aggregates table where each row corresponds to a single biological replicate.
+Learn more about building the sample and aggregates tables:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">replicate</span></code> in sample table: <a class="reference internal" href="../configuration/samples-table.html#samples-replicate"><span class="std std-ref">replicate</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">replicate</span></code> in aggregates table: <a class="reference internal" href="../configuration/aggregates-table.html#aggr-replicate"><span class="std std-ref">replicate</span></a></p></li>
+</ul>
+</section>
+<section id="how-do-i-explore-my-data">
+<h2>How do I explore my data?<a class="headerlink" href="#how-do-i-explore-my-data" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> generates a modality-combined Seurat object, saved in
+<code class="docutils literal notranslate"><span class="pre">workflow/results/combine/seurat_combined.rds</span></code>. Users will need the <a class="reference external" href="https://satijalab.org/seurat/">Seurat</a> package to open this object in R. Once imported, count matrices
+and dimensionality reductions for each modality are provided in the Seurat object, as shown below:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">## An object of class Seurat</span>
+<span class="c1">## 870542 features across 15600 samples within 9 assays</span>
+<span class="c1">## Active assay: SCT (20354 features, 3000 variable features)</span>
+<span class="c1">##  3 layers present: counts, data, scale.data</span>
+<span class="c1">##  8 other assays present: Gene.Expression, Peaks, MACS, Gene.Activity, integrated_0_SCT, integrated_1_Peaks, integrated_2_MACS, integrated_3_Gene.Activity</span>
+<span class="c1">##  19 dimensional reductions calculated: SCT_pca, SCT_umap, Peaks_lsi, Peaks_umap, MACS_lsi, MACS_umap, Gene.Activity_pca, Gene.Activity_umap, pca, integrated_0_pca, integrated_0_umap, integrated_1_lsi, integrated_1_umap, integrated_2_lsi, integrated_2_umap, integrated_3_pca, integrated_3_umap, wnn_0_umap, wnn_1_umap</span>
+</pre></div>
+</div>
+<p>The most straightforward way to explore this data is by utilizing the functions provided in the Seurat
+package. If you wish to perform downstream analyses outside of Seurat, you can extract count matrices
+and metadata to build the required single cell object, or simply convert to another single cell object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The default argument setting may raise errors when calling Seurat functions due to modified
+names for assays and dimensionality reductions in the Seurat object. Be sure to carefully check
+the naming conventions in <cite>multiome-wf</cite> when assigning arguments.</p>
+</div>
+<p>Additional data is provided for marker genes, called peaks, and analysis reports at each step,
+depending on the analysis configurations. Refer to the <a class="reference internal" href="../workflows/overview-output.html#overview-output"><span class="std std-ref">Overview of output files</span></a> for more details.</p>
+</section>
+<section id="my-multiome-atac-seq-input-organism-is-neither-human-nor-mouse">
+<h2>My Multiome/ATAC-seq input organism is neither human nor mouse<a class="headerlink" href="#my-multiome-atac-seq-input-organism-is-neither-human-nor-mouse" title="Link to this heading"></a></h2>
+<p>The current version of <cite>multiome-wf</cite> provides two options for annotating genomic loci:
+using <code class="docutils literal notranslate"><span class="pre">EnsDb</span></code> packages in R or a user’s <code class="docutils literal notranslate"><span class="pre">GTF</span></code> file. Users can configure this annotation option
+in the <a class="reference internal" href="../configuration/config-yaml.html#config-annotation"><span class="std std-ref">ANNOTATION field</span></a>. One limitation of the <code class="docutils literal notranslate"><span class="pre">EnsDb</span></code> option is that only the <strong>mm10
+(mouse) and hg38 (human)</strong> reference genomes are available with this package.</p>
+<p>Input from other organisms, or reads from mouse/human mapped to different reference genomes, are
+supported through the <code class="docutils literal notranslate"><span class="pre">GTF</span></code> option.</p>
+</section>
+<section id="chromosome-names-differ-from-my-input-in-multiome-atac-seq">
+<h2>Chromosome names differ from my input in Multiome/ATAC-seq<a class="headerlink" href="#chromosome-names-differ-from-my-input-in-multiome-atac-seq" title="Link to this heading"></a></h2>
+<p>The <cite>multiome-wf</cite> relies on the <code class="docutils literal notranslate"><span class="pre">EnsDb.Mmusculus.v79</span></code> (mm10) or <code class="docutils literal notranslate"><span class="pre">EnsDb.Hsapiens.v86</span></code> (hg38)
+annotation packages in R. If the chromosome names in your input files don’t match the conventions
+used in these annotation packages, it is highly recommended that you rerun the mapping process
+using a reference genome with a compatible release version.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="citations.html" class="btn btn-neutral float-left" title="Citation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mira Sohn, Christopher Rhodes.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
