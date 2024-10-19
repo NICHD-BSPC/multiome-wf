@@ -2,7 +2,6 @@
 title: "Weighted Nearest Neighbor Analysis"
 output:
     html_document:
-            keep_md: yes
             toc: true
             toc_float: true
             code_folding: hide
@@ -11,23 +10,23 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(tidyverse)
 library(Signac)
 library(Seurat)
 library(knitr)
 library(future)
+library(parallel)
 set.seed(1234)
 
 source('common.R')
 ```
 
-## Parallelization
 
 ```{r parallelize, include=FALSE}
 
@@ -40,19 +39,16 @@ options(future.globals.maxSize=40000 * 1024^2,
 
 # Parallelize the run
 plan("multicore", workers=ncpus)
-
-
 ```
 
+# Set variables
 
-
-## Set variables
-
-We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. 
+We'll also set paths to input files.
 
 ```{r variables}
 seurat_inputs <- unlist(strsplit(params[['seurats']], ' '))
-cat('Input Seurat objects: \n')
+print('Input Seurat objects:')
 print(seurat_inputs)
 
 config_path <- params[['config']]
@@ -67,137 +63,146 @@ toydataset <- config[['dataset_size']][['toydataset']]
 
 ```{r get_analysis_group}
 
-group <- config[['weighted_nn']][['groups']][[ params[["seurat"]] ]]
+group <- config[['weighted_nn']][['groups']][[params[["seurat"]]]]
 
 group_name <- params[["seurat"]]
-print('Current group:')
-print(group_name)
+print(paste('Current group:', group_name))
 
 targets <- group[['input_groups']]
 idx <- grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
 seurat_inputs <- seurat_inputs[idx]
 
+comm_detection <- group[['detection_method']]
+
 print('Seurat objects in use:')
 print(seurat_inputs)
+
+
 ```
 
-## Read in data
+# Read in data
 
 Read in Seurat objects.
 
 ```{r input_seurat}
-seurat_list <- lapply(seq_along(seurat_inputs), function(x){
-	s_in <- readRDS(seurat_inputs[x])
-	return(s_in)
-})
-cat('Input sample list: \n')
+
+# Import Seurat objects
+seurat_list <- mclapply(seurat_inputs, readRDS) %>%
+    set_names(sapply(seurat_inputs, str_split_i, "/", 3))
+
+print('Input sample list:')
 print(seurat_list)
 ```
 
 
-## Cluster
+# Cluster
 
 
 ```{r cluster}
 
 reductions <- group[['reduction']]
 
-print('reductions')
-print(reductions)
+print(paste('Configured dimensionality reductions:', paste(reductions, collapse=", ")))
 
 umap_dims <- group[['umap_dims']]
-print('dimension range')
+print('Dimension ranges:')
 print(umap_dims)
 
+
+# Create a list storing serial integers for the min to max dimensions
 if (!any(is.integer(unlist(umap_dims)))) {
-    dims_list <- lapply(seq_along(assay_name), function(x) {
-        u_seq <- 1:50
-        return(u_seq)
-    })
+    dims_list <- lapply(seq_along(seurat_list), function(x) 1:50)
 } else {
     if (is.list(umap_dims)) {
-        dims_list <- lapply(seq_along(umap_dims), function(x) {
-            u <- umap_dims[[x]]
-            u_seq <- seq(from = u[1], to = u[2])
-            return(u_seq)
-        })
+        dims_list <- lapply(umap_dims, function(l) l[1]:l[2])
     } else {
-        dims_list <- dim_vals_to_list(
-            dim_vals <- umap_dims
-        )
+        # Break if dimension is not correctly configured
+        stop("Wrong dimensions! Check your umap_dims in weighted_nn.")
     }
 }
 
-print('dims_list dims')
+names(dims_list) <- names(seurat_list)
+
+print('Dimensions for each modality:')
 print(dims_list)
 
+# Determine resolution for clustering
 res <- group[['resolution']]
 
+# Set the resolution to 0.8 if it's not configured by user
 if (is.null(res)) {
     res <- 0.8
 }
 
-print('resolution')
-print(res)
+print(paste('Resolution:', res))
 
-# weighted nearest neirbor required both matrices to have equal barcodes
+# Create a vector for barcodes found in both modalities
 common_names <- intersect(colnames(seurat_list[[1]]), colnames(seurat_list[[2]]))
 
 if (length(common_names) > 0) {
     print('Common barcodes found for selected assays. Starting weighted NN graphing')
+    print('--------------------------------------------------------------------------')
     
-    # sort seurat list to be sure
-    reducs_present <- lapply(seq_along(seurat_list), function(x) {
-        dr_names <- names(seurat_list[[x]]@reductions)
+    # Create a list storing the names of dimensionality reductions other than UMAP
+    reducs_present <- lapply(seurat_list, function(obj) {
+        dr_names <- names(obj@reductions)
         idx <- !(dr_names %in% "umap")
-        dr_names <- dr_names[idx]
-        return(dr_names)
+        return(dr_names[idx])
     })
-    print('reductions present in each seurat object')
+
+    print('All dim reductions present in each seurat object:')
     print(reducs_present)
+    print('--------------------------------------------------------------------------')
     
+    # Create a vector for indices between configured and available dimensionality reductions
     idx <- sapply(seq_along(reductions), function(x) {
         idy <- which(reductions %in% reducs_present[[x]])
         return(idy)
     })
-    print(idx)
     
+    # Break if any of the configured dimensionality reduction is missing in the current Seurat obj
     if (length(idx) < 2) {
-        print("Not all reductions listed in config file found in input objects!")
-        q()
+        stop("Not all reductions listed in config file found in input objects!")
     }
     
-    seurat_list <- seurat_list[idx]
+    # Ensure to have only common cells across the modalities
+    seurat_list <- mclapply(seurat_list, subset, cells=common_names)
     
-    # keep only cells/barcodes common to both data sets
-    # some may have been removed during qc, etc
-    seurat_list[[1]] <- subset(seurat_list[[1]],
-                              cells = common_names)
-    seurat_list[[2]] <- subset(seurat_list[[2]],
-                              cells = common_names)
-    
-    # extract 
-    reduction1 <- reductions[1]
-    assay_used1 <- seurat_list[[1]]@reductions[[reduction1]]@assay.used
-    assay1 <- seurat_list[[1]]@assays[[assay_used1]]
-    dr1 <- seurat_list[[1]][[reduction1]]
-    dr1_name <- paste0(reduction1, assay_used1)
-    
-    reduction2 <- reductions[2]
-    assay_used2 <- seurat_list[[2]]@reductions[[reduction2]]@assay.used
-    assay2 <- seurat_list[[2]]@assays[[assay_used2]]
-    dr2 <- seurat_list[[2]][[reduction2]]
-    dr2_name <- paste0(reduction2, assay_used2)
-    
-    seurat <- seurat_list[[1]]
-    seurat[[assay_used2]] <- assay2
-    
-    # seurat = merge(seurat_list[[1]], seurat_list[[2]])
-    seurat[[dr1_name]] <- dr1
-    seurat[[dr2_name]] <- dr2
-    
-    reduc_list <- list(dr1_name, dr2_name)
+    # Create a list storing each assay
+    assay_list <- mclapply(seurat_list, function(obj) {
+        red <- reductions[reductions %in% names(obj@reductions)]
+        assay_used <- obj@reductions[[red]]@assay.used
+        assay <- obj@assays[[assay_used]]
+        dr <- obj[[red]]
+        dr_name <- paste0(red, assay_used)
+        list(
+            'red'=red,
+            'assay_used'=assay_used,
+            'assay'=assay,
+            'dr'=dr,
+            'dr_name'=dr_name)
+    }) %>%
+    set_names(names(seurat_list))
 
+    print("Assays extracted:")
+    print(lapply(assay_list, summary))
+
+    print('--------------------------------------------------------------------------')
+
+    # Create a merged seurat obj for both modalities
+    seurat <- seurat_list[[1]]
+    seurat[[assay_list[[2]][['assay_used']]]] <- assay_list[[2]][['assay']]
+    for (l in assay_list) { seurat[[l[['dr_name']]]] <- l[['dr']] }
+
+    # Create a list storing dimensionality reductions that will be
+    # used to compute multimodal neighbors
+    reduc_list <- lapply(assay_list, function(l) l[['dr_name']])
+    print("Dimensionality reductions used to compute multimodal neighbors:")
+    print(reduc_list)
+
+    print('--------------------------------------------------------------------------')
+
+    # Determine k
     if (toydataset) {
         k.nn <- 5
         k.range <- 50
@@ -206,70 +211,94 @@ if (length(common_names) > 0) {
         k.range <- 200     # Seurat default for FindMultiModalNeighbors
     }
     
+    print(paste("Number of multimodal neighbors:", k.nn))
+    print(paste("Number of approximate neighbors to compute:", k.range))
+
+
+    # Find multimodal neighbors
     seurat <- FindMultiModalNeighbors(
         object = seurat,
         reduction.list = reduc_list,
         dims.list = dims_list,
         k.nn=k.nn,
-        knn.range=k.range
+        knn.range=k.range,
+        verbose=FALSE
     )
     
-    print('finished finding multimodal neighbor')
-    
+    # Run UMAP
     seurat <- RunUMAP(
         object = seurat,
         nn.name = "weighted.nn",
         reduction.name = "wnn_umap",
-        reduction.key = "wnnUMAP_"
+        reduction.key = "wnnUMAP_",
+        verbose=FALSE
     )
 
+    # Run clustering
+    comm_detection <- ifelse(is.null(comm_detection), 3, comm_detection)
+    comm_label <- ifelse(comm_detection == 1, "Louvain", ifelse(
+        comm_detection == 2, "Louvain with multilevel refinement", ifelse(
+        comm_detection == 3, "Smart local moving (SLM)", ifelse(
+        comm_detection == 4, "Leiden", "Undetermined"
+    ))))
+
+    print('--------------------------------------------------------------------------')
+
+    if (comm_label == "Undetermined") {
+        stop("Wrong method for algorithm parameter in FindCluster function! Check yoru configuration.")
+    } else {
+        print(paste("WNN clustering performed using modularity optimization method no.", comm_detection))
+        print(paste("This will run", comm_label))
+        print("See the following reference for more info:")
+        print("Ludo Waltmana and Nees Jan van Eck, Eur. Phys. J. B (2013)")
+        print("https://link.springer.com/article/10.1140/epjb/e2013-40829-0")
+    }
     seurat <- FindClusters(
         object = seurat,
         graph.name = "wsnn",
-        algorithm = 3,
-        resolution = res
+        algorithm = comm_detection,
+        resolution = res,
+        verbose=FALSE
     )
-    
+} else {
+    seurat <- NULL
+    print("Multimodal analysis is unavailable because input datasets do not have common cells.")
 }
 
 ```
 
 
-## Visiualize
+# Visualize {.tabset}
 
-```{r umap}
-plot <- DimPlot(
-  seurat,
-  reduction = "wnn_umap",
-  pt.size = 0.5,
-  group.by = "orig.ident"
-)
+```{r umap, results='asis'}
 
-plot
+for (name in c("orig.ident", "seurat_clusters")) {
+    p <- DimPlot(
+      seurat,
+      reduction = "wnn_umap",
+      pt.size = 0.5,
+      group.by = name
+    )
 
-plot <- DimPlot(
-  seurat,
-  reduction = "wnn_umap",
-  pt.size = 0.5,
-  group.by = "seurat_clusters"
-)
-
-plot
+    cat('\n\n##', name, '\n\n')
+    print(p)
+    cat('\n\n')
+}
 ```
 
 
-## Save Seurat object
+# Save Seurat object
 
 ```{r save}
 
 # save main seurat object
 saveRDS(object=seurat, file=params[['seurat_out']])
-print('Done saving seurat object.')
+print(paste("Seurat object saved:", params[["seurat_out"]]))
 
 # save barcodes for later use (combining multiple processed objects)
-barcodes = colnames(seurat)
+barcodes <- colnames(seurat)
 saveRDS(object=barcodes, file=params[['barcodes_out']])
-cat('Done saving cell barcodes.')
+print(paste("Barcodes saved:", params[['barcodes_out']]))
 ```
 
 

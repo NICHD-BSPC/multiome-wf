@@ -88,9 +88,6 @@ plan("multicore", workers=ncpus)
 # This function requires the biovizbase package installed (conda: bioconductor-biovizbase)
 # annotation.ensdb <- GetGRangesFromEnsDb(ensdb=EnsDb.Hsapiens.v86)
 
-# genome(annotation.ensdb) <- "hg38"
-
-
 if (genome == 'mm10') {
     # extract gene annotations from EnsDb
     library(EnsDb.Mmusculus.v79)

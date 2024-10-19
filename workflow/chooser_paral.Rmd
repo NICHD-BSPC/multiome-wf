@@ -5,18 +5,12 @@ output:
         toc_float: true
         toc: true
         code_folding: hide
-
-
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning=FALSE,
                       message=FALSE)
 ```
-
-## Activate conda env
-
-Ensure getting all the packages in `requirements.txt` installed and running `activate conda ./env`
 
 ```{r packages_and_functions, include=FALSE}
 library(tidyverse)
@@ -34,44 +28,37 @@ library(purrr)
 set.seed(1327)  # added to remove unwanted randomness
 
 # Set correct paths
-source("chooser_var.R")
+source("chooser/R/pipeline.R")
 ```
 
 
-
-
-
-## Set variables
-
-We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
-
-
-
-```{r variables}
-config_path = params[['config']]
+```{r config}
+config_path <- params[['config']]
 res <- as.numeric(params[["res"]])
+
+# Number of chooseR iteration
+# nIter <- 10	# Testing only
+nIter <- 20
 ```
 
 
-## Load Seurat object
+# Load Seurat object
 
-- **Input data** = an RDS file storing a **seurat object** (after SCTransform & PCA)
+**Input data** is an RDS file storing a **seurat object** preprocessed with normalization and dimensionality
+reduction.
 
 
 ```{r load_data}
-config = yaml::read_yaml(file = config_path)
+config <- yaml::read_yaml(file = config_path)
 
 # Read a QC-ed seuat object
 obj <- readRDS(params[["seurat_in"]])
 
-
 # Explore the output
 obj
-
 ```
 
-
-## Set variables
+# Set variables
 
 ```{r set_variables}
 
@@ -83,94 +70,98 @@ obj
 # assay <- "SCT"
 # reduction <- "pca"
 
+# Identify your target configured
+target <- params[["seurat_out"]]
 
-# target = basename(params[['seurat_out']])
-# target = gsub("^(.*).clustered_data.rds", "\\1", target)
-target <- params[["seurat_out"]]   # changed by Mira
-## #  print("Choosing for group:")
-cat(target)
+print(paste("Target group:", target))
 
-groups = config[['chooser']][['groups']]
+groups <- config[['chooser']][['groups']]
+idx <- which(names(groups) %in% target)
 
-idx = which(names(groups) %in% target)
- 
+# Break if your target is not present in the input Seurat obj
 if (length(idx) == 0) {
-    cat("Group is not present in config's normalize groups list.")
-    q()
+    stop("Group is not present in config's normalize groups list.")
 } else if (length(idx) > 1) {
-    cat("You are trying to normalize group/assay multiple times. Please fix.")
-    q()
+    stop("You are trying to normalize group/assay multiple times. Please fix.")
 }
 
-group_name = names(groups)[idx]
-cat('Current group:')
-cat(group_name)
-
-group = groups[[idx]]
+group_name <- names(groups)[idx]
+print(paste('Current group:', group_name))
 
 # determined by ElbowPlots from normalize/integrate rules
-npcs = group[['npcs']]
+npcs <- groups[[idx]][['npcs']]
 
-cat('npcs')
-cat(npcs)
+print(paste('Number of dimensions:', npcs))
 
-targets = c("pca", "lsi")
-idx = grep(paste(targets,collapse="|"), names(obj@reductions))
-reduction = names(obj@reductions)[idx]
+# Identify dimensionality reduction performed in the previous step for the input obj
+dim_reductions <- c("pca", "lsi")
+reduction <- names(obj@reductions)
+reduction_idx <- sapply(dim_reductions, function(r) str_detect(reduction, r))
 
-# npcs = ncol(obj[[reduction]]@cell.embeddings)
-assay = obj[[reduction]]@assay.used
+# Break if the number of dimensionality reduction is 0 or more than 1 unintegrated dimensionality reductions
+# found
+if (sum(reduction_idx) > 1) {
+    if (any(str_detect(reduction, "integrated"))) {
+        reduction <- reduction[str_detect(reduction, "integrated")]
+    }
+    else {
+        stop("More than one dimensionality reduction found!")
+    }
+} else if (sum(reduction_idx) == 0) {
+    stop("Dimensionality reduction missing!")
+}
+
+# Identify assay in the current obj
+assay <- obj[[reduction]]@assay.used
 
 # Create a directory for output plots
 # create sample subdir - May be multiple chooseR scripts running at once.
-results_path = params[['results_path']]
-cat(results_path)
+results_path <- params[['results_path']]
 
-system(paste0("mkdir -p ./", results_path))
+# Create output directory if it's missing
+if (! dir.exists(results_path)) { dir.create(results_path) }
 
+print(paste("Output directory created:", results_path))
 ```
 
-## Run chooseR
+# Run chooseR
 
-- **Input = seurat object (after SCTransform and PCA)**
-
+The [ChooseR](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-03957-4) analyzes the 
+optimal resolution for single cell clustering based on silhouette scores by iteratively calculating on
+sampled cells.
 
 ```{r chooser}
 
-
 # Run pipeline
-message(paste0("Clustering ", res, "..."))
-message("\tFinding ground truth...")
+print(paste0("Clustering ", res, "..."))
+print("Finding ground truth...")
 
 # "Truths" will be stored at glue::glue("{reduction}.{assay}_res.{res}")
-obj <- find_clusters(obj,
-                   npcs=npcs,
-                   reduction = reduction,
-                   assay = assay,
-                   resolution = res)
+obj <- find_clusters(
+    obj,
+    npcs=npcs,
+    reduction = reduction,
+    assay = assay,
+    resolution = res)
 
 
 # Now perform iterative, sub-sampled clusters (returns a data frame)
-results <- multiple_cluster(obj,
-                          n = nIter,
-                          npcs = npcs,
-                          res = res,
-                          reduction = reduction,
-                          assay = assay)
+results <- multiple_cluster(
+    obj,
+    n = nIter,
+    npcs = npcs,
+    res = res,
+    reduction = reduction,
+    assay = assay)
 
 
 
 # Explore the clusters (first 5 rows and columns)
-kable(results[1:5, 1:5])
-dim(results)
-
-
+print(paste("Number of cells sampled:", nrow(results)))
+print(paste("Times sampling performed:", ncol(results)))
 
 # Extract sampled barcodes
 sampled.cells <- results$cell
-
-# Explore the number of sampled cells
-length(sampled.cells)
 
 # Now calculate the co-clustering frequencies
 message(paste0("Tallying ", res, "..."))
@@ -181,7 +172,7 @@ message(paste0("Tallying ", res, "..."))
 # matches <- purrr::reduce(matches, `+`)
 
 # CR change:
-results = results[,-1]
+results <- results[,-1]
 columns <- colnames(results)
 
 mtchs <- matrix(0, nrow = dim(results)[1], ncol = dim(results)[1])
@@ -203,16 +194,14 @@ message(paste0("Scoring ", res, "..."))
 # dplyr::as_tibble(matches),
 # function(x) dplyr::if_else(Re(x) > 0, percent_match(x), 0)
 # )
-# Converted to (by Mira): # returns class "matrix" of type "double"
-mtchs <- apply(as.data.table(mtchs),
+# Converted matrix to data frame:
+mtchs <- apply(as.data.frame(mtchs),
                2,
                function(x) dplyr::if_else(Re(x) > 0, percent_match(x), 0))
 
 # Sometimes next line causes error for some reason
 # mtchs[1:5, 1:5]
-print("Scores:")
-print(dim(mtchs))
-
+print(paste0("Scores row x column: ", dim(mtchs)[1], ", ", dim(mtchs)[2]))
 
 # Now calculate silhouette scores
 message(paste0("Silhouette ", res, "..."))
@@ -224,8 +213,6 @@ if (length(sampled.cells) > 0) {
 } else {
     sampled.obj <- obj
 }
-
-
 
 # Extract clusters from the sampled seurat
 clusters <- unlist(sampled.obj[[glue::glue("{reduction}.{assay}_res.{res}")]])
@@ -275,8 +262,6 @@ sil <- tryCatch(
         return(data.frame())
     }
     )
-
-
 ```
 
 ## Save objects
@@ -284,21 +269,24 @@ sil <- tryCatch(
 
 ```{r save}
 
-saveRDS(grp, paste0(results_path, "/frequency_grouped_", res, ".rds"))   # short (seconds)
-saveRDS(sil, paste0(results_path, "/silhouette_grouped_", res, ".rds"))  # short (seconds)
-saveRDS(sampled.obj, paste0(results_path, "/seurat_obj_", res, ".rds"))   # takes nearly 20min
+grp_path <- paste0(results_path, "/frequency_grouped_", res, ".rds")
+sil_path <- paste0(results_path, "/silhouette_grouped_", res, ".rds")
+obj_path <- paste0(results_path, "/seurat_obj_", res, ".rds")
 
+print("Output files saved to the following paths")
+print(paste("- Frequency groups:", grp_path))
+print(paste("- Silhouette groups:", sil_path))
+print(paste("- Sampled seurat obj:", obj_path))
 
+saveRDS(grp, grp_path)   # short (seconds)
+saveRDS(sil, sil_path)  # short (seconds)
+saveRDS(sampled.obj, obj_path, compress=FALSE)   # takes nearly 20min
 ```
-
-
 
 ## Session info
 
 ```{r session_info}
-
 sessionInfo()
-
 ```
 
 

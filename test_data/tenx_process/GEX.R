@@ -16,10 +16,6 @@ library(Matrix)
 # Source variables and paths
 source("GEX_config.R")
 
-# Create toy datasets from the original 10X multiome outputs
-system(paste("bash", multiome.toy.bash))
-
-
 ########## Import HDF5 matrix
 
 # Import hdf5 file using Seurat package
@@ -167,7 +163,7 @@ str(counts)
 # add by chris
 # get valid barcodes from "toy_barcode.csv" (filetered for N-th valid barcodes)
 library(readr)
-toy_barcodes <- read_csv("toy_barcode.csv")
+toy_barcodes <- read_csv(path.to.bc)
 head(toy_barcodes)
 
 length(intersect(colnames(counts[[1]]), toy_barcodes$barcode))

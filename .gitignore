@@ -8,5 +8,9 @@ workflow/Snakefile.log
 *_files/
 *.out
 *.pdf
+test_data/tenx_multiome_toy/
 test_data/tenx_atac/
 test_data/tenx_rna/
+test_data/tenx_process/tenx_input/
+*.DS_Store
+env*/

@@ -2,7 +2,6 @@
 title: "Combine Processed Seurats"
 output:
     html_document:
-            keep_md: yes
             toc: true
             toc_float: true
             code_folding: hide
@@ -11,13 +10,14 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(tidyverse)
+library(parallel)
 library(Signac)
 library(Seurat)
 library(knitr)
@@ -27,7 +27,6 @@ set.seed(1234)
 source('common.R')
 ```
 
-## Parallelization
 
 ```{r parallelize, include=FALSE}
 
@@ -43,68 +42,70 @@ plan("multicore", workers=ncpus)
 ```
 
 
-## Set variables
-
-We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
+Here, we combine all Seurat objects created so far depending on the number of barcodes.
 
 ```{r variables}
+# Retrieve input/output file paths
 seurat_paths <- unlist(strsplit(params[['seurats']], " "))
 config_path <- params[["config"]]
 seurat_out <- params[["seurat_out"]]
 ```
 
 
-## Read in data
+# Read in data
 
-For input file paths listed in samples.tsv, we'll read in data from files in one of the following formats: 'HDF5', 'MEX', or 'RDS'.
-If multiple assays are present in the 'HDF5' or 'RDS' files, a list of sparse matrices ('dgCMatrix') will be created.
-'read_10X_mm()' mimics Seurat::Read_10X() but allows import of multiple MEX matrices.
+Seurat objects containing identical number of barcodes are combined into one object (e.g. `nBarcodes_<number>`).
 
 ```{r config_input}
+
+# Import user configuration
 config <- yaml::read_yaml(config_path)
 
+# Retrieve user-configured groups
 groups <- names(config$normalize$groups)
-
-
-
-
-assay_list <- sapply(seq_along(groups), function(x){
-    group <- groups[x]
-    assay_c <- config$normalize$groups[[group]]$assay_name
-    return(assay_c)
+assay_list <- sapply(groups, function(group) { 
+    config$normalize$groups[[group]]$assay_name
 })
 
-norm_list = sapply(seq_along(groups), function(x){
-    group <- groups[x]
-    norm_c <- config$normalize$groups[[group]]$norm_method
-    return(norm_c)
+# Retrieve user-configured normalizations across the groups
+norm_list <- sapply(groups, function(x){
+    config$normalize$groups[[x]]$norm_method
 })
 
+# If integration is enabled
 if (config$integrate$activate) {
+    # Create a vector storing the names for integrated groups
     groups_int <- names(config$integrate$groups)
 
+    # Add a placeholder for integrated groups
     assay_list_int <- rep("integrate", length(groups_int))
 
-    norm_list_int <- sapply(seq_along(groups_int), function(x){
-        group <- groups_int[x]
-        norm_c <- config$integrate$groups[[group]]$norm_method
-        return(norm_c)
-  })
-  
-    groups <- c(groups, groups_int)
+    # Create a vector storing normalization method for each integrated group
+    norm_list_int <- sapply(groups_int, function(x){
+        config$integrate$groups[[x]]$norm_method
+    })
+
+    # Create a vector storing all group names
+    groups <- unique(c(groups, groups_int))
+
+    # Add activated assays and normalizations 
     assay_list <- c(assay_list, assay_list_int)
     norm_list <- c(norm_list, norm_list_int)
-  
+
+    # Delete unnecessary variables
     rm(groups_int, assay_list_int, norm_list_int)
 }
 
+# If multimodal analysis is enabled
 if (config$weighted_nn$activate) {
+    # Retrieve multimodal group names
     groups_wnn <- names(config$weighted_nn$groups)
 
+    # Add a placeholder for mulimodal groups
     assay_list_wnn <- rep("wnn", length(groups_wnn))
-  
     norm_list_wnn <- rep("wnn", length(groups_wnn))
-  
+
+    # Add group, assay, and normalization names corresponding to multimodal analysis
     groups <- c(groups, groups_wnn)
     assay_list <- c(assay_list, assay_list_wnn)
     norm_list <- c(norm_list, norm_list_wnn)
@@ -121,129 +122,158 @@ if (config$macs$run == 'N') {
 }
 
 
-
-
-
 # Raise an error if macs2 configuration is incorrect
 if (!(config$macs$run %in% c("Y", "N"))) {
     stop("macs2 is incorrectly configured. Double-check macs in the config.yaml file.")
 }
 
-
-
+print("Groups analyzed:")
 groups
+
+print("Assays analyzed:")
 assay_list
+
+print("Preprocessing performed:")
 norm_list
 ```
 
-```{r input}
+```{r input_barcodes}
 
-# fix later:
-# export barcode list from all seurat objects output 
-# from rules "cluster" and "weighted_nn"
-# but for testing, rading in each object to get barcodes is OK
-barcodes_list <- lapply(seq_along(seurat_paths), function(x) {
-    current_path <- seurat_paths[x]
-    barcodes <- readRDS(file.path(dirname(current_path), "barcodes.rds"))
-    return(barcodes)
-})
-
-barcodes_list <- lapply(barcodes_list, sort)
+# Import saved barcodes
+barcodes_list <- lapply(seurat_paths, function(x) {
+    readRDS(file.path(dirname(x), "barcodes.rds")) %>%
+        sort()
+}) %>%
+set_names(str_split_i(seurat_paths, "/", 3))
 
 # check which objs have the same barcodes
-bc_counts <- unique(
-    sapply(barcodes_list, length)
+bc_counts <- sapply(barcodes_list, length) %>%
+    unique()
+
+# Create a list of lists storing barcodes, paths to Seurat obj, groups,
+# assays, and normalizations for corresponding barcode counts
+bc_summary_list <- mclapply(bc_counts, function(bc_count) {
+
+    # Get an index of which seurat objects has the same # barcodes
+    idx <-sapply(barcodes_list, length) == bc_count
+
+    # Return a list storing everything
+    list(
+        bc_sub=barcodes_list[idx],
+        paths_sub=seurat_paths[idx],
+        groups_sub=groups[idx],
+        assay_sub=assay_list[idx],
+        norm_sub=norm_list[idx]
+    )
+}) %>%
+set_names(paste0("nBarcodes_", bc_counts))
+
+print(paste(
+    "Barcode counts per obj:",
+    paste(names(bc_summary_list), collapse=", "))
 )
+```
 
-seurat_list = list()
-list_n = 1
+```{r build_obj}
 
-for (x in seq_along(bc_counts)) {
-    bc_count <- bc_counts[x]
-  
-    cat("\ncombining objects with the following barcode counts")
-    print(bc_count)
-    # get an index of which seurat objects has the same # barcodes
-    idx <- which(sapply(barcodes_list, length) == bc_count)
+seurat_list <- lapply(names(bc_summary_list), function(name) {
+
+    bc_count <- bc_summary_list[[name]]
+    print(paste(name, "processed..."))
+    print("---------------------------------------------------------------------------")
+
     # subset into current barcode #s
-    bc_sub <- barcodes_list[idx]
-  
-    paths_sub <- seurat_paths[idx]
-    groups_sub <- groups[idx]
-    assay_sub <- assay_list[idx]
-    norm_sub <- norm_list[idx]
-  
-    cat(paths_sub, groups_sub, assay_sub, norm_sub)
-  
-    seq_sub <- 1:length(paths_sub)
-  
-    # In bc vecotrs of equal length, are call constituent bc's identiecal too?
-    if ( all(sapply(X = bc_sub[-1], FUN = identical, bc_sub[[1]])) ) {
-    
+    bc_sub <- bc_count$bc_sub
+    paths_sub <- bc_count$paths_sub
+    groups_sub <- bc_count$groups_sub
+    assay_sub <- bc_count$assay_sub
+    norm_sub <- bc_count$norm_sub
+
+    # In bc vecotrs of equal length, are they all identical barcodes?
+    bc_identical <- sapply(
+        bc_sub[-1], 
+        function(bc) identical(bc, bc_sub[[1]])
+        )
+
+    # If barcodes are all identical,
+    if ( all(bc_identical) ) {
+
+        # Get indices for all SCT-normalized groups
         idys <- grep("sct", norm_sub)
-        if (length(idys) > 0) {
-            idy <- idys[1]
-        } else {
-            idy <- 1
-        }
-    
+
+        # Pick one index for SCT-normalized groups
+        idy <- ifelse(length(idys) > 0, idys[1], 1)
+
         # if an object contains sct, use that first
         paths_c <- paths_sub[idy]
         groups_c <- groups_sub[idy]
         assay_c <- assay_sub[idy]
         norm_c <- norm_sub[idy]
 
-        cat(paths_c, groups_c, assay_c, norm_c)
+        print(paste("Path to Seurat obj:", paths_c))
+        print(paste("Corresponding group:", groups_c))
+        print(paste("Corresponding assay:", assay_c))
+        print(paste("Corresponding preprocessing:", norm_c))
 
+        print("---------------------------------------------------------------------------")
+
+        # Import the main Seurat obj
         seurat_main <- readRDS(paths_c)
-        
-        #update dim reduction names before mergino objects
-        for (r in seq_along(seurat_main@reductions)) {
-            dr_name <- paste(
-            seurat_main@reductions[[r]]@assay.used,
-            names(seurat_main@reductions)[r], sep = "_")
-            names(seurat_main@reductions)[r] <- dr_name
-            Key(object = seurat_main[[dr_name]]) <- dr_name
-        }
-        
-        colnames_use <- colnames(seurat_main)
 
-        # if any remaining assays exist, add to seurat object
-        if (length(seq_sub) > 1) {
+        # Update dim reduction names before merging objects
+        for (r in seq_along(seurat_main@reductions)) {
+
+            # Determine a new name
+            # e.g. pca to SCT_pca, umap to SCT_umap
+            dr_name <- paste(
+                seurat_main@reductions[[r]]@assay.used,
+                names(seurat_main@reductions)[r], sep = "_")
+
+            names(seurat_main@reductions)[r] <- dr_name
+            Key(object=seurat_main[[dr_name]]) <- dr_name
+        }
+
+        # If any remaining assays exist, add to seurat object
+        if (length(paths_sub) > 1) {
+
             # idy: either first object containing sct assay (if present) or first object
-            remaining <- seq_sub[-idy]
+            remaining <- seq_along(paths_sub)[-idy]
 
             paths_r <- paths_sub[remaining]
             groups_r <- groups_sub[remaining]
             assay_r <- assay_sub[remaining]
             norm_r <- norm_sub[remaining]
 
-            cat(paths_r, groups_r, assay_r, norm_r)
-
+            # Loop over to add individual assays to the main Seurat object
             for (i in seq_along(remaining)) {
-                # i=2 #testing
+
                 paths_c <- paths_r[i]
                 groups_c <- groups_r[i]
                 assay_c <- assay_r[i]
                 norm_c <- norm_r[i]
-                cat(paths_c, groups_c, assay_c, norm_c)
+
+                print(paste("Path to Seurat obj:", paths_c))
+                print(paste("Corresponding group:", groups_c))
+                print(paste("Corresponding assay:", assay_c))
+                print(paste("Corresponding preprocessing:", norm_c))
+
+                print("---------------------------------------------------------------------------")
 
                 seurat_add <- readRDS(paths_c)
 
+                # If the current assay is integrated one
                 if (any(grepl("integrated", names(seurat_add@reductions)))) {
                     # integrating embedding of peaks does not rename assay to "integrate"
-                    if (seurat_add@active.assay == "integrated") {
-                        assay_new <- groups_c
-                    } else {
-                        # fix later:
-                        # possibly use 'make.names(groups_c)'
-                        assay_new <- paste(groups_c, seurat_add@active.assay, sep = "_")
-                  }
+                    assay_new <- ifelse(
+                        seurat_add@active.assay == "integrated",
+                        group_c,
+                        paste(groups_c, seurat_add@active.assay, sep = "_")
+                    )
                 } else {
                     assay_new <- seurat_add@active.assay
                 }
-                
-                # do not transfer assay if object is "wnn", which only adds Dim Reducs
+
+                # Do not transfer assay if object is "wnn", which only adds Dim Reducs
                 if (!any(names(seurat_add@reductions) %in% "wnn_umap")) {
                     if (any(names(seurat_main@assays) %in% assay_new)) {
                         # if assays exist, overwrite (to keep nomalized and scaled slots)
@@ -255,112 +285,115 @@ for (x in seq_along(bc_counts)) {
                     }
                 }
 
-
                 if (any(grepl("integrated", names(seurat_add@reductions)))) {
                     tryCatch( expr={ Key(seurat_main[[assay_new]]) <- assay_new },
                         error=function(e) {
                             # add a new assay if absent
-                            seurat_main[[assay_new]] <- seurat_add[[seurat_add@active.assay]]  
-                            Key(seurat_main[[assay_new]]) <- assay_new }
-                        )
+                            seurat_main[[assay_new]] <- seurat_add[[seurat_add@active.assay]]
+                        }
+                    )
                 }
 
-                
                 # if object contains wnn, remove all other dim reductions,
                 # they are dups from other objects
-                if ( any(grepl("wnn_umap", names(seurat_add@reductions))) ) {
+                if (any(grepl("wnn_umap", names(seurat_add@reductions)))) {
                     for (j in rev(seq_along(names(seurat_add@reductions)))) {
                         dr_c <- names(seurat_add@reductions)[j]
-                        print(dr_c)
+                        # Remove non-wnn reductions if present
                         if (!dr_c == "wnn_umap") {
                             seurat_add@reductions[[dr_c]] <- NULL
                         }
                     }
                 }
-                
+
                 for (r in seq_along(seurat_add@reductions)) {
+                    reduction_name <- names(seurat_add@reductions)[r]
                     if (any(grepl("integrated", names(seurat_add@reductions))) && 
-                        names(seurat_add@reductions)[r] != "umap") {
-                        dr_name <- gsub("integrated", groups_c, names(seurat_add@reductions)[r])
+                        reduction_name != "umap") {
+                        dr_name <- gsub("integrated", groups_c, reduction_name)
                         names(seurat_add@reductions)[r] <- dr_name
                         Key(object = seurat_add[[dr_name]]) <- dr_name
                         # next line is needed for transferring to new seurat assay
                         seurat_add@reductions[[r]]@assay.used <- assay_new
 
                     } else if (any(grepl("integrated", names(seurat_add@reductions))) && 
-                        names(seurat_add@reductions)[r] == "umap") {
+                        reduction_name == "umap") {
                             dr_name <- paste(groups_c,
-                                             names(seurat_add@reductions)[r],
+                                             reduction_name,
                                              sep = "_")
                             names(seurat_add@reductions)[r] <- dr_name
                             Key(object = seurat_add[[dr_name]]) <- dr_name
                             seurat_add@reductions[[r]]@assay.used <- assay_new
 
-                    } else if (names(seurat_add@reductions)[r] == "wnn_umap") {
-                        dr_name <- gsub("wnn", groups_c, names(seurat_add@reductions)[r])
+                    } else if (reduction_name == "wnn_umap") {
+                        dr_name <- gsub("wnn", groups_c, reduction_name)
                         names(seurat_add@reductions)[r] <- dr_name
                         Key(object = seurat_add[[dr_name]]) <- dr_name
                     } else {
                         dr_name <- paste(
                             seurat_add@reductions[[r]]@assay.used,
-                            names(seurat_add@reductions)[r],
+                            reduction_name,
                             sep = "_"
                             )
                         names(seurat_add@reductions)[r] <- dr_name
                         Key(object = seurat_add[[dr_name]]) <- dr_name
                     }
-                  
-                seurat_main[[dr_name]] <- seurat_add[[dr_name]]
+
+                    seurat_main[[dr_name]] <- seurat_add[[dr_name]]
                 }
-                
-                # transfer clustering metadata
-                ident_pattern <- "snn_res\\.[0-9]+.*"
-                idc <- grep(ident_pattern, names(seurat_add@meta.data))
-                if (length(idc) > 0) {
+
+                # Transfer clustering metadata
+                ident_pattern <- ".snn_res\\.[0-9]+.*"
+                # Create a logical vector for clustering columns
+                idc <- str_detect(colnames(seurat_add@meta.data), ident_pattern)
+                # If any clustering column present,
+                if (any(idc)) {
+                    # Choose one column name matching the current group name
                     clust_column <- names(seurat_add@meta.data)[idc]
-                    if (any(grepl("wsnn", clust_column))) {
+                    col_name_new <- if (any(grepl("wsnn", clust_column))) {
                         idw <- which(grepl("wsnn", clust_column))
                         clust_column <- clust_column[idw]
-                        col_name_new <- gsub("wsnn", groups_c, clust_column)
-                    } else if (any(grepl("integrated", clust_column))) {
-                        col_name_new <- gsub("integrated", groups_c, clust_column)
+                        sub("wsnn", groups_c, clust_column)
                     } else {
-                        col_name_new <- clust_column
+                        clust_column <- clust_column[str_detect(clust_column, groups_c)]
                     }
                 }
-                
+
                 # Re-order seurat_add metadata rows based on seurat_main colnames
-                rows.add <- colnames_use
-                meta.add <- seurat_add@meta.data[rows.add, ]
+                meta.add <- seurat_add@meta.data[colnames(seurat_main), ]
                 seurat_main <- AddMetaData(
                     object = seurat_main, 
                     metadata = meta.add[,clust_column], 
                     col.name = col_name_new
                     )
-                }
+            }
         }
+        seurat_main
+
     } else {
+        NULL
     #fix later:
     # do something if 2 seurat objects have equal # barcodes, bc's not identical
     #sapply(X = bc_sub[-1], FUN = identical, bc_sub[1])
     }
-    seurat_list[[list_n]] <- seurat_main
-    list_n <- list_n + 1
-}
+}) %>%
+set_names(names(bc_summary_list))
 
+# Remove NULL object from the list
+seurat_list <- seurat_list[sapply(seurat_list, function(o) !is.null(o))]
 ```
 
 
 
-## Save Seurat object
+# Save Seurat object
 
-```{r save, results='asis'}
 
-cat('Updated Seurat object:')
+```{r save}
+print('Updated Seurat obj:')
 print(seurat_list)
 
 saveRDS(object=seurat_list, file=seurat_out)
-cat('Done saving seurat object.')
+print(paste("Seurat obj saved to", seurat_out))
 ```
 
 

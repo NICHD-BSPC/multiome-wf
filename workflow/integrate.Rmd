@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(tidyverse)
 library(Signac)
 library(Seurat)
 library(GenomeInfoDb)
@@ -26,10 +27,7 @@ set.seed(1234)
 source('common.R')
 ```
 
-
-
-
-## Parallelization
+# Parallelization
 
 ```{r parallelize, include=FALSE}
 
@@ -42,13 +40,9 @@ options(future.globals.maxSize=Inf,
 
 # Parallelize the run
 plan("multicore", workers=ncpus)
-
-
 ```
 
-
-
-## Set variables
+# Set variables
 
 We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
 
@@ -57,491 +51,251 @@ config_path <- params[['config']]
 ```
 
 
-## Read in data
+# Read in data
 
 Read in all Seurat objects and combine in a list.
 
 ```{r input}
-seurat_obj <- readRDS(params[['seurat_in']])
-cat('Input Seurat object: \n')
-print(seurat_obj)
-
-tryCatch(expr={ DefaultAssay(seurat_obj) <- "Peaks" },
-         error=function(x) { DefaultAssay(seurat_obj) <- "Gene.Expression" })
+seurat <- readRDS(params[['seurat_in']])
+print('Input Seurat object:')
+print(seurat)
 
 config <- yaml::read_yaml(file = config_path)
 
 integrate_activate <- config[['integrate']][['activate']]
-memory_MB <- config[['integrate']][['memory_MB']]
 atac_integrate_embeddings <- config[['integrate']][['atac_integrate_embeddings']]
 ```
 
 
 # Group data for normalization
 
-We'll iterate over a single group listed in the 'normalize' section of the yaml config file (Snakemake will choose which assay to use right now). For every group found, we'll look for the selected assay and normalize using a user selected method.
+We'll iterate over a single group listed in the 'normalize' section of the yaml config file 
+(Snakemake will choose which assay to use right now). For every group found, we'll look for the selected 
+assay and normalize using a user selected method.
 
 ```{r group}
 
 target <- basename(params[['seurat_out']])
 target <- gsub("^(.*).rds", "\\1", target)
-print("Integrating for group:")
-print(target)
 
-groups <- config[['integrate']][['groups']]
+# Retrieve configuration for integration
+group <- config[['integrate']][['groups']][[target]]
+assay_name <- group[['assay_name']]
 
-idx <- which(names(groups) %in% target)
- 
-if (length(idx) == 0) {
-    print("Group is not present in config's normalize groups list.")
-    q()
-} else if (length(idx) > 1) {
-    print("You are trying to normalize group/assay multiple times. Please fix.")
-    q()
-}
-
-group_name <- names(groups)[idx]
-print('Current group:')
-print(group_name)
-
-group <- groups[[idx]]
-```
-
-
-# Integrate Data
-
-We'll pick a metadata column in the Seurat object, split the input Seurat object based on metadata labels within the column of interest, and integrate between those groups.
-
-```{r params_list}
-split_by <- group[['split_by']]
-n_dataset <- group[['n_dataset']]
-	
-
-# Only for pairwise integration
-if (n_dataset == 2) {
-    ref_label <- group[['reference']][['label']]
-    query_label <- group[['query']][['label']]
-    features_use <- c(ref_label, query_label)
-        
-    ref_assay <- group[['reference']][['assay_name']]
-    query_assay <- group[['query']][['assay_name']]
-    assays <- c(ref_assay, query_assay)
-} else {
-    assays <- rep(group[['reference']][['assay_name']], n_dataset)
-}
-    
-# new_assay_name = group[['new_slot_name']]
+split_by <- config[['integrate']][['split_by']]
 norm_method <- group[['norm_method']]
-    
 integrate_dims <- group[['integrate_dims']]
+integrate_method <- group[['integrate_method']]
 
-
-
-```
-
-
-```{r prep_integration}
-# Split by modalities (aka Seurat assays, aka 10X Genomics feature types) using Seurat metadata column 
-print('Current integration group:')
-print(group_name)
-
-seurat_list <- SplitObject(
-    object = seurat_obj,
-    split.by = split_by
-)
-
-if (length(seurat_list) == 1) {
-    print('Provided metadata column has only one group. Integration requires 2 or more.')
-    print('Nothing to integrate. Quiting.')
-    q()
+if (is.null(integrate_dims)) {
+    integrate_dims <- 1:30
 }
 
-print('list names before subsetting')
-print(seurat_list)
-
-if (n_dataset == 2) {
-    # resulting list from 'SplitObject' may have more elements than want to integrate
-    # for each metadata column, subset list for metadata values
-    seurat_list <- seurat_list[features_use]
-
-    print('list names after subsetting')
-    print(seurat_list)
-    print(names(seurat_list))
-
-    print('setting default assays')
-    assays
-
-    seurat_list <- lapply(seq_along(seurat_list), function(x) {
-        seurat_obj <- seurat_list[[x]]
-        DefaultAssay(seurat_obj) <- assays[x]
-        return(seurat_obj)
-    })
-
-    names(seurat_list) <- features_use
-}
-
-print('list names after setting default assays')
-print(seurat_list)
-```
-
-
-```{r normalize}
-
-# Normalize data
-if (norm_method == 'log') {
-    print("Performing log normalization.")
-    
-    ################
-    
-    # Find common features if integrating different assays
-    # As with SCTransform
-    
-    # doesn't seem needed????
-    # SelectIntegrationFeatures picks features present in both/all assays
-    
-    ################
-    
-    # normalize and identify variable features for each dataset independently
-    seurat_list <- lapply(seq_along(seurat_list), function(x) {
-        seurat_obj <- seurat_list[[x]]
-        
-        seurat_obj <- NormalizeData(
-            object = seurat_obj,
-            normalization.method = 'LogNormalize'
-        )
-        seurat_obj <- FindVariableFeatures(
-            object = seurat_obj,
-            selection.method = "vst",
-            nfeatures = 2000
-        )
-        
-        return(seurat_obj)
-    })
-    
-    features <- SelectIntegrationFeatures(
-        object.list = seurat_list,
-        assay = assays
-    )
-    
-} else if (norm_method == 'sct') {
-    print("Performing SCTransform normalization.")
-    
-    # Integration step for SCTransform (and ATAC) require equal feature names (genes, peaks, etc)
-    # if length of assays is 1 (i.e. assays = 'RNA'), 
-    # rownames are already equal from merging Seurat objects in 'combine_seurat.R'
-    if (length(unique(assays)) > 1) {
-        print("More than one assay provided.")
-        seurat_list <- lapply(seq_along(seurat_list), function(x) {
-            seurat_obj <- seurat_list[[x]]
-            
-            assay <- assays[x]
-            counts <- seurat_obj[[assay]]@counts
-            obj <- Seurat::CreateAssayObject(counts = counts)
-            seurat_obj[['PrepSCT']] <- obj
-            
-            return(seurat_obj)
-        })
-        
-        print('merging list')
-        if (length(seurat_list) == 1) {
-            joint_obj <- seurat_list[[1]]
-        } else if (length(seurat_list) == 2) {
-            joint_obj <- merge(seurat_list[[1]], seurat_list[[2]])
-        } else if (length(seurat_list) > 2) {
-            joint_obj <- merge(seurat_list[[1]], seurat_list[2:length(seurat_list)])
-        }
-        
-        print('splitting object')
-        seurat_list <- SplitObject(
-            object = joint_obj, 
-            split.by = group_name
-        )
-        
-        print('setting default assay')
-        seurat_list <- lapply(seq_along(seurat_list), function(x) {
-            seurat_obj <- seurat_list[[x]]
-            DefaultAssay(seurat_obj) <- 'PrepSCT'
-            return(seurat_obj)
-        })
-        
-        assays = rep('PrepSCT', length(assays))
-    }
-    
-    # sctransform::vst requires cells (columns) sum up to a value > 0
-    # https://github.com/ChristophH/sctransform/issues/86
-    print('prepping SCTransform.')
-    seurat_list <- lapply(seq_along(seurat_list), function(x) {
-        seurat_obj <- seurat_list[[x]]
-        
-        assay <- assays[x]
-        # Remove zero-counted cells
-        cell_counts <- colSums(seurat_obj[[assay]]@counts)
-        idx <- which(cell_counts == 0)
-        seurat_obj <- subset(seurat_obj, cells = idx, invert = TRUE)
-        # Run SCTransform
-        seurat_obj <- SCTransform(
-            object = seurat_obj,
-            assay = assay
-            )
-        return(seurat_obj)
-    })
-    
-    
-    print('Finding integration features.')
-    features <- SelectIntegrationFeatures(
-        object.list = seurat_list,
-        nfeatures = 3000
-    )
-    
-    print('Preparing for SCT integration.')
-    seurat_list <- PrepSCTIntegration(
-        object.list = seurat_list,
-        anchor.features = features
-    )
-    
-} else if (norm_method == "lsi") {
-    print("Performing LSA normalization.")
-    
-    if (atac_integrate_embeddings) {
-        print('merging list')
-        if (length(seurat_list) == 1) {
-            joint_obj <- seurat_list[[1]]
-        } else if (length(seurat_list) == 2) {
-            joint_obj <- merge(seurat_list[[1]],
-                               seurat_list[[2]])
-        } else if (length(seurat_list) > 2) {
-            joint_obj <- merge(seurat_list[[1]],
-                               seurat_list[2:length(seurat_list)])
-        }
-        print('joint object')
-        print(joint_obj)
-        
-        DefaultAssay(joint_obj) <- 'Peaks'
-        
-        # process the combined dataset, need LSI for full data later
-        joint_obj <- FindTopFeatures(
-            object = joint_obj,
-            min.cutoff = 10
-        )
-        joint_obj <- RunTFIDF(
-            object = joint_obj
-        )
-        joint_obj <- RunSVD(
-            object = joint_obj
-        )
-    } else {
-        seurat_list <- lapply(seq_along(seurat_list), function(x) {
-            seurat_obj <- seurat_list[[x]]
-            
-            seurat_obj <- RunTFIDF(seurat_obj)
-            
-            # The low dynamic range of scATAC-seq data makes it challenging
-            # to perform variable feature selection, as we do for scRNA-seq.
-            # Instead, we can choose to use only the top n% of features (peaks) for dimensional reduction.
-            seurat_obj <- FindTopFeatures(
-                object = seurat_obj,
-                min.cutoff = 10
-            )
-            
-            return(seurat_obj)
-        })
-        
-        features <- SelectIntegrationFeatures(
-            object.list = seurat_list,
-            nfeatures = floor(0.25 * nrow(seurat_list[[1]]))
-        )
-        
-        seurat_list = lapply(seq_along(seurat_list), function(x) {
-            seurat_obj <- seurat_list[[x]]
-            
-            # need to have dim reduction in at least one assays,
-            # since specifying weight.reduction="lsi" in IntegrateData()
-            seurat_obj <- RunSVD(seurat_obj)
-            
-            return(seurat_obj)
-        })
-    }
-} else {
-    print('Invalid choice for integration normalization.')
-    print('please select log, sct or tfidf methods and re-run this step')
-}
-
-
-```
-
-
-```{r integrate}
-# https://satijalab.org/seurat/v3.0/future_vignette.html
-# set global variable size to 5-35 GiBs depending on number cells integrating.
-# if (!is.null(memory_MB) && memory_MB > 500) {
-#     options(future.globals.maxSize = memory_MB * 1024^2)
-# }
+print(paste("Integrating for group:", target))
+print(paste("Integrating for assay:", assay_name))
+print(paste("Integrating for metadata column:", split_by))
+print(paste("Integrating for normalization method:", norm_method))
+print(paste("Number of dimensions used for integration:", integrate_dims[1], "to", integrate_dims[2]))
+print(paste("Integration method configured:", integrate_method))
 
 # Set the number of neighbors when weighting anchors
 k.weight <- ifelse(config[['dataset_size']][['toydataset']],
                    config[['dataset_size']][['toy_k']],   # 10 by default
                    100)
+```
 
-if (is.null(integrate_dims)) {
-    integrate_dims = 1:30
+
+# Integrate Data
+
+We'll pick a metadata column in the Seurat object and integrate between those groups. The current analysis is
+configured to integrate dataset by `r split_by`. 
+
+Integration approaches are described in the following documentations:
+
+- scRNA-seq: [Integrative analysis in Seurat v5](https://satijalab.org/seurat/articles/seurat5_integration)
+- scATAC-seq: [scATAC-seq data integration](https://stuartlab.org/signac/articles/integrate_atac)
+
+For ATAC data normalized with
+[term frequency inverse document frequency (TF-IDF)](https://stuartlab.org/signac/reference/runtfidf), 
+integration is performed using the `IntegrateEmbeddings` function in 
+[Signac](https://stuartlab.org/signac/). The main steps of this procedure are identical to 
+[IntegrateData](https://satijalab.org/seurat/reference/integratedata) with one key distinction. 
+When computing the weights matrix, the distance calculations are performed in the full space of 
+integrated embeddings when integrating more than two datasets, as opposed to a reduced PCA space 
+which is the default behavior in IntegrateData.
+
+
+```{r sanity_check}
+
+sanity_check <- c(
+    assay= assay_name %in% names(seurat),
+    dimred= names(seurat@reductions)
+)
+
+sanity_check['norm_method'] <- ifelse(
+    norm_method == "sct", "SCT", ifelse(
+    norm_method == "log", "LogNormalize", ifelse(
+    norm_method == "lsi", "LSI", NULL)
+)) 
+
+sanity_check['N_dataset'] <- length(SplitObject(seurat, split_by))
+
+# Break if your configured assay name is not found in your current Seurat obj
+if (sanity_check['assay'] != "TRUE") {
+    stop(paste(assay_name, "not found in your single cell object!"))
 }
 
-if (norm_method == "log") {
-    print("Performing Log integration.")
-    
-    anchors <- FindIntegrationAnchors(
-        object.list = seurat_list,
-        assay = assays,
-        dims = integrate_dims,
-        normalization.method = "LogNormalize",
-        anchor.features = features
+# Run dimensionality reduction if missing
+if (!any(sanity_check %in% c("pca", "lsi")) & sanity_check['N_dataset'] > 1) {
+    print("Reduced dimensions missing in the current single cell obj.")
+    print("Running dimensionality reduction...")
+    seurat <- preprocess_seurat(
+        seurat_obj=seurat,
+        assay=assay_name,
+        norm_method=norm_method
     )
-    
-    # new.assay.name = new_assay_name,
-    integrated <- IntegrateData(
-        anchorset = anchors,
-        dims = integrate_dims,
-        k.weight=k.weight,
-        normalization.method = "LogNormalize"
-    )
-    
-    DefaultAssay(integrated) <- "integrated"
-    
-    # Log norm method needs further scaling
-    integrated <- ScaleData(
-        object = integrated
-    )
-    
-    reduction_name = 'integrated_pca'
-    integrated <- RunPCA(
-        object = integrated,
-        reduction.name = reduction_name,
-    )
+}
 
-} else if (norm_method == "sct") {
-    print("Performing SCT integration.")
+dim_name <- names(seurat@reductions)
 
-    anchors <- FindIntegrationAnchors(
-        object.list = seurat_list,
-        dims = integrate_dims,
-        normalization.method = "SCT",
-        anchor.features = features
-    )
-    # new.assay.name = new_assay_name,
-    integrated <- IntegrateData(
-        anchorset = anchors,
-        dims = integrate_dims,
-        k.weight=k.weight,
-        normalization.method = "SCT"
-    )
-    
-    DefaultAssay(integrated) <- "integrated"
-    
-    # !!!!!!!!!! When integrating with SCT method DO NOT scale data with ScaleData() !!!!!!!!!!
-    
-    reduction_name = 'integrated_pca'
-    integrated <- RunPCA(
-        object = integrated,
-        reduction.name = reduction_name,
-    )
- 
-
-} else if (norm_method == "lsi") {
-    print("Performing LSA integration.")
-    
-    if (atac_integrate_embeddings) {
-        print("Integrating embeddings.")
-        # integrating only dim reduc embringings is more efficient for sparse ATAC matrices
-        anchors <- FindIntegrationAnchors(
-            object.list = seurat_list,
-            anchor.features = rownames(seurat_list[[1]]),
-            dims = 2:max(integrate_dims)
-        )
-        
-        # # integrated all, even if using 2:30 for FindIntegrationAnchors
-        # dims_to_integrate = seq(from = 1, to = max(dims))
-        
-        # integrate LSI embeddings
-        # reduction_name = paste0(tolower(new_assay_name), '_lsi')
-
-        reduction_name = 'integrated_lsi'
-        integrated <- IntegrateEmbeddings(
-            anchorset = anchors,
-            reductions = joint_obj[['lsi']],
-            new.reduction.name = reduction_name,
-            dims.to.integrate = integrate_dims,
-            k.weight=k.weight  # 100 by default. Adjusted to 10 if input is toydataset.
-        )
-
-    } else {
-        print("Integrating peaks matrix.")
-        # original Seurat integration method. Transforms matrix in active assay.
-        
-        # use k.filter = 'NA'. https://github.com/timoast/signac/issues/94
-        anchors <- FindIntegrationAnchors(
-            object.list = seurat_list,
-            anchor.features = features,
-            dims = 2:max(integrate_dims),
-            k.filter = NA
-        )
-
-        # new.assay.name = new_assay_name,
-        integrated <- IntegrateData(
-            anchorset = anchors,
-            dims = integrate_dims,
-            weight.reduction = seurat_list[[2]][['lsi']],
-            k.weight=k.weight,  # 100 by default. Adjusted to 10 if input is toydataset.
-            preserve.order = TRUE
-        )
-        
-        DefaultAssay(integrated) <- "integrated"
-        
-        # we now have a "corrected" TF-IDF matrix, and can run LSI again on this corrected matrix
-        # reduction_name = paste0(tolower(new_assay_name), '_lsi')
-        reduction_name = 'integrated_lsi'
-        integrated <- RunSVD(
-            object = integrated,
-            reduction.name = reduction_name
-        )
-    }
+if (is.null(sanity_check['norm_method'])) {
+    stop("Current normalization method is not available for integration!")
 }
 ```
 
-## Double check object & dimension reduction {.tabset .tabset-pills}
+
+```{r integrate}
+
+integrated <- NULL
+
+# Integration runs only when you have more than one datasets
+if (sanity_check['N_dataset'] > 1) {
+
+    print(paste("Integration performed on the following counts:", norm_method))
+    if (norm_method %in% c("sct", "log")) {
+        # Integrate SCT or log-transformed datasets
+        integrated <- if (integrate_method == "CCAIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=CCAIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "RPCAIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=RPCAIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "HarmonyIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=HarmonyIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "FastMNNIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=FastMNNIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else if (integrate_method == "scVIIntegration") {
+            IntegrateLayers(
+                seurat,
+                method=FastMNNIntegration,
+                orig.reduction="pca",
+                new.reduction="integrated_pca",
+                normalization.method=sanity_check["norm_method"],
+                dims=integrate_dims,
+                k.weight=k.weight
+                )
+        } else {
+            stop("Configure valid integrate_method in config.yaml!")
+        }
+
+    } else if (norm_method == "lsi") {
+
+        # Convert obj into a list of subsetted obj
+        seurat_list <- SplitObject(seurat, split_by)
+
+        anchors <- FindIntegrationAnchors(
+            object.list=seurat_list,
+            anchor.features=rownames(seurat_list[[1]]),
+            reduction="rlsi",
+            dims=2:max(integrate_dims)
+            )
+
+        integrated <- IntegrateEmbeddings(
+                anchorset = anchors,
+                reductions = seurat[['lsi']],
+                new.reduction.name = 'integrated_lsi',
+                dims.to.integrate = integrate_dims,
+                k.weight=k.weight  # 100 by default. Adjusted to 10 if input is toydataset.
+            )
+
+    } else {
+        stop(paste(norm_method, "is unavailable for normalization in", assay_name))
+    }
+} else {
+    stop(paste("Not enough dataset for integration. Delete", target, "from your config.yaml!"))
+}
+
+if (!is.null(integrated)) {
+    print('Final seurat objects, with integrated assay and linear dim reduction:')
+    print(integrated)
+}
+```
 
 
-### Elbow Plot
+# Elbow Plot
 
 ```{r finish, results='asis'}
-print('final seurat objects, with integrated assay and linear dim reduciton')
-print(integrated)
 
-targets = c("pca", "lsi")
-idx = grep(paste(targets,collapse="|"), names(integrated@reductions))
-reduction_name = names(integrated@reductions)[idx]
+# Determine the name of reduced dimension for plotting
+targets <- c("pca", "lsi")
+idx <- grep(paste(targets,collapse="|"), names(integrated@reductions))
+reduction_name <- names(integrated@reductions)[idx]
+reduction_name <- reduction_name[str_detect(reduction_name, "integrated")]
 
-max_comps = ncol(integrated[[reduction_name]]@cell.embeddings)
+max_comps <- ncol(integrated[[reduction_name]]@cell.embeddings)
 
 # Seurat::Stdev() has "pca" hard coded (from IRLBA)
 # calc our own standard deviations for cell embedding, if absent (i.e. LSI)
-sdev = integrated[[reduction_name]]@stdev
+sdev <- integrated[[reduction_name]]@stdev
 if (length(sdev) == 0) {
-    m = integrated[[reduction_name]]@cell.embeddings
-    sdev = apply(m, 2, sd)
-    integrated[[reduction_name]]@stdev = sdev
+    m <- integrated[[reduction_name]]@cell.embeddings
+    sdev <- apply(m, 2, sd)
+    integrated[[reduction_name]]@stdev <- sdev
 }
 
-ElbowPlot(object = integrated, ndims = max_comps, reduction = reduction_name)
+ElbowPlot(
+    object=integrated,
+    ndims=max_comps,
+    reduction=reduction_name)
 ```
 
 
-## Save Seurat object
+# Save Seurat object
 
 ```{r save}
 saveRDS(object=integrated, file=params[['seurat_out']])
-print('Done saving list of seurat objects.')
+print(paste("Seurat obj saved in", params[['seurat_out']]))
 ```
-max_comps = ncol(integrated[[reduction_name]]@cell.embeddings)
 
 ## Session Info
 

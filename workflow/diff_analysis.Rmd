@@ -2,7 +2,6 @@
 title: "Finding Markers"
 output:
     html_document:
-            keep_md: yes
             toc: true
             toc_float: true
             code_folding: hide
@@ -11,13 +10,14 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
     warning=FALSE,
-    message=FALSE,
-    results='hide'
+    message=FALSE
     )
 
 ```
 
 ```{r packages_and_functions, include=FALSE}
+library(tidyverse)
+library(parallel)
 library(Signac)
 library(Seurat)
 library(knitr)
@@ -27,7 +27,6 @@ set.seed(1234)
 source('common.R')
 ```
 
-## Parallelization
 
 ```{r parallelize, include=FALSE}
 
@@ -41,168 +40,178 @@ options(future.globals.maxSize=40000 * 1024^2,
 # Parallelize the run
 plan("multicore", workers=ncpus)
 
-
 ```
 
 
-
-
-## Set variables
-
-We'll get all the sample and replicate specific variables listed in samples.tsv and units.tsv, respectively. We'll also set paths to input files.
-
-```{r variables}
-config_path = params[['config']]
-
-```
-
-
-## Read in data
+# Read in data
 
 Read in Seurat object.
 
 ```{r input}
-seurat = readRDS(params[['seurat_in']])
-cat('Input seurat object: \n')
+
+# Read configuration
+config_path <- params[['config']]
+config <- yaml::read_yaml(file = config_path)
+
+# Import Seurat object
+seurat <- readRDS(params[['seurat_in']])
+print('Input seurat object:')
 print(seurat)
 
-config = yaml::read_yaml(file = config_path)
 ```
 
 
-## Find markers
+# Find markers
 
-```{r get_analysis_group}
-# target = basename(params[['seurat_in']])
-# target = gsub("^(.*).clustered_data.rds", "\\1", target)
-# print("Choosing for group:")
-# print(target)
-# 
-# groups = config[['diff_analysis']][['groups']]
-# 
-# idx = which(names(groups) %in% target)
-#  
-# if (length(idx) == 0) {
-#     print("Group is not present in config's normalize groups list.")
-#     q()
-# } else if (length(idx) > 1) {
-#     print("You are trying to normalize group/assay multiple times. Please fix.")
-#     q()
-# }
+```{r get_analysis_group_and_threshold}
 
-group = config[['diff_analysis']][['groups']][[ params[["seurat"]] ]]
-group_name = params[["seurat"]]
-print('Current group:')
-print(group_name)
+# Retrieve group info
+group <- config[['diff_analysis']][['groups']][[ params[["seurat"]] ]]
+group_name <- params[["seurat"]]
 
+print(paste('Current group:', group_name))
+
+# Retrieve FDR threshold info
+alpha <- group[['alpha']]
+alpha <- ifelse(is.numeric(alpha), alpha, as.numeric(alpha))
 ```
 
 
-```{r find_markers}
-cluster_idents = group[['cluster_idents']]
-if (is.null(cluster_idents)) {
-  ident_name = "seurat_clusters"
-} else {
-  ident_name = cluster_idents
-}
+```{r choose_clustering_column}
 
-# should only have one resolution column that is copied to "seurat_clusters"
-# except for weighted nearest neighbor objects
-pattern = ".*wsnn_res\\.[0-9]+.*"
-idx = grep(pattern = pattern, x = names(seurat@meta.data))
+# Assign column name used for clustering
+cluster_idents <- group[['cluster_idents']]
+
+# Determine the clustering column to seurat_clusters if it's missing
+ident_name <- ifelse(
+    is.null(cluster_idents),
+    "seurat_clusters",
+    cluster_idents)
+
+
+# Find columns storing WNN clustering
+# NOTE: should only have one resolution column that is copied to "seurat_clusters"
+#       except for weighted nearest neighbor objects
+pattern <- ".*wsnn_res\\.[0-9]+.*"
+idx <- grep(pattern = pattern, x = names(seurat@meta.data))
+
+# Update the idx if WNN is not present
 if (length(idx) > 0) {
-  print("Weighted snn idents identical to cluster_idents?")
+    print("Weighted snn idents identical to cluster_idents?")
 } else {
-  pattern = ".*snn_res\\.[0-9]+.*"
-  idx = grep(pattern = pattern, x = names(seurat@meta.data))
-  print("Shared nn idents identical to cluster_idents?")
+    pattern <- ".*snn_res\\.[0-9]+.*"
+    idx <- grep(pattern = pattern, x = names(seurat@meta.data))
+    print("Shared nn idents identical to cluster_idents?")
 }
 
-# check if all identical. Not necessary but helpful
-# print(all(seurat@meta.data[,ident_name] == seurat@meta.data[,idx]))  # raises an error after clustering bug fixation. skipped.
+```
 
+```{r marker_genes}
 
-# fix later, add loop to this section to support multiple assays/slots in a single object.
 # Ex: "Gene.Expression" with "data" slot, "SCT" with "scale.data"
 # Ex: "Peaks" with "data", "GeneActivity" with "data"
 if (length(ident_name) > 0) {
-  print("finding markers for:")
-  print(ident_name)
-  
-  Idents(object = seurat) <- ident_name
-  head(Idents(object = seurat))
-  
-  if (is.null(group[['slot']])) {
-    slot_use = "data"
-  } else {
-    slot_use = group[['slot']]
-  }
-  
-  # set default values if they are null in config.yaml
-  if (is.null(group[['assay']])) {
-    targets = c("pca", "lsi")
-    idx = grep(paste(targets,collapse="|"), names(seurat@reductions))
-    red_use = names(seurat@reductions)[idx]
-    assay_use = seurat@reductions[[red_use]]@assay.used
-  } else {
-    assay_use = group[['assay']]
-    assay_present = any(names(seurat@assays) %in% assay_use)
+
+    print(paste("Finding markers for:", ident_name))
     
-    if (assay_present) {
-      matrix_use = GetAssayData(object = seurat,
-                                assay = assay_use,
-                                slot = slot_use)
-      if (nrow(matrix_use) == 0 && ncol(matrix_use) == 0) {
-        print("Assay and slot defined in config file is empty! Quiting.")
-        q()
-      }
+    Idents(object = seurat) <- ident_name
+    
+    slot_use <- ifelse(is.null(group[['slot']]), "data", group[['slot']])
+    
+    # Set default values if they are null in config.yaml
+    if (is.null(group[['assay']])) {
+
+        # Determine the name of reduced dimension and assay for plotting
+        targets <- c("pca", "lsi")
+        idx <- grep(paste(targets,collapse="|"), names(seurat@reductions))
+        red_use <- names(seurat@reductions)[idx]
+        red_use <- if (any(sapply(red_use, function(r) str_detect(r, "integrated")))) {
+            red_use[str_detect(red_use, "integrated")]
+        } else {
+            red_use
+        }
+        assay_use <- seurat@reductions[[red_use]]@assay.used
+
+    } else {
+        assay_use <- group[['assay']]
+        assay_present <- any(names(seurat@assays) %in% assay_use)
+    
+        # Break if user-configured assay is not available in the current Seurat object
+        if (assay_present) {
+            matrix_use <- GetAssayData(object = seurat,
+                                      assay = assay_use,
+                                      slot = slot_use)
+            if (nrow(matrix_use) == 0 && ncol(matrix_use) == 0) {
+                stop("Assay and slot defined in config file is empty!")
+            }
+        }
     }
-  }
-  if (is.null(group[['min_pct']])) {
-    min_pct = 0.1
-  } else {
-    min_pct = group[['min_pct']]
-  }
-  if (is.null(group[['test_use']])) {
-    test_use = "wilcox"
-  } else {
-    test_use = group[['test_use']]
-  }
 
-  # fix later:
-  # Warning: 'latent.vars' is only used for the following tests: negbinom, poisson, MAST, LR
-  markers_df = FindAllMarkers(
-    object = seurat,
-    assay = assay_use,
-    slot = slot_use,
-    min.pct = min_pct,
-    test.use = test_use,
-    latent.vars = group[['latent_vars']]
-  )
+    # Assign parameters for marker computation
+    min_pct <- ifelse(is.null(group[['min_pct']]), 0.1, group[['min_pct']])
+    test_use <- ifelse(is.null(group[['test_use']]), 'wilcox', group[['test_use']])
 
-  markers_df$group = rep(ident_name, nrow(markers_df))
-  markers_df$assay = rep(assay_use, nrow(markers_df))
-  markers_df$slot = rep(slot_use, nrow(markers_df))
+    print(paste("Minimum fraction of cells for testing a gene:", min_pct))
+    print(paste("Testing method:", test_use))
+
+    # fix later:
+    # Warning: 'latent.vars' is only used for the following tests: negbinom, poisson, MAST, LR
+    print(paste("Null hypothesis testing in use:", test_use))
+    print(paste("See more info about testing options in https://satijalab.org/seurat/reference/findallmarkers"))
+    markers_df <- FindAllMarkers(
+        object = seurat,
+        assay = assay_use,
+        slot = slot_use,
+        min.pct = min_pct,
+        verbose = FALSE,
+        test.use = test_use,
+        latent.vars = group[['latent_vars']]
+    )
+ 
+    # Add columns for extra information
+    markers_df$group <- rep(ident_name, nrow(markers_df))
+    markers_df$assay <- rep(assay_use, nrow(markers_df))
+    markers_df$slot <- rep(slot_use, nrow(markers_df))
 }
 
-markers_df = markers_df[markers_df$p_val_adj <= 0.05,]
+# Filter out non DEGs from the data frame
+print(paste("FDR threshold:", alpha))
+if (nrow(markers_df) > 0) {
+    markers_df <- markers_df[markers_df$p_val_adj <= alpha,] %>%
+        # Reorder columns
+        rownames_to_column("Gene") %>%
+        dplyr::select(-gene)
+} else {
+    print("No DEGs found!")
+    markers_df <- data.frame()
+}
 
 ```
 
 
-## Save Seurat object
+# Save Seurat object
 
-```{r save}
-print('Writing markers list to file:')
+```{r save, results='asis'}
 
-write.table(x = markers_df, file = params[['markers_out']], 
-            sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+path_out <- params[['markers_out']]
+if (nrow(markers_df) > 0) {
+    cat("- DE table: [", path_out, "](", path_out, ")")
+} else {
+    cat("Table for DEG not provided.")
+}
 
-print('Done saving markers table')
+write.table(
+    x = markers_df,
+    file = params[['markers_out']],
+    sep = "\t",
+    col.names = TRUE,
+    row.names = FALSE,
+    quote = FALSE)
+
 ```
 
 
-## Session Info
+# Session Info
 
 ```{r session_info}
 sessionInfo()
