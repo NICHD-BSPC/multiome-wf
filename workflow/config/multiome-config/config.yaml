@@ -16,6 +16,8 @@ assays: config/multiome-config/assays.tsv
 #   "EnsDb" is not available due to annotation incompatibility. Use "GTF" instead.
 ANNOTATION: "EnsDb"
 ANNO_FILE: "path/to/genes.gtf.gz"
+fasta: "../reference/genome.fa"
+chromsizes: "../reference/multiome.chromsizes"
 
 # Feature based QC filtering of cells.
 # rm_outliers_method: Detect outliers using standard deviation 'sd' or Tukey's interquartile ranger 'iqr'.
@@ -149,7 +151,7 @@ integrate:
 # toy_k: size of the number of neighbors when weighting anchors during integration
 #    This value is passed to weight.k argument in the IntegrateLayers function of Seurat
 dataset_size:
-  toydataset: false  # true or false
+  toydataset: false # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # 
 
