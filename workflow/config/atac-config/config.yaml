@@ -17,8 +17,6 @@ assays: config/multiome-config/assays.tsv
 #   "EnsDb" is not available due to annotation incompatibility. Use "GTF" instead.
 ANNOTATION: "EnsDb"
 ANNO_FILE: "path/to/genes.gtf.gz"
-fasta: "../reference/genome.fa"
-chromsizes: "../reference/atac.chromsizes"
 
 # Feature based QC filtering of cells.
 # rm_outliers_method: Detect outliers using standard deviation 'sd' or Tukey's interquartile ranger 'iqr'.
@@ -50,6 +48,8 @@ qc:
 macs2:
   run: "Y"
   group_fragments_by: genome # feature_type
+  fasta: "../reference/genome.fa" # genome.fa used in cellranger count
+  chromsizes: "../reference/atac.chromsizes" # desired path to save chromsizes file
 
 
 # Normalization and linear reduction
@@ -155,12 +155,6 @@ chooser:
   resolutions:
     - 0.6
     - 0.8
-    - 1.0
-    - 1.2
-    - 1.4
-    - 1.6
-    - 1.8
-    - 2.0
   silhouette:
     - silhouette
     - frequency_grouped
