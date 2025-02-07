@@ -10,7 +10,7 @@ from itertools import compress
 
 
 ##### load config and sample sheets #####
-configfile: "config/multiome-config/config.yaml"
+configfile: "config/atac-config/config.yaml"
 
 
 # configuration = "config/config.yaml"
@@ -178,6 +178,10 @@ def all_input(wildcards):
                 seurat=valid_groups['diff_analysis']
             )
         )
+
+    if config["macs2"]["run"] == "Y":
+        wanted_input.append("results/macs2/NA_treat_pileup.bigwig")
+        wanted_input.append("results/macs2/NA_control_lambda.bigwig")
 
     wanted_input.append(
         "results/combine/seurat_combined.rds"
@@ -426,6 +430,8 @@ rule macs2:
         tsvgz = "results/macs2/macspeaks.tsv.gz",
         tbi = "results/macs2/macspeaks.tsv.gz.tbi",
         peak = "results/macs2/NA_peaks.narrowPeak",
+        signal = "results/macs2/NA_treat_pileup.bdg",
+        noise = "results/macs2/NA_control_lambda.bdg"
     params:
         tsv = "results/macs2/macspeaks.tsv"
     threads: 12
@@ -446,7 +452,7 @@ rule macs2:
         "parallel --max-procs={threads} "
             "'tabix -p bed --zero-based --force --begin 2 --end 3 {{}}' ::: {output.tsvgz} && "
         "parallel --max-procs={threads} "
-            "'macs2 callpeak -t {{}} -f BED --nomodel --outdir results/macs2' ::: {output.tsvgz}"
+            "'macs2 callpeak -t {{}} -f BED --nomodel -B --outdir results/macs2' ::: {output.tsvgz}"
 
 rule add_macs_peaks:
     """
@@ -482,6 +488,85 @@ rule add_macs_peaks:
             params=params,
             output_file = "{output.html}")'
         """
+
+rule chromsizes:
+    """
+    Creates a chromsizes table from fasta
+    """
+    input:
+        config["macs2"]["fasta"]
+    output:
+        config["macs2"]["chromsizes"]
+    log:
+        f'{config["macs2"]["fasta"]}.log'
+    params:
+        # NOTE: Be careful with the memory here; make sure you have enough
+        # and/or it matches the resources you're requesting in the cluster
+        # config.
+        java_args='-Xmx20g'
+        # java_args='-Xmx2g'  # [TEST SETTINGS -1]
+    resources:
+        mem_mb=1024 * 24,
+        disk_mb=1024 * 12,
+        runtime=60 * 1
+    shell:
+        'export LC_COLLATE=C; '
+        'rm -f {output}.tmp '
+        '&& picard '
+        '{params.java_args} '
+        'CreateSequenceDictionary R={input} O={output}.tmp &> {log} '
+        '&& grep "^@SQ" {output}.tmp '
+        '''| awk '{{print $2, $3}}' '''
+        '| sed "s/SN://g;s/ LN:/\\t/g" '
+        '| sort -k1,1 > {output} '
+        '&& rm -f {output}.tmp '
+
+
+rule bigwig_signal:
+    """
+    Creates a bigwig file for peak intensity from macs2-generated bedGraph
+    """
+    input:
+        chrom = config["macs2"]["chromsizes"],
+        bdg = "results/macs2/NA_treat_pileup.bdg",
+    output:
+        "results/macs2/NA_treat_pileup.bigwig",
+    resources:
+        mem_mb=1024 * 20,
+        disk_mb=1024 * 10,
+        runtime=60 * 1
+    shell:
+        """
+        awk 'NR==FNR {{chr_size[$1]=$2; next}}
+             {{if ($3 > chr_size[$1]) $3 = chr_size[$1]; print}}' {input.chrom} {input.bdg} > {input.bdg}.temp
+        bedClip {input.bdg} {input.chrom} {input.bdg}.temp
+        bedGraphToBigWig {input.bdg}.temp {input.chrom} {output}
+        rm {input.bdg}.temp
+        """
+
+rule bigwig_noise:
+    """
+    Creates a bigwig file for noise intensity from macs2-generated bedGraph
+    """
+    input:
+        chrom = config["macs2"]["chromsizes"],
+        bdg = "results/macs2/NA_control_lambda.bdg"
+    output:
+        "results/macs2/NA_control_lambda.bigwig"
+    resources:
+        mem_mb=1024 * 20,
+        disk_mb=1024 * 10,
+        runtime=60 * 1
+    shell:
+        """
+        awk 'NR==FNR {{chr_size[$1]=$2; next}}
+             {{if ($3 > chr_size[$1]) $3 = chr_size[$1]; print}}' {input.chrom} {input.bdg} > {input.bdg}.temp
+        bedClip {input.bdg} {input.chrom} {input.bdg}.temp
+        bedGraphToBigWig {input.bdg}.temp {input.chrom} {output}
+        rm {input.bdg}.temp
+        """
+
+
 
 rule normalize_reduce_dims:
     """
