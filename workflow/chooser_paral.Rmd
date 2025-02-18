@@ -31,7 +31,6 @@ set.seed(1327)  # added to remove unwanted randomness
 source("chooser/R/pipeline.R")
 ```
 
-
 ```{r config}
 config_path <- params[['config']]
 res <- as.numeric(params[["res"]])
