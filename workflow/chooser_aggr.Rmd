@@ -30,13 +30,11 @@ set.seed(1327)
 source("chooser/R/pipeline.R")
 ```
 
-
 ```{r variables}
 results_path <- params[['results_path']]
 new_path <- params[['new_path']]
 snakemake.config <- yaml::read_yaml(params[['config']])
 resolutions <- as.character(unlist(snakemake.config$chooser$resolutions))
-
 ```
 
 
@@ -66,8 +64,11 @@ meds <- tryCatch(
 )
 
 try_boot_median <- function(x){
-    outs = tryCatch(
-        boot_median(x), 
+    outs <- tryCatch(
+        { 
+            x_jittered <- x + rnorm(length(x), mean = 0, sd = 0.0001) 
+            boot_median(x_jittered, type="bca")
+        }, 
         error=function(e) {
             message(paste("Can't calculate CI for res:", c_res))
             message("Error:")
@@ -84,8 +85,8 @@ n_clusters_list <- c()
 
 all_res <- unique(meds$res)
 
-
 for (x in seq_along(all_res)) {
+
     c_res <- all_res[x]
     c_meds <- meds[meds$res == c_res,]
 
@@ -399,14 +400,6 @@ sil_scores <- if (length(sil_scores) <= 1) {
     sil_scores
 }
 
-# sil_scores <- if (is.null(sil_scores)) {
-#     NULL
-# } else if (is.na(sil_scores)) {
-#     NULL
-# } else {
-#     sil_scores
-# }
-
 if (!is.null(sil_scores)) {
     sil_scores <- as.data.frame(sil_scores[, 3], row.names = Seurat::Cells(obj))
     colnames(sil_scores) <- c("sil_score")
@@ -443,8 +436,8 @@ dim_reductions <- c("pca", "lsi")
 reduction <- names(obj@reductions)
 reduction_idx <- sapply(dim_reductions, function(r) str_detect(reduction, r))
 
-# Break if the number of dimensionality reduction is 0 or more than 1 unintegrated dimensionality reductions
-# found
+# Break if the number of dimensionality reduction is 0 or more than 1 unintegrated 
+# dimensionality reductions found
 if (sum(reduction_idx) > 1) {
     if (any(str_detect(reduction, "integrated"))) {
         reduction <- reduction[str_detect(reduction, "integrated")]
@@ -539,7 +532,6 @@ if (!is.null(sil_scores) & "umap" %in% names(obj@reductions)) {
 # Save
 
 ```{r save}
-
 # Save original data, with optimal neighbor resolution
 outdir <- file.path(".", "results", "chooser_plot", params[["seurat"]])
 if (!dir.exists(outdir)) {
