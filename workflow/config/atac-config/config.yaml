@@ -153,8 +153,9 @@ chooser:
     integrated_3:
       npcs: 20
   resolutions:
-    - 0.6
     - 0.8
+    - 1
+    - 1.2
   silhouette:
     - silhouette
     - frequency_grouped
