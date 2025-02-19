@@ -3,11 +3,11 @@ samples: config/rna-config/samples.tsv
 
 # Optionally, barcode suffix/ibrary ID mappings should be included in a aggregates.tsv file.
 # This table is required when providing concatenated input matrices
-aggregates: config/multiome-config/aggregates.tsv
+aggregates: config/rna-config/aggregates.tsv
 
 # Additional assay info should be included in an assays.tsv file that contains one row per assay per sample/rep.
 # Only include "DIY" custom count matrices, any "core" matrices/assays are included in 'samples.tsv'.
-assays: config/multiome-config/assays.tsv
+assays: config/rna-config/assays.tsv
 
 # Choose how to build your annotation (e.g. EnsDb or GTF)
 # NOTE:
@@ -46,6 +46,9 @@ qc:
 macs2:
   run: "N"
   group_fragments_by: genome # feature_type
+  fasta: "../reference/genome.fa" # genome.fa used in cellranger count
+  chromsizes: "../reference/rna.chromsizes" # desired path to save chromsizes file
+
 
 
 # Normalization and linear reduction
@@ -141,12 +144,9 @@ chooser:
   resolutions:
     - 0.6
     - 0.8
-    - 1.0
+    - 1
     - 1.2
     - 1.4
-    - 1.6
-    - 1.8
-    - 2.0
   silhouette:
     - silhouette
     - frequency_grouped
