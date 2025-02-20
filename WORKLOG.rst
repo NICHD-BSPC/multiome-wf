@@ -196,6 +196,12 @@ multiome-wf
 
         .. code-block:: r
 
-            x_jittered <- x + rnorm(length(x), mean = 0, sd = 0.0001)
+            x_jittered <- x + rnorm(length(x), mean = 0, sd = 0.000001)
             boot_median(x_jittered, type="bca")
 
+2025-02-19
+----------
+
+@Mira0507
+
+- Testing with toy datasets
