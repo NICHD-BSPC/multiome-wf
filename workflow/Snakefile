@@ -10,7 +10,7 @@ from itertools import compress
 
 
 ##### load config and sample sheets #####
-configfile: "config/atac-config/config.yaml"
+configfile: "config/multiome-config/config.yaml"
 
 
 # configuration = "config/config.yaml"
