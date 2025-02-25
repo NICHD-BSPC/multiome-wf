@@ -69,15 +69,16 @@ group_name <- params[["seurat"]]
 print(paste('Current group:', group_name))
 
 targets <- group[['input_groups']]
-idx <- grepl(pattern = paste(paste0('/', targets), collapse = "|"), seurat_inputs)
+idx <- grepl(
+    pattern = paste(paste0('/', targets), collapse = "|"), 
+    seurat_inputs
+)
 seurat_inputs <- seurat_inputs[idx]
 
 comm_detection <- group[['detection_method']]
 
 print('Seurat objects in use:')
 print(seurat_inputs)
-
-
 ```
 
 # Read in data
