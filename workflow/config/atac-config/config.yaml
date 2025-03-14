@@ -61,7 +61,7 @@ macs2:
 # norm_method: Method to normalize the group's assay.
 #   Currently supported methods: 'log', 'sct', 'clr' or 'lsi'.
 normalize:
-  split_by: meta_tissue
+  split_by: meta_geno
   groups:
     unintegrated_1:
       assay_name: Peaks
@@ -107,7 +107,7 @@ normalize:
 integrate:
   activate: true
   atac_integrate_embeddings: true
-  split_by: meta_tissue
+  split_by: meta_geno
   groups:
     integrated_1:
       assay_name: Peaks
@@ -286,6 +286,14 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_MACS'
+      alpha: 0.05
+    unintegrated_3:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: 0.2
+      test_use: null
+      latent_vars: 'nCount_Gene.Activity'
       alpha: 0.05
     integrated_1:
       cluster_idents: seurat_clusters
