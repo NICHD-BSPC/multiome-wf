@@ -151,7 +151,7 @@ integrate:
 # toy_k: size of the number of neighbors when weighting anchors during integration
 #    This value is passed to weight.k argument in the IntegrateLayers function of Seurat
 dataset_size:
-  toydataset: true # true or false
+  toydataset: false # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # 
 
