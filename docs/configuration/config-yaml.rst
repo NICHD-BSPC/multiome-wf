@@ -486,12 +486,6 @@ Example:
           integrate_dims:
             - 1
             - 30
-        integrated_2:
-          assay_name: MACS
-          norm_method: lsi
-          integrate_dims:
-            - 1
-            - 30
         integrated_3:
           assay_name: Gene.Activity
           norm_method: log
@@ -605,12 +599,9 @@ Example:
       resolutions:
         - 0.6
         - 0.8
-        - 1.0
+        - 1
         - 1.2
         - 1.4
-        - 1.6
-        - 1.8
-        - 2.0
       silhouette:
         - silhouette
         - frequency_grouped
@@ -890,6 +881,14 @@ Example:
           test_use: null
           latent_vars: 'nCount_MACS'
           alpha: 0.05
+        unintegrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Gene.Activity'
+          alpha: 0.05
         integrated_0:
           cluster_idents: seurat_clusters
           assay: null
@@ -905,6 +904,14 @@ Example:
           min_pct: 0.2
           test_use: null
           latent_vars: 'nCount_Peaks'
+          alpha: 0.05
+        integrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         wnn_0:
           cluster_idents: seurat_clusters
@@ -924,6 +931,8 @@ Example:
           alpha: 0.05
 
 
+
+
 Example
 ~~~~~~~
 
@@ -936,16 +945,15 @@ See :ref:`overview-wf` for more detailed examples of config files.
 
 .. code-block:: yaml
 
-    # Paths to sample tables
     samples: config/multiome-config/samples.tsv
+
     aggregates: config/multiome-config/aggregates.tsv
+
     assays: config/multiome-config/assays.tsv
 
-    # Annotation
     ANNOTATION: "EnsDb"
-    ANNO_FILE: "path/to/gene.gtf.gz"
+    ANNO_FILE: "path/to/genes.gtf.gz"
 
-    # QC
     qc:
       remove_outliers: true
       rm_outliers_method: sd
@@ -960,13 +968,12 @@ See :ref:`overview-wf` for more detailed examples of config files.
         TSS.enrichment: 2
       upper: null
 
-
-    # MACS2 peak calling
     macs2:
       run: "Y"
       group_fragments_by: genome
+      fasta: "../reference/genome.fa"
+      chromsizes: "../reference/multiome.chromsizes"
 
-    # Normalization
     normalize:
       split_by: meta_geno
       groups:
@@ -983,7 +990,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           assay_name: Gene.Activity
           norm_method: log
 
-    # Integration
     integrate:
       activate: true
       atac_integrate_embeddings: true
@@ -1003,13 +1009,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           integrate_dims:
             - 1
             - 30
-        integrated_2:
-          assay_name: MACS
-          norm_method: lsi
-          integrate_method: rlsi
-          integrate_dims:
-            - 1
-            - 30
         integrated_3:
           assay_name: Gene.Activity
           norm_method: log
@@ -1018,12 +1017,10 @@ See :ref:`overview-wf` for more detailed examples of config files.
             - 1
             - 30
 
-    # Toy dataset utilization
     dataset_size:
       toydataset: false
       toy_k: 10
 
-    # Cluster optimization
     chooser:
       groups:
         unintegrated_0:
@@ -1045,24 +1042,25 @@ See :ref:`overview-wf` for more detailed examples of config files.
       resolutions:
         - 0.6
         - 0.8
+        - 1
+        - 1.2
+        - 1.4
       silhouette:
         - silhouette
         - frequency_grouped
         - silhouette_grouped
 
-    # Clustering
     cluster:
       detection_method: 3
       resolution: null
 
-    # Multimodal embedding
     weighted_nn:
       activate: true
       groups:
         wnn_0:
           input_groups:
-            - unintegrated_0
-            - unintegrated_1
+            - unintegrated_0 # corresponds to SCT
+            - unintegrated_1 # corresponds to Peaks
           reduction:
             - pca
             - lsi
@@ -1075,8 +1073,8 @@ See :ref:`overview-wf` for more detailed examples of config files.
           detection_method: 3
         wnn_1:
           input_groups:
-            - integrated_0
-            - integrated_1
+            - integrated_0 # corresponds to SCT
+            - integrated_1 # corresponds to Peaks
           reduction:
             - integrated_pca
             - integrated_lsi
@@ -1088,7 +1086,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           resolution: 0.6
           detection_method: 3
 
-    # Differential testing
     diff_analysis:
       activate: true
       groups:
@@ -1120,9 +1117,9 @@ See :ref:`overview-wf` for more detailed examples of config files.
           cluster_idents: seurat_clusters
           assay: null
           slot: data
-          min_pct: null
+          min_pct: 0.2
           test_use: null
-          latent_vars: 'Gene.Activity'
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         integrated_0:
           cluster_idents: seurat_clusters
@@ -1140,21 +1137,13 @@ See :ref:`overview-wf` for more detailed examples of config files.
           test_use: null
           latent_vars: 'nCount_Peaks'
           alpha: 0.05
-        integrated_2:
+        integrated_3:
           cluster_idents: seurat_clusters
           assay: null
           slot: data
           min_pct: 0.2
           test_use: null
-          latent_vars: 'nCount_MACS'
-          alpha: 0.05
-        integrated_3:
-          cluster_idents: seurat_clusters
-          assay: null
-          slot: data
-          min_pct: null
-          test_use: null
-          latent_vars: 'Gene.Activity'
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         wnn_0:
           cluster_idents: seurat_clusters
