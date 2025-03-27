@@ -16,8 +16,8 @@ structure from a Multiome analysis:
 
 .. code-block:: bash
 
-    $ tree workflow/results
-    workflow/results
+    $ tree workflow/results/
+    workflow/results/
     ├── add_macs_peaks
     │   ├── report.html
     │   └── seurat.rds
@@ -26,17 +26,274 @@ structure from a Multiome analysis:
     │   ├── report.html
     │   └── report.md
     ├── chooser_plot
-    │   └── intermediates_dir
+    │   ├── integrated_0
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   ├── integrated_1
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   ├── integrated_3
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   ├── intermediates_dir
+    │   ├── unintegrated_0
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   ├── unintegrated_1
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   ├── unintegrated_2
+    │   │   ├── choice.rds
+    │   │   ├── clustered_data.rds
+    │   │   ├── median_ci.xlsx
+    │   │   └── report.html
+    │   └── unintegrated_3
+    │       ├── choice.rds
+    │       ├── clustered_data.rds
+    │       ├── median_ci.xlsx
+    │       └── report.html
+    ├── chooser_run
+    │   ├── integrated_0
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   ├── integrated_1
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   ├── integrated_3
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   ├── intermediates_dir
+    │   │   ├── integrated_0
+    │   │   ├── integrated_1
+    │   │   ├── integrated_3
+    │   │   ├── unintegrated_0
+    │   │   ├── unintegrated_1
+    │   │   ├── unintegrated_2
+    │   │   └── unintegrated_3
+    │   ├── unintegrated_0
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   ├── unintegrated_1
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   ├── unintegrated_2
+    │   │   ├── frequency_grouped_0.6.rds
+    │   │   ├── frequency_grouped_0.8.rds
+    │   │   ├── frequency_grouped_1.2.rds
+    │   │   ├── frequency_grouped_1.4.rds
+    │   │   ├── frequency_grouped_1.rds
+    │   │   ├── res_0.6
+    │   │   │   └── report.html
+    │   │   ├── res_0.8
+    │   │   │   └── report.html
+    │   │   ├── res_1
+    │   │   │   └── report.html
+    │   │   ├── res_1.2
+    │   │   │   └── report.html
+    │   │   ├── res_1.4
+    │   │   │   └── report.html
+    │   │   ├── seurat_obj_0.6.rds
+    │   │   ├── seurat_obj_0.8.rds
+    │   │   ├── seurat_obj_1.2.rds
+    │   │   ├── seurat_obj_1.4.rds
+    │   │   ├── seurat_obj_1.rds
+    │   │   ├── silhouette_0.6.rds
+    │   │   ├── silhouette_0.8.rds
+    │   │   ├── silhouette_1.2.rds
+    │   │   ├── silhouette_1.4.rds
+    │   │   ├── silhouette_1.rds
+    │   │   ├── silhouette_grouped_0.6.rds
+    │   │   ├── silhouette_grouped_0.8.rds
+    │   │   ├── silhouette_grouped_1.2.rds
+    │   │   ├── silhouette_grouped_1.4.rds
+    │   │   └── silhouette_grouped_1.rds
+    │   └── unintegrated_3
+    │       ├── frequency_grouped_0.6.rds
+    │       ├── frequency_grouped_0.8.rds
+    │       ├── frequency_grouped_1.2.rds
+    │       ├── frequency_grouped_1.4.rds
+    │       ├── frequency_grouped_1.rds
+    │       ├── res_0.6
+    │       │   └── report.html
+    │       ├── res_0.8
+    │       │   └── report.html
+    │       ├── res_1
+    │       │   └── report.html
+    │       ├── res_1.2
+    │       │   └── report.html
+    │       ├── res_1.4
+    │       │   └── report.html
+    │       ├── seurat_obj_0.6.rds
+    │       ├── seurat_obj_0.8.rds
+    │       ├── seurat_obj_1.2.rds
+    │       ├── seurat_obj_1.4.rds
+    │       ├── seurat_obj_1.rds
+    │       ├── silhouette_0.6.rds
+    │       ├── silhouette_0.8.rds
+    │       ├── silhouette_1.2.rds
+    │       ├── silhouette_1.4.rds
+    │       ├── silhouette_1.rds
+    │       ├── silhouette_grouped_0.6.rds
+    │       ├── silhouette_grouped_0.8.rds
+    │       ├── silhouette_grouped_1.2.rds
+    │       ├── silhouette_grouped_1.4.rds
+    │       └── silhouette_grouped_1.rds
     ├── cluster
     │   ├── integrated_0
     │   │   ├── barcodes.rds
     │   │   ├── clustered_data.rds
     │   │   └── report.html
     │   ├── integrated_1
-    │   │   ├── barcodes.rds
-    │   │   ├── clustered_data.rds
-    │   │   └── report.html
-    │   ├── integrated_2
     │   │   ├── barcodes.rds
     │   │   ├── clustered_data.rds
     │   │   └── report.html
@@ -65,16 +322,15 @@ structure from a Multiome analysis:
     │   ├── report.html
     │   └── seurat_combined.rds
     ├── create_seurat
-    │   ├── multiome-nan.report.html
-    │   └── multiome-nan.seurat_raw.rds
+    │   ├── rep1_homo-nan.report.html
+    │   ├── rep1_homo-nan.seurat_raw.rds
+    │   ├── rep1_wt-nan.report.html
+    │   └── rep1_wt-nan.seurat_raw.rds
     ├── diff_analysis
     │   ├── integrated_0
     │   │   ├── markers.tsv
     │   │   └── report.html
     │   ├── integrated_1
-    │   │   ├── markers.tsv
-    │   │   └── report.html
-    │   ├── integrated_2
     │   │   ├── markers.tsv
     │   │   └── report.html
     │   ├── integrated_3
@@ -103,17 +359,19 @@ structure from a Multiome analysis:
     │   ├── integrated_0.report.html
     │   ├── integrated_1.rds
     │   ├── integrated_1.report.html
-    │   ├── integrated_2.rds
-    │   ├── integrated_2.report.html
     │   ├── integrated_3.rds
     │   └── integrated_3.report.html
     ├── macs2
     │   ├── macspeaks.tsv
     │   ├── macspeaks.tsv.gz
     │   ├── macspeaks.tsv.gz.tbi
+    │   ├── NA_control_lambda.bdg
+    │   ├── NA_control_lambda.bigwig
     │   ├── NA_peaks.narrowPeak
     │   ├── NA_peaks.xls
-    │   └── NA_summits.bed
+    │   ├── NA_summits.bed
+    │   ├── NA_treat_pileup.bdg
+    │   └── NA_treat_pileup.bigwig
     ├── merge_macs_prep
     │   ├── Multiome.bed
     │   ├── report.html
@@ -132,26 +390,11 @@ structure from a Multiome analysis:
     │   └── unintegrated_3
     │       ├── unintegrated_3.rds
     │       └── unintegrated_3.report.html
-    ├── prep_cluster
-    │   ├── integrated_0
-    │   │   └── choice.rds
-    │   ├── integrated_1
-    │   │   └── choice.rds
-    │   ├── integrated_2
-    │   │   └── choice.rds
-    │   ├── integrated_3
-    │   │   └── choice.rds
-    │   ├── unintegrated_0
-    │   │   └── choice.rds
-    │   ├── unintegrated_1
-    │   │   └── choice.rds
-    │   ├── unintegrated_2
-    │   │   └── choice.rds
-    │   └── unintegrated_3
-    │       └── choice.rds
     ├── qc
-    │   ├── multiome-nan.report.html
-    │   └── multiome-nan.seurat_qc.rds
+    │   ├── rep1_homo-nan.report.html
+    │   ├── rep1_homo-nan.seurat_qc.rds
+    │   ├── rep1_wt-nan.report.html
+    │   └── rep1_wt-nan.seurat_qc.rds
     └── wnn
         ├── wnn_0
         │   ├── barcodes.rds
@@ -162,7 +405,8 @@ structure from a Multiome analysis:
             ├── clustered_data.rds
             └── report.html
 
-    49 directories, 94 files
+    96 directories, 290 files
+
 
 
 ``html`` summary files
@@ -242,6 +486,9 @@ as instructed in the :ref:`macs-peakcalling`. The output files are summarized be
   pileup and fold enrichment
 - ``*_summits.bed``: Peak summit locations for every peak. Recommended when identifying motifs at the
   binding sites.
+- ``*_control_lambda.bdg``: fragment pileup saved in bedGraph; local lambda values from control
+- ``*_treat_pileup.bdg``: fragment pileup saved in bedGraph; values from treatment
+- ``*_control_lambda.bigwig``, ``*_treat_pileup.bigwig``: ``bigwig`` coverage files converted from bedGraph
 
 The remaining files (e.g. ``macspeaks.*``) are pre-processed input files for MACS2 and are not considered
 as outputs of the peak calling process.
