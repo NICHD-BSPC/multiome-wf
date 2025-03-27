@@ -27,7 +27,8 @@ in mind when creating a ``config.yaml``.
 
 The following rules are optional:
 
-- ``merge_macs_prep``/``macs2``/``add_macs_peaks`` for MACS2 peak calling
+- ``chromsizes``/``merge_macs_prep``/``macs2``/``add_macs_peaks``/``bigwig_signal``/``bigwig_noise`` 
+  for MACS2 peak calling
 - ``integrate`` for `dataset integration using Seurat 
   <https://satijalab.org/seurat/articles/integration_introduction>`_
 - ``chooser_paral``/``chooser_aggr`` for computing optimal resolution in clustering
@@ -82,7 +83,7 @@ All other keys are hard-coded as options.
 
 Using the ``normalize`` section as an example, we see a single analysis group below. 
 The group value, ``unintegrated_0``, is itself a dictionary key for this analysis
-variant (a modality for RNA in multiome). This group's dictionary contains additional 
+variant (a modality for RNA in Multiome). This group's dictionary contains additional 
 fields which together define the groups' analysis options: ``assay_name``, and 
 ``norm_method``.
 
@@ -143,7 +144,7 @@ Config Tables
 
     string, default ``aggregates.tsv``. Defines path to aggregates table.
     If you are using aggregated input of multiple samples created using 
-    ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` (scATAC-seq), 
+    ``cellranger-arc aggr`` (Multiome), ``cellranger-atac aggr`` (scATAC-seq), 
     or ``cellranger aggr`` (scRNA-seq), specify the path to ``aggregates.tsv``. 
     Otherwise, set to an empty string (``""``). See :ref:`aggregates-table` 
     for more.
@@ -185,7 +186,7 @@ Annotation
 ^^^^^^^^^^^^^^^^^^^^
 
     string of ``"EnsDb"`` or ``"GTF"``, default ``"EnsDb"``. Defines the method 
-    to build an annotation object (``GenomicRanges``) for scATAC-seq and multiome 
+    to build an annotation object (``GenomicRanges``) for scATAC-seq and Multiome 
     analyses.
 
     - ``"EnsDb"`` uses the ``EnsDb.Mmusculus.v79`` (mouse mm10) or 
@@ -247,7 +248,7 @@ Quality Control (``qc`` section)
       (``nCount_Gene.Expression``, ``nCount_Peaks``, and ``TSS.enrichment``), 
       1 detects lower outliers automatically (``percent.mt``).
 
-    - 10X Genomics ATAC and multiome kits use nuclei, so reads will not map to 
+    - 10X Genomics ATAC and Multiome kits use nuclei, so reads will not map to 
       mitochondria. However, the workflow imputes a value of 0 for ``percent.mt`` 
       in these assays, since missing values are not generally allowed in the underlying 
       packages. This will not effect downstream processes such as normalization, 
@@ -284,7 +285,7 @@ MACS specific parameters.
 ^^^^^^^^^^^^^
 
     string of ``"Y"`` or  ``"N"``, default ``"Y"``. Determine whether or not to run 
-    MACS. Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and multiome requiring 
+    MACS. Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and Multiome requiring 
     MACS peak calling. If you don’t run MACS, delete analysis groups where 
     ``assay_name`` corresponds to ``MACS`` in the remaining sections/fields 
     (e.g. ``unintegrated_2``).
@@ -297,6 +298,22 @@ MACS specific parameters.
     This forces generation of a single fragments file for MACS peak calling.
     Do not change this setting unless under special circumstances.
 
+
+``fasta`` field
+^^^^^^^^^^^^^^^
+    
+    string. A path to the ``fasta`` reference genome used to map sequencing reads.
+    Cell Ranger users can specify ``fasta/genome.fa`` in the reference directory 
+    that was used to run ``cellranger-atac count`` or ``cellranger-arc count``.
+
+
+``chromsizes`` field
+^^^^^^^^^^^^^^^^^^^^
+    
+    string, default ``"../reference/multiome.chromsizes"`` (Multiome) or
+    ``"../reference/atac.chromsizes"`` (ATAC). A path to the ``.chromsizes`` 
+    file created from the ``fasta`` reference genome.
+
 Example:
 
 .. code-block:: yaml
@@ -304,6 +321,8 @@ Example:
     macs2:
       run: "Y"
       group_fragments_by: genome
+      fasta: "../reference/genome.fa"
+      chromsizes: "../reference/multiome.chromsizes"
 
 Normalization (``normalize`` section)
 -------------------------------------
@@ -662,7 +681,7 @@ modalities into a global reduced dimensional space.
 ``activate`` field
 ^^^^^^^^^^^^^^^^^^
 
-    boolean, default ``true`` (multiome) or ``false`` (RNA/ATAC). Specify whether or not 
+    boolean, default ``true`` (Multiome) or ``false`` (RNA/ATAC). Specify whether or not 
     to run the coembed rule.
 
 ``groups`` field
@@ -908,7 +927,7 @@ Example:
 Example
 ~~~~~~~
 
-A **basic** example of a ``config.yaml`` file using 2 multiome batches is provided below. 
+A **basic** example of a ``config.yaml`` file using 2 Multiome batches is provided below. 
 The analysis will be performed on all samples with and without integration, followed by 
 clustering and differential testing. This example also includes automated optimization 
 of clustering parameters.
