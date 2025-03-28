@@ -7,8 +7,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Overview of output files &mdash; multiome-wf  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -115,8 +115,8 @@ of a run. All output files are saved in this directory.</p>
 <h2><code class="docutils literal notranslate"><span class="pre">results</span></code> directory<a class="headerlink" href="#results-directory" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">results</span></code> folder contains subfolders and output files. Below is an example of the directory
 structure from a Multiome analysis:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>workflow/results
-workflow/results
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tree<span class="w"> </span>workflow/results/
+workflow/results/
 ├──<span class="w"> </span>add_macs_peaks
 │<span class="w">   </span>├──<span class="w"> </span>report.html
 │<span class="w">   </span>└──<span class="w"> </span>seurat.rds
@@ -125,17 +125,274 @@ workflow/results
 │<span class="w">   </span>├──<span class="w"> </span>report.html
 │<span class="w">   </span>└──<span class="w"> </span>report.md
 ├──<span class="w"> </span>chooser_plot
-│<span class="w">   </span>└──<span class="w"> </span>intermediates_dir
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>intermediates_dir
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>choice.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">       </span>├──<span class="w"> </span>choice.rds
+│<span class="w">       </span>├──<span class="w"> </span>clustered_data.rds
+│<span class="w">       </span>├──<span class="w"> </span>median_ci.xlsx
+│<span class="w">       </span>└──<span class="w"> </span>report.html
+├──<span class="w"> </span>chooser_run
+│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>intermediates_dir
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>integrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>integrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>integrated_3
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.6
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_0.8
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.2
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>res_1.4
+│<span class="w">   </span>│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>silhouette_grouped_1.rds
+│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
+│<span class="w">       </span>├──<span class="w"> </span>frequency_grouped_0.6.rds
+│<span class="w">       </span>├──<span class="w"> </span>frequency_grouped_0.8.rds
+│<span class="w">       </span>├──<span class="w"> </span>frequency_grouped_1.2.rds
+│<span class="w">       </span>├──<span class="w"> </span>frequency_grouped_1.4.rds
+│<span class="w">       </span>├──<span class="w"> </span>frequency_grouped_1.rds
+│<span class="w">       </span>├──<span class="w"> </span>res_0.6
+│<span class="w">       </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">       </span>├──<span class="w"> </span>res_0.8
+│<span class="w">       </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">       </span>├──<span class="w"> </span>res_1
+│<span class="w">       </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">       </span>├──<span class="w"> </span>res_1.2
+│<span class="w">       </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">       </span>├──<span class="w"> </span>res_1.4
+│<span class="w">       </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
+│<span class="w">       </span>├──<span class="w"> </span>seurat_obj_0.6.rds
+│<span class="w">       </span>├──<span class="w"> </span>seurat_obj_0.8.rds
+│<span class="w">       </span>├──<span class="w"> </span>seurat_obj_1.2.rds
+│<span class="w">       </span>├──<span class="w"> </span>seurat_obj_1.4.rds
+│<span class="w">       </span>├──<span class="w"> </span>seurat_obj_1.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_0.6.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_0.8.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_1.2.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_1.4.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_1.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_grouped_0.6.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_grouped_0.8.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_grouped_1.2.rds
+│<span class="w">       </span>├──<span class="w"> </span>silhouette_grouped_1.4.rds
+│<span class="w">       </span>└──<span class="w"> </span>silhouette_grouped_1.rds
 ├──<span class="w"> </span>cluster
 │<span class="w">   </span>├──<span class="w"> </span>integrated_0
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
 │<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
 │<span class="w">   </span>├──<span class="w"> </span>integrated_1
-│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
-│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
-│<span class="w">   </span>├──<span class="w"> </span>integrated_2
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>clustered_data.rds
 │<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
@@ -164,16 +421,15 @@ workflow/results
 │<span class="w">   </span>├──<span class="w"> </span>report.html
 │<span class="w">   </span>└──<span class="w"> </span>seurat_combined.rds
 ├──<span class="w"> </span>create_seurat
-│<span class="w">   </span>├──<span class="w"> </span>multiome-nan.report.html
-│<span class="w">   </span>└──<span class="w"> </span>multiome-nan.seurat_raw.rds
+│<span class="w">   </span>├──<span class="w"> </span>rep1_homo-nan.report.html
+│<span class="w">   </span>├──<span class="w"> </span>rep1_homo-nan.seurat_raw.rds
+│<span class="w">   </span>├──<span class="w"> </span>rep1_wt-nan.report.html
+│<span class="w">   </span>└──<span class="w"> </span>rep1_wt-nan.seurat_raw.rds
 ├──<span class="w"> </span>diff_analysis
 │<span class="w">   </span>├──<span class="w"> </span>integrated_0
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
 │<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
 │<span class="w">   </span>├──<span class="w"> </span>integrated_1
-│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
-│<span class="w">   </span>├──<span class="w"> </span>integrated_2
 │<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>markers.tsv
 │<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>report.html
 │<span class="w">   </span>├──<span class="w"> </span>integrated_3
@@ -202,17 +458,19 @@ workflow/results
 │<span class="w">   </span>├──<span class="w"> </span>integrated_0.report.html
 │<span class="w">   </span>├──<span class="w"> </span>integrated_1.rds
 │<span class="w">   </span>├──<span class="w"> </span>integrated_1.report.html
-│<span class="w">   </span>├──<span class="w"> </span>integrated_2.rds
-│<span class="w">   </span>├──<span class="w"> </span>integrated_2.report.html
 │<span class="w">   </span>├──<span class="w"> </span>integrated_3.rds
 │<span class="w">   </span>└──<span class="w"> </span>integrated_3.report.html
 ├──<span class="w"> </span>macs2
 │<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv
 │<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv.gz
 │<span class="w">   </span>├──<span class="w"> </span>macspeaks.tsv.gz.tbi
+│<span class="w">   </span>├──<span class="w"> </span>NA_control_lambda.bdg
+│<span class="w">   </span>├──<span class="w"> </span>NA_control_lambda.bigwig
 │<span class="w">   </span>├──<span class="w"> </span>NA_peaks.narrowPeak
 │<span class="w">   </span>├──<span class="w"> </span>NA_peaks.xls
-│<span class="w">   </span>└──<span class="w"> </span>NA_summits.bed
+│<span class="w">   </span>├──<span class="w"> </span>NA_summits.bed
+│<span class="w">   </span>├──<span class="w"> </span>NA_treat_pileup.bdg
+│<span class="w">   </span>└──<span class="w"> </span>NA_treat_pileup.bigwig
 ├──<span class="w"> </span>merge_macs_prep
 │<span class="w">   </span>├──<span class="w"> </span>Multiome.bed
 │<span class="w">   </span>├──<span class="w"> </span>report.html
@@ -231,26 +489,11 @@ workflow/results
 │<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
 │<span class="w">       </span>├──<span class="w"> </span>unintegrated_3.rds
 │<span class="w">       </span>└──<span class="w"> </span>unintegrated_3.report.html
-├──<span class="w"> </span>prep_cluster
-│<span class="w">   </span>├──<span class="w"> </span>integrated_0
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>integrated_1
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>integrated_2
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>integrated_3
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>unintegrated_0
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>unintegrated_1
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>├──<span class="w"> </span>unintegrated_2
-│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>choice.rds
-│<span class="w">   </span>└──<span class="w"> </span>unintegrated_3
-│<span class="w">       </span>└──<span class="w"> </span>choice.rds
 ├──<span class="w"> </span>qc
-│<span class="w">   </span>├──<span class="w"> </span>multiome-nan.report.html
-│<span class="w">   </span>└──<span class="w"> </span>multiome-nan.seurat_qc.rds
+│<span class="w">   </span>├──<span class="w"> </span>rep1_homo-nan.report.html
+│<span class="w">   </span>├──<span class="w"> </span>rep1_homo-nan.seurat_qc.rds
+│<span class="w">   </span>├──<span class="w"> </span>rep1_wt-nan.report.html
+│<span class="w">   </span>└──<span class="w"> </span>rep1_wt-nan.seurat_qc.rds
 └──<span class="w"> </span>wnn
 <span class="w">    </span>├──<span class="w"> </span>wnn_0
 <span class="w">    </span>│<span class="w">   </span>├──<span class="w"> </span>barcodes.rds
@@ -261,7 +504,7 @@ workflow/results
 <span class="w">        </span>├──<span class="w"> </span>clustered_data.rds
 <span class="w">        </span>└──<span class="w"> </span>report.html
 
-<span class="m">49</span><span class="w"> </span>directories,<span class="w"> </span><span class="m">94</span><span class="w"> </span>files
+<span class="m">96</span><span class="w"> </span>directories,<span class="w"> </span><span class="m">290</span><span class="w"> </span>files
 </pre></div>
 </div>
 </section>
@@ -361,6 +604,9 @@ as instructed in the <a class="reference internal" href="../configuration/config
 pileup and fold enrichment</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">*_summits.bed</span></code>: Peak summit locations for every peak. Recommended when identifying motifs at the
 binding sites.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*_control_lambda.bdg</span></code>: fragment pileup saved in bedGraph; local lambda values from control</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*_treat_pileup.bdg</span></code>: fragment pileup saved in bedGraph; values from treatment</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*_control_lambda.bigwig</span></code>, <code class="docutils literal notranslate"><span class="pre">*_treat_pileup.bigwig</span></code>: <code class="docutils literal notranslate"><span class="pre">bigwig</span></code> coverage files converted from bedGraph</p></li>
 </ul>
 <p>The remaining files (e.g. <code class="docutils literal notranslate"><span class="pre">macspeaks.*</span></code>) are pre-processed input files for MACS2 and are not considered
 as outputs of the peak calling process.</p>

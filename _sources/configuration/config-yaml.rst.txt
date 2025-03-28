@@ -27,7 +27,8 @@ in mind when creating a ``config.yaml``.
 
 The following rules are optional:
 
-- ``merge_macs_prep``/``macs2``/``add_macs_peaks`` for MACS2 peak calling
+- ``chromsizes``/``merge_macs_prep``/``macs2``/``add_macs_peaks``/``bigwig_signal``/``bigwig_noise`` 
+  for MACS2 peak calling
 - ``integrate`` for `dataset integration using Seurat 
   <https://satijalab.org/seurat/articles/integration_introduction>`_
 - ``chooser_paral``/``chooser_aggr`` for computing optimal resolution in clustering
@@ -82,7 +83,7 @@ All other keys are hard-coded as options.
 
 Using the ``normalize`` section as an example, we see a single analysis group below. 
 The group value, ``unintegrated_0``, is itself a dictionary key for this analysis
-variant (a modality for RNA in multiome). This group's dictionary contains additional 
+variant (a modality for RNA in Multiome). This group's dictionary contains additional 
 fields which together define the groups' analysis options: ``assay_name``, and 
 ``norm_method``.
 
@@ -143,7 +144,7 @@ Config Tables
 
     string, default ``aggregates.tsv``. Defines path to aggregates table.
     If you are using aggregated input of multiple samples created using 
-    ``cellranger-arc aggr`` (multiome), ``cellranger-atac aggr`` (scATAC-seq), 
+    ``cellranger-arc aggr`` (Multiome), ``cellranger-atac aggr`` (scATAC-seq), 
     or ``cellranger aggr`` (scRNA-seq), specify the path to ``aggregates.tsv``. 
     Otherwise, set to an empty string (``""``). See :ref:`aggregates-table` 
     for more.
@@ -185,7 +186,7 @@ Annotation
 ^^^^^^^^^^^^^^^^^^^^
 
     string of ``"EnsDb"`` or ``"GTF"``, default ``"EnsDb"``. Defines the method 
-    to build an annotation object (``GenomicRanges``) for scATAC-seq and multiome 
+    to build an annotation object (``GenomicRanges``) for scATAC-seq and Multiome 
     analyses.
 
     - ``"EnsDb"`` uses the ``EnsDb.Mmusculus.v79`` (mouse mm10) or 
@@ -247,7 +248,7 @@ Quality Control (``qc`` section)
       (``nCount_Gene.Expression``, ``nCount_Peaks``, and ``TSS.enrichment``), 
       1 detects lower outliers automatically (``percent.mt``).
 
-    - 10X Genomics ATAC and multiome kits use nuclei, so reads will not map to 
+    - 10X Genomics ATAC and Multiome kits use nuclei, so reads will not map to 
       mitochondria. However, the workflow imputes a value of 0 for ``percent.mt`` 
       in these assays, since missing values are not generally allowed in the underlying 
       packages. This will not effect downstream processes such as normalization, 
@@ -284,7 +285,7 @@ MACS specific parameters.
 ^^^^^^^^^^^^^
 
     string of ``"Y"`` or  ``"N"``, default ``"Y"``. Determine whether or not to run 
-    MACS. Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and multiome requiring 
+    MACS. Set to ``"N"`` for RNA-seq. Set to ``"Y"`` for ATAC and Multiome requiring 
     MACS peak calling. If you don’t run MACS, delete analysis groups where 
     ``assay_name`` corresponds to ``MACS`` in the remaining sections/fields 
     (e.g. ``unintegrated_2``).
@@ -297,6 +298,22 @@ MACS specific parameters.
     This forces generation of a single fragments file for MACS peak calling.
     Do not change this setting unless under special circumstances.
 
+
+``fasta`` field
+^^^^^^^^^^^^^^^
+    
+    string. A path to the FASTA reference genome used to map sequencing reads.
+    Cell Ranger users can specify ``fasta/genome.fa`` in the reference directory 
+    that was used to run ``cellranger-atac count`` or ``cellranger-arc count``.
+
+
+``chromsizes`` field
+^^^^^^^^^^^^^^^^^^^^
+    
+    string, default ``"../reference/multiome.chromsizes"`` (Multiome) or
+    ``"../reference/atac.chromsizes"`` (ATAC). A path to the ``.chromsizes`` 
+    file created from the FASTA reference genome.
+
 Example:
 
 .. code-block:: yaml
@@ -304,6 +321,8 @@ Example:
     macs2:
       run: "Y"
       group_fragments_by: genome
+      fasta: "../reference/genome.fa"
+      chromsizes: "../reference/multiome.chromsizes"
 
 Normalization (``normalize`` section)
 -------------------------------------
@@ -467,12 +486,6 @@ Example:
           integrate_dims:
             - 1
             - 30
-        integrated_2:
-          assay_name: MACS
-          norm_method: lsi
-          integrate_dims:
-            - 1
-            - 30
         integrated_3:
           assay_name: Gene.Activity
           norm_method: log
@@ -543,9 +556,13 @@ the ``resolution`` field in the ``cluster`` section is set to ``null``.
 ``resolutions`` field
 ^^^^^^^^^^^^^^^^^^^^^
 
-    list of integers, default ``[0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2]``. 
-    Resolutions to use when bootstrapping cluster methods. Best to have 
-    a range spanning target resolution.
+    list of integers, default ``[0.6, 0.8, 1, 1.2, 1.4]``. Resolutions 
+    to use when bootstrapping cluster methods. Best to have a range 
+    spanning target resolution.
+
+.. warning::
+
+    Specifying ``1.0`` instead of ``1`` can cause an error.
 
 ``silhouette`` field
 ^^^^^^^^^^^^^^^^^^^^
@@ -586,12 +603,9 @@ Example:
       resolutions:
         - 0.6
         - 0.8
-        - 1.0
+        - 1
         - 1.2
         - 1.4
-        - 1.6
-        - 1.8
-        - 2.0
       silhouette:
         - silhouette
         - frequency_grouped
@@ -662,7 +676,7 @@ modalities into a global reduced dimensional space.
 ``activate`` field
 ^^^^^^^^^^^^^^^^^^
 
-    boolean, default ``true`` (multiome) or ``false`` (RNA/ATAC). Specify whether or not 
+    boolean, default ``true`` (Multiome) or ``false`` (RNA/ATAC). Specify whether or not 
     to run the coembed rule.
 
 ``groups`` field
@@ -871,6 +885,14 @@ Example:
           test_use: null
           latent_vars: 'nCount_MACS'
           alpha: 0.05
+        unintegrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Gene.Activity'
+          alpha: 0.05
         integrated_0:
           cluster_idents: seurat_clusters
           assay: null
@@ -886,6 +908,14 @@ Example:
           min_pct: 0.2
           test_use: null
           latent_vars: 'nCount_Peaks'
+          alpha: 0.05
+        integrated_3:
+          cluster_idents: seurat_clusters
+          assay: null
+          slot: data
+          min_pct: 0.2
+          test_use: null
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         wnn_0:
           cluster_idents: seurat_clusters
@@ -905,10 +935,12 @@ Example:
           alpha: 0.05
 
 
+
+
 Example
 ~~~~~~~
 
-A **basic** example of a ``config.yaml`` file using 2 multiome batches is provided below. 
+A **basic** example of a ``config.yaml`` file using 2 Multiome batches is provided below. 
 The analysis will be performed on all samples with and without integration, followed by 
 clustering and differential testing. This example also includes automated optimization 
 of clustering parameters.
@@ -917,16 +949,15 @@ See :ref:`overview-wf` for more detailed examples of config files.
 
 .. code-block:: yaml
 
-    # Paths to sample tables
     samples: config/multiome-config/samples.tsv
+
     aggregates: config/multiome-config/aggregates.tsv
+
     assays: config/multiome-config/assays.tsv
 
-    # Annotation
     ANNOTATION: "EnsDb"
-    ANNO_FILE: "path/to/gene.gtf.gz"
+    ANNO_FILE: "path/to/genes.gtf.gz"
 
-    # QC
     qc:
       remove_outliers: true
       rm_outliers_method: sd
@@ -941,13 +972,12 @@ See :ref:`overview-wf` for more detailed examples of config files.
         TSS.enrichment: 2
       upper: null
 
-
-    # MACS2 peak calling
     macs2:
       run: "Y"
       group_fragments_by: genome
+      fasta: "../reference/genome.fa"
+      chromsizes: "../reference/multiome.chromsizes"
 
-    # Normalization
     normalize:
       split_by: meta_geno
       groups:
@@ -964,7 +994,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           assay_name: Gene.Activity
           norm_method: log
 
-    # Integration
     integrate:
       activate: true
       atac_integrate_embeddings: true
@@ -984,13 +1013,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           integrate_dims:
             - 1
             - 30
-        integrated_2:
-          assay_name: MACS
-          norm_method: lsi
-          integrate_method: rlsi
-          integrate_dims:
-            - 1
-            - 30
         integrated_3:
           assay_name: Gene.Activity
           norm_method: log
@@ -999,12 +1021,10 @@ See :ref:`overview-wf` for more detailed examples of config files.
             - 1
             - 30
 
-    # Toy dataset utilization
     dataset_size:
       toydataset: false
       toy_k: 10
 
-    # Cluster optimization
     chooser:
       groups:
         unintegrated_0:
@@ -1026,24 +1046,25 @@ See :ref:`overview-wf` for more detailed examples of config files.
       resolutions:
         - 0.6
         - 0.8
+        - 1
+        - 1.2
+        - 1.4
       silhouette:
         - silhouette
         - frequency_grouped
         - silhouette_grouped
 
-    # Clustering
     cluster:
       detection_method: 3
       resolution: null
 
-    # Multimodal embedding
     weighted_nn:
       activate: true
       groups:
         wnn_0:
           input_groups:
-            - unintegrated_0
-            - unintegrated_1
+            - unintegrated_0 # corresponds to SCT
+            - unintegrated_1 # corresponds to Peaks
           reduction:
             - pca
             - lsi
@@ -1056,8 +1077,8 @@ See :ref:`overview-wf` for more detailed examples of config files.
           detection_method: 3
         wnn_1:
           input_groups:
-            - integrated_0
-            - integrated_1
+            - integrated_0 # corresponds to SCT
+            - integrated_1 # corresponds to Peaks
           reduction:
             - integrated_pca
             - integrated_lsi
@@ -1069,7 +1090,6 @@ See :ref:`overview-wf` for more detailed examples of config files.
           resolution: 0.6
           detection_method: 3
 
-    # Differential testing
     diff_analysis:
       activate: true
       groups:
@@ -1101,9 +1121,9 @@ See :ref:`overview-wf` for more detailed examples of config files.
           cluster_idents: seurat_clusters
           assay: null
           slot: data
-          min_pct: null
+          min_pct: 0.2
           test_use: null
-          latent_vars: 'Gene.Activity'
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         integrated_0:
           cluster_idents: seurat_clusters
@@ -1121,21 +1141,13 @@ See :ref:`overview-wf` for more detailed examples of config files.
           test_use: null
           latent_vars: 'nCount_Peaks'
           alpha: 0.05
-        integrated_2:
+        integrated_3:
           cluster_idents: seurat_clusters
           assay: null
           slot: data
           min_pct: 0.2
           test_use: null
-          latent_vars: 'nCount_MACS'
-          alpha: 0.05
-        integrated_3:
-          cluster_idents: seurat_clusters
-          assay: null
-          slot: data
-          min_pct: null
-          test_use: null
-          latent_vars: 'Gene.Activity'
+          latent_vars: 'nCount_Gene.Activity'
           alpha: 0.05
         wnn_0:
           cluster_idents: seurat_clusters
