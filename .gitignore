@@ -14,3 +14,4 @@ test_data/tenx_rna/
 test_data/tenx_process/tenx_input/
 *.DS_Store
 env*/
+reference/

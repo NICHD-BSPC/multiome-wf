@@ -47,6 +47,8 @@ qc:
 macs2:
   run: "Y"
   group_fragments_by: genome # feature_type
+  fasta: "../reference/genome.fa" # genome.fa used in cellranger count
+  chromsizes: "../reference/multiome.chromsizes" # desired path to save chromsizes file
 
 
 # Normalization and linear reduction
@@ -149,7 +151,7 @@ integrate:
 # toy_k: size of the number of neighbors when weighting anchors during integration
 #    This value is passed to weight.k argument in the IntegrateLayers function of Seurat
 dataset_size:
-  toydataset: false  # true or false
+  toydataset: false # true or false
   toy_k: 10         # size of the number of neighbors when weighting anchors during integration
                     # 
 
@@ -183,12 +185,9 @@ chooser:
   resolutions:
     - 0.6
     - 0.8
-    - 1.0
+    - 1
     - 1.2
     - 1.4
-    - 1.6
-    - 1.8
-    - 2.0
   silhouette:
     - silhouette
     - frequency_grouped
@@ -312,6 +311,14 @@ diff_analysis:
       test_use: null
       latent_vars: 'nCount_MACS'
       alpha: 0.05
+    unintegrated_3:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: 0.2
+      test_use: null
+      latent_vars: 'nCount_Gene.Activity'
+      alpha: 0.05
     integrated_0:
       cluster_idents: seurat_clusters
       assay: null
@@ -327,6 +334,14 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
+    integrated_3:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: 0.2
+      test_use: null
+      latent_vars: 'nCount_Gene.Activity'
       alpha: 0.05
     wnn_0:
       cluster_idents: seurat_clusters

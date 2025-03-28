@@ -48,6 +48,8 @@ qc:
 macs2:
   run: "Y"
   group_fragments_by: genome # feature_type
+  fasta: "../reference/genome.fa" # genome.fa used in cellranger count
+  chromsizes: "../reference/atac.chromsizes" # desired path to save chromsizes file
 
 
 # Normalization and linear reduction
@@ -114,6 +116,19 @@ integrate:
       integrate_dims:
         - 1
         - 30
+    # integrated_2:
+      # assay_name: MACS
+      # norm_method: lsi
+      # integrate_dims:
+        # - 1
+        # - 30
+    integrated_3:
+      assay_name: Gene.Activity
+      norm_method: log
+      integrate_method: CCAIntegration
+      integrate_dims:
+        - 1
+        - 30
 
 # Is your input a toy dataset?
 # This section is required for small datasets to adjust the number of neighbors when integrating datasets
@@ -146,19 +161,16 @@ chooser:
       npcs: 20
     integrated_1:
       npcs: 20
-    integrated_2:
-      npcs: 20
+    # integrated_2:
+      # npcs: 20
     integrated_3:
       npcs: 20
   resolutions:
     - 0.6
     - 0.8
-    - 1.0
+    - 1
     - 1.2
     - 1.4
-    - 1.6
-    - 1.8
-    - 2.0
   silhouette:
     - silhouette
     - frequency_grouped
@@ -275,6 +287,14 @@ diff_analysis:
       test_use: null
       latent_vars: 'nCount_MACS'
       alpha: 0.05
+    unintegrated_3:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: 0.2
+      test_use: null
+      latent_vars: 'nCount_Gene.Activity'
+      alpha: 0.05
     integrated_1:
       cluster_idents: seurat_clusters
       assay: null
@@ -282,5 +302,13 @@ diff_analysis:
       min_pct: 0.2
       test_use: null
       latent_vars: 'nCount_Peaks'
+      alpha: 0.05
+    integrated_3:
+      cluster_idents: seurat_clusters
+      assay: null
+      slot: data
+      min_pct: 0.2
+      test_use: null
+      latent_vars: 'nCount_Gene.Activity'
       alpha: 0.05
 
