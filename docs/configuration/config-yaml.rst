@@ -302,7 +302,7 @@ MACS specific parameters.
 ``fasta`` field
 ^^^^^^^^^^^^^^^
     
-    string. A path to the ``fasta`` reference genome used to map sequencing reads.
+    string. A path to the FASTA reference genome used to map sequencing reads.
     Cell Ranger users can specify ``fasta/genome.fa`` in the reference directory 
     that was used to run ``cellranger-atac count`` or ``cellranger-arc count``.
 
@@ -312,7 +312,7 @@ MACS specific parameters.
     
     string, default ``"../reference/multiome.chromsizes"`` (Multiome) or
     ``"../reference/atac.chromsizes"`` (ATAC). A path to the ``.chromsizes`` 
-    file created from the ``fasta`` reference genome.
+    file created from the FASTA reference genome.
 
 Example:
 
