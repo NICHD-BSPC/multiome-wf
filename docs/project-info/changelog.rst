@@ -8,7 +8,7 @@ Changelog
 v2.1 (March 2025)
 -----------------
 
-Minor update to support ``bigwig`` generation and fix bugs
+Minor update to support ``bigwig`` generation in MACS2 peak calling and to fix bugs
 
 - Updates to packages in the Conda environment
     - New dependencies added
@@ -25,7 +25,8 @@ Minor update to support ``bigwig`` generation and fix bugs
         - Default resolutions narrowed
         - ``1.0`` replaced with ``1`` in the ``resolutions`` field
     - ``integrated_3``, representing integrated gene activity, added to integration
-    - ``unintegrated_3`` and ``integrated_3`` added to ``diff_analysis``
+    - ``unintegrated_3`` and ``integrated_3`` added to the ``groups`` field of the 
+      ``diff_analysis`` section
 - Bugfix in ``workflow/chooser_aggr.Rmd``
     - Aimed to fix an error that occurs when the ``boot::boot.ci`` function is called on an input vector 
       with many ties, causing issues with smoothing resampling distributions in bootstrapping
