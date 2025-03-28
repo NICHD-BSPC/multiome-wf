@@ -556,9 +556,13 @@ the ``resolution`` field in the ``cluster`` section is set to ``null``.
 ``resolutions`` field
 ^^^^^^^^^^^^^^^^^^^^^
 
-    list of integers, default ``[0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2]``. 
-    Resolutions to use when bootstrapping cluster methods. Best to have 
-    a range spanning target resolution.
+    list of integers, default ``[0.6, 0.8, 1, 1.2, 1.4]``. Resolutions 
+    to use when bootstrapping cluster methods. Best to have a range 
+    spanning target resolution.
+
+.. warning::
+
+    Specifying ``1.0`` instead of ``1`` can cause an error.
 
 ``silhouette`` field
 ^^^^^^^^^^^^^^^^^^^^
