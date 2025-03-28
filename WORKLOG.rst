@@ -199,3 +199,9 @@ multiome-wf
             x_jittered <- x + rnorm(length(x), mean = 0, sd = 0.000001)
             boot_median(x_jittered, type="bca")
 
+2025-03-27
+----------
+
+@Mira0507
+
+- Documentation updated
