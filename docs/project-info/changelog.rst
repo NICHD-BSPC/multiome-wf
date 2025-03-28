@@ -4,6 +4,34 @@
 Changelog
 =========
 
+
+v2.1 (March 2025)
+-----------------
+
+Minor update to support ``bigwig`` generation and fix bugs
+
+- Updates to packages in the Conda environment
+    - New dependencies added
+    - Pre-existing dependencies updated
+- ``Snakefile`` updates
+    - Rule ``chromsizes`` added to generate the ``.chromsizes`` file
+    - Rule ``bigwig_signal`` added to generate ``.bigwig`` for MAC2-called peaks from input ATAC signal
+    - Rule ``bigwig_noise`` added to generate ``.bigwig`` for MACS2-called local lambda values from control
+    - Rule ``macs2`` updated with the ``-B`` parameter, aiming to generate bedGraph files for 
+      MAC2-called peaks
+- ``config.yaml`` updates
+    - ``fasta`` and ``chromsizes`` fields added to the ``macs2`` section
+    - Updates to the ``chooser`` section
+        - Default resolutions narrowed
+        - ``1.0`` replaced with ``1`` in the ``resolutions`` field
+    - ``integrated_3``, representing integrated gene activity, added to integration
+    - ``unintegrated_3`` and ``integrated_3`` added to ``diff_analysis``
+- Bugfix in ``workflow/chooser_aggr.Rmd``
+    - Aimed to fix an error that occurs when the ``boot::boot.ci`` function is called on an input vector 
+      with many ties, causing issues with smoothing resampling distributions in bootstrapping
+    - Resolved by introducing very small random noise to the input vector
+
+
 v2.0 (October 2024)
 -------------------
 
