@@ -24,7 +24,8 @@ Minor update to support ``bigwig`` generation in MACS2 peak calling and to fix b
     - Updates to the ``chooser`` section
         - Default resolutions narrowed
         - ``1.0`` replaced with ``1`` in the ``resolutions`` field
-    - ``integrated_3``, representing integrated gene activity, added to integration
+    - ``integrated_3``, representing integrated gene activity, added to the ``groups`` field of the
+      ``integration`` section
     - ``unintegrated_3`` and ``integrated_3`` added to the ``groups`` field of the 
       ``diff_analysis`` section
 - Bugfix in ``workflow/chooser_aggr.Rmd``
