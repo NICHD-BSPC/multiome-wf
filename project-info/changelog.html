@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Changelog &mdash; multiome-wf  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -73,6 +73,7 @@
 <li class="toctree-l1"><a class="reference internal" href="citations.html">Citation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#v2-1-1-september-2026">v2.1.1 (September 2026)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#v2-1-march-2025">v2.1 (March 2025)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#v2-0-october-2024">v2.0 (October 2024)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#v1-1-v1-2-july-2024">v1.1, v1.2 (July 2024)</a></li>
@@ -109,6 +110,17 @@
              
   <section id="changelog">
 <span id="id1"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h1>
+<section id="v2-1-1-september-2026">
+<h2>v2.1.1 (September 2026)<a class="headerlink" href="#v2-1-1-september-2026" title="Link to this heading"></a></h2>
+<p>Patch released to fix bugs in <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code> and the <code class="docutils literal notranslate"><span class="pre">merge_macs_prep</span></code> rule</p>
+<ul class="simple">
+<li><p>Added the <code class="docutils literal notranslate"><span class="pre">--conda-frontend</span> <span class="pre">conda</span></code> parameter to the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command in <code class="docutils literal notranslate"><span class="pre">WRAPPER_SLURM</span></code>
+(<cite>https://github.com/NICHD-BSPC/multiome-wf/issues/26</cite>)</p></li>
+<li><p>Deleted the <code class="docutils literal notranslate"><span class="pre">fragpath</span></code> variable and set the default assay to <code class="docutils literal notranslate"><span class="pre">&quot;Peaks&quot;</span></code>
+before merging fragments in <code class="docutils literal notranslate"><span class="pre">merge_macs_prep.Rmd</span></code>
+(<cite>https://github.com/NICHD-BSPC/multiome-wf/issues/27</cite>)</p></li>
+</ul>
+</section>
 <section id="v2-1-march-2025">
 <h2>v2.1 (March 2025)<a class="headerlink" href="#v2-1-march-2025" title="Link to this heading"></a></h2>
 <p>Minor update to support <code class="docutils literal notranslate"><span class="pre">bigwig</span></code> generation in MACS2 peak calling and to fix bugs</p>

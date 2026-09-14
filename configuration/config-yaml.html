@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Config YAML &mdash; multiome-wf  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -227,7 +227,7 @@ execution of each rule. Refer to the following instruction to activate or inacti
 each rule:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Activate MACS2 peak calling</span>
 <span class="nt">macs2</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">"Y"</span>
 
 <span class="c1"># Activate dataset integration</span>
 <span class="nt">integrate</span><span class="p">:</span>
@@ -300,11 +300,11 @@ extra, unwanted rules/jobs when building a DAG.</p>
 <div><p>string, default <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>. Defines path to sampletable.
 See <a class="reference internal" href="samples-table.html#samples-table"><span class="std std-ref">Samples Table</span></a> for more.</p>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">samples</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/samples.tsv&quot;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">samples</span><span class="p">:</span><span class="w"> </span><span class="s">"config/multiome-config/samples.tsv"</span>
 
 <span class="c1"># OR</span>
-<span class="c1"># samples: &quot;config/atac-config/samples.tsv&quot; for scATAC-seq</span>
-<span class="c1"># samples: &quot;config/rna-config/samples.tsv&quot; for scRNA-seq</span>
+<span class="c1"># samples: "config/atac-config/samples.tsv" for scATAC-seq</span>
+<span class="c1"># samples: "config/rna-config/samples.tsv" for scRNA-seq</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -319,11 +319,11 @@ or <code class="docutils literal notranslate"><span class="pre">cellranger</span
 Otherwise, set to an empty string (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>). See <a class="reference internal" href="aggregates-table.html#aggregates-table"><span class="std std-ref">Aggregates Table</span></a>
 for more.</p>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/aggregates.tsv&quot;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">"config/multiome-config/aggregates.tsv"</span>
 
 <span class="c1"># OR</span>
-<span class="c1"># assays: &quot;config/atac-config/aggregates.tsv&quot; for scATAC-seq</span>
-<span class="c1"># assays: &quot;config/rna-config/aggregates.tsv&quot; for scRNA-seq</span>
+<span class="c1"># assays: "config/atac-config/aggregates.tsv" for scATAC-seq</span>
+<span class="c1"># assays: "config/rna-config/aggregates.tsv" for scRNA-seq</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -336,11 +336,11 @@ If you are using custom counts matrices, specify path to <code class="docutils l
 Otherwise, set to an empty string (<code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>). See <a class="reference internal" href="assays-table.html#assays-table"><span class="std std-ref">Assays Table</span></a>
 for more.</p>
 <p>Example:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;config/multiome-config/assays.tsv&quot;</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="s">"config/multiome-config/assays.tsv"</span>
 
 <span class="c1"># OR</span>
-<span class="c1"># assays: &quot;config/atac-config/assays.tsv&quot; for scATAC-seq</span>
-<span class="c1"># assays: &quot;config/rna-config/assays.tsv&quot; for scRNA-seq</span>
+<span class="c1"># assays: "config/atac-config/assays.tsv" for scATAC-seq</span>
+<span class="c1"># assays: "config/rna-config/assays.tsv" for scRNA-seq</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -484,10 +484,10 @@ file created from the FASTA reference genome.</p>
 </div></blockquote>
 <p>Example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">macs2</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">"Y"</span>
 <span class="w">  </span><span class="nt">group_fragments_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">genome</span>
-<span class="w">  </span><span class="nt">fasta</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;../reference/genome.fa&quot;</span>
-<span class="w">  </span><span class="nt">chromsizes</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;../reference/multiome.chromsizes&quot;</span>
+<span class="w">  </span><span class="nt">fasta</span><span class="p">:</span><span class="w"> </span><span class="s">"../reference/genome.fa"</span>
+<span class="w">  </span><span class="nt">chromsizes</span><span class="p">:</span><span class="w"> </span><span class="s">"../reference/multiome.chromsizes"</span>
 </pre></div>
 </div>
 </section>
@@ -1029,7 +1029,7 @@ nodes than allocated on a cluster node. Do not use <code class="docutils literal
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Peaks'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1037,7 +1037,7 @@ nodes than allocated on a cluster node. Do not use <code class="docutils literal
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_MACS&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_MACS'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1045,7 +1045,7 @@ nodes than allocated on a cluster node. Do not use <code class="docutils literal
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Gene.Activity'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1061,7 +1061,7 @@ nodes than allocated on a cluster node. Do not use <code class="docutils literal
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Peaks'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1069,7 +1069,7 @@ nodes than allocated on a cluster node. Do not use <code class="docutils literal
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Gene.Activity'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1105,8 +1105,8 @@ of clustering parameters.</p>
 
 <span class="nt">assays</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config/multiome-config/assays.tsv</span>
 
-<span class="nt">ANNOTATION</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;EnsDb&quot;</span>
-<span class="nt">ANNO_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;path/to/genes.gtf.gz&quot;</span>
+<span class="nt">ANNOTATION</span><span class="p">:</span><span class="w"> </span><span class="s">"EnsDb"</span>
+<span class="nt">ANNO_FILE</span><span class="p">:</span><span class="w"> </span><span class="s">"path/to/genes.gtf.gz"</span>
 
 <span class="nt">qc</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">remove_outliers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -1123,10 +1123,10 @@ of clustering parameters.</p>
 <span class="w">  </span><span class="nt">upper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
 
 <span class="nt">macs2</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Y&quot;</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="s">"Y"</span>
 <span class="w">  </span><span class="nt">group_fragments_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">genome</span>
-<span class="w">  </span><span class="nt">fasta</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;../reference/genome.fa&quot;</span>
-<span class="w">  </span><span class="nt">chromsizes</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;../reference/multiome.chromsizes&quot;</span>
+<span class="w">  </span><span class="nt">fasta</span><span class="p">:</span><span class="w"> </span><span class="s">"../reference/genome.fa"</span>
+<span class="w">  </span><span class="nt">chromsizes</span><span class="p">:</span><span class="w"> </span><span class="s">"../reference/multiome.chromsizes"</span>
 
 <span class="nt">normalize</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">split_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">meta_geno</span>
@@ -1257,7 +1257,7 @@ of clustering parameters.</p>
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Peaks'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">unintegrated_2</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1265,7 +1265,7 @@ of clustering parameters.</p>
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_MACS&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_MACS'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">unintegrated_3</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1273,7 +1273,7 @@ of clustering parameters.</p>
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Gene.Activity'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">integrated_0</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1289,7 +1289,7 @@ of clustering parameters.</p>
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Peaks&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Peaks'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">integrated_3</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
@@ -1297,7 +1297,7 @@ of clustering parameters.</p>
 <span class="w">      </span><span class="nt">slot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data</span>
 <span class="w">      </span><span class="nt">min_pct</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
 <span class="w">      </span><span class="nt">test_use</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
-<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;nCount_Gene.Activity&#39;</span>
+<span class="w">      </span><span class="nt">latent_vars</span><span class="p">:</span><span class="w"> </span><span class="s">'nCount_Gene.Activity'</span>
 <span class="w">      </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
 <span class="w">    </span><span class="nt">wnn_0</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster_idents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">seurat_clusters</span>
