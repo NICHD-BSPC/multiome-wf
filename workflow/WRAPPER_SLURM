@@ -47,6 +47,7 @@ fi
     --jobname "s.{rulename}.{jobid}.sh" \
     -j 999 \
     --use-conda \
+    --conda-frontend conda \
     --configfile config/multiome-config/config.yaml \
     $PROFILE_CMD \
     --latency-wait=300 \

@@ -4,6 +4,16 @@
 Changelog
 =========
 
+v2.1.1 (September 2026)
+-----------------------
+
+Patch released to fix bugs in ``WRAPPER_SLURM`` and the ``merge_macs_prep`` rule
+
+- Added the ``--conda-frontend conda`` parameter to the ``snakemake`` command in ``WRAPPER_SLURM``
+  (`https://github.com/NICHD-BSPC/multiome-wf/issues/26`)
+- Deleted the ``fragpath`` variable and set the default assay to ``"Peaks"``
+  before merging fragments in ``merge_macs_prep.Rmd``
+  (`https://github.com/NICHD-BSPC/multiome-wf/issues/27`)
 
 v2.1 (March 2025)
 -----------------

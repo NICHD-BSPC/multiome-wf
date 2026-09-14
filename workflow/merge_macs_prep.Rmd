@@ -61,7 +61,6 @@ print(seurat_inputs)
 
 anno_path <- params[['annotation']]
 genome <- params[['genome']]
-fragpath <- params[['fragments']]
 
 config_path <- params[['config']]
 config <- yaml::read_yaml(file = config_path)
@@ -154,8 +153,6 @@ if (sum(peaks_idx, na.rm = TRUE) > 1) {
 }
 ```
 
-
-
 ## Merge all individual seurat objects into joint object
 
 ```{r merge}
@@ -165,7 +162,6 @@ seurat <- merge(
     x=seurat_list[[1]],
     y=seurat_list[-1]
 )
-
 
 if (any(names(seurat@assays) %in% 'Gene.Expression')) {
     DefaultAssay(seurat) <- 'Gene.Expression'
@@ -187,6 +183,7 @@ if (any(names(seurat) %in% 'Peaks')) {
         seurat_obj <- seurat_list[[x]]
         if (any(names(seurat_obj) %in% 'Peaks')) {
             # Ensure that the fragments slot contains fragments from each sample
+            DefaultAssay(seurat_obj) <- "Peaks"
             if (length(Fragments(seurat_obj)) == 1 & 
                 !identical(seurat[['Peaks']]@fragments[[1]], Fragments(seurat_obj)[[1]])) {
                 seurat[['Peaks']]@fragments <- lapply(
